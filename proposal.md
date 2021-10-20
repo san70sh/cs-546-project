@@ -1,37 +1,47 @@
 # Proposal
 
+## Github repo
+
+https://github.com/ywang408/cs-546-project
+
+## Group members
+
+Chen, Yuyun
+Joshi, Ashwin
+Wang, You
+Vinnakota, Bapiraju
+
 ## Introduction of the project
 
 ## Core features
 
-- main page
-  - Users who haven't sign in can access the job lists. Sort, filter functions.
-  - Search bar, users can search with regard to company, location and fields, etc.
+- Main Page
+  - The main page will contain a list of posted jobs; Users can sort, filter the jobs by some fields, for example, created date, update date, job location and etc.
+  - Search bar, users can search with regard to companies, job location and etc.
   - Login button on the top right.
+  - When users log in, our application will filter the job list and only show related jobs to the users.
 
-- Login system
-  - Sign up and in as hosts and clients.
-    - During registration, they can upload their resume as an option. Once we have their resume, we extract their infos to store in our database, and finish their profiles.
-    - Having one template of resume, if someone's resume lacked some info, we just fill them with blank and ask them to finish it later.
-  - Ajax functions to validate their email or phone number.
-  - Store username and password in database.
+- User Profile
+  - Sign up and in as recruiters or job seekers.
+    - For job seekers: 
+      - During registration, apart from offering basic information, they can upload their resume as an option. Once we have their resume, we extract their infos to store in our database, and finish their profiles.
+      - We have an general resume template for job seekers. If there isn't sufficient information in their resume, we will fill them with blank first and ask them to fill them later. Also, job seekers can fill our template directly if they don't want to upload a resume.
+      - They will be able to update their resume since there may exist errors when we parsing their pdf into our template.
+      - Track the status of their applied jobs.
+      - A favorite list to save some jobs.
+    - For recruiters:
+      - Recruiters also need to submit their information but it's different from job seekers.
+      - Able to see their posted job list.
 
-- Client
-  - Update their resume.
-  - main page will be changed based on their info.
-  - Function to sort and filter.
-  - able to apply for jobs.
-  - See the status of their applied jobs.
-  - Once aprroved, the applicants get notified.
-  - Save jobs in favouriate.
-
-- Recruiter
-  - Post, update and delete jobs.
-  - Fill out the infos about recruiters.(Also have a template of it)
-  - Able to see the list of the applicants, and can access the details of the applicants.
-  - Able to approve or reject the applicants, add comments on them.
+- Job Pages
+  - The overall job list page is the main page, and each job has one individual job page,
+  - Recruiters
+    - They can post and update the information in individual job pages.
+    - They are able to accept or reject applications in individual job pages.
+  - Job seekers
+    - In individual job pages, they can know the information of jobs and select to apply for them.
 
 ## Extra features
 
 - Use cookies to refresh the status of logging.
-- Using LinkedIn api.
+- Using LinkedIn api
