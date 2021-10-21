@@ -6,9 +6,9 @@ https://github.com/ywang408/cs-546-project
 
 ## Group members
 
-Chen, Yuyun
-Joshi, Ashwin
-Wang, You
+Chen, Yuyun \
+Joshi, Ashwin \
+Wang, You \
 Vinnakota, Bapiraju
 
 ## Introduction of the project
@@ -16,32 +16,35 @@ Vinnakota, Bapiraju
 ## Core features
 
 - Main Page
-  - The main page will contain a list of posted jobs; Users can sort, filter the jobs by some fields, for example, created date, update date, job location and etc.
-  - Search bar, users can search with regard to companies, job location and etc.
-  - Login button on the top right.
-  - When users log in, our application will filter the job list and only show related jobs to the users.
+  - The main page will contain a list of posted jobs; Users can sort and filter the jobs by Job Posted Date, Job Expiry date, Job Location.
+  - There will be a search bar, where users can search for jobs based on companies, location and skills.
+  - There will be a Login/Register button on the top right corner of the page.
+  - On logging in, the job seekers will be shown jobs related to them.
 
 - User Profile
   - Sign up and in as recruiters or job seekers.
+
     - For job seekers: 
-      - During registration, apart from offering basic information, they can upload their resume as an option. Once we have their resume, we extract their infos to store in our database, and finish their profiles.
-      - We have an general resume template for job seekers. If there isn't sufficient information in their resume, we will fill them with blank first and ask them to fill them later. Also, job seekers can fill our template directly if they don't want to upload a resume.
-      - They will be able to update their resume since there may exist errors when we parsing their pdf into our template.
-      - Track the status of their applied jobs.
-      - A favorite list to save some jobs.
+      - During registration, apart from requesting basic information, they can upload their resume as an option. Using their resume, we extract their details to store in our database, and fill the requested fields.
+      - We have an general resume template for job seekers. If there isn't sufficient information in their resume, we will ask them to fill them, in case the field is mandatory. Also, job seekers can fill the fields manually if they do not want to upload a resume.
+      - They will be able to upload new resumes later in case of any update.
+      - They will be able to track the status of their applied jobs.
+      - They will be able to save jobs in case they would want to apply later.
+
     - For recruiters:
-      - Recruiters also need to submit their information but it's different from job seekers.
-      - Able to see their posted job list.
+      - Recruiters will be required to fill a different set of fields such as Company and position.
+      - They will be able to see jobs they had posted.
 
 - Job Pages
-  - The overall job list page is the main page, and each job has one individual job page,
-  - Recruiters
-    - They can post and update the information in individual job pages.
-    - They are able to accept or reject applications in individual job pages.
-  - Job seekers
-    - In individual job pages, they can know the information of jobs and select to apply for them.
+  - The overall job list page is the primary page, and every job has its own page.
+
+    - Recruiters
+      - They can post new jobs as well as update/delete their job pages.
+      - They are able to accept or reject applications inside their job pages.
+
+    - Job seekers
+      - They can access the job page where additional information will be displayed and can apply from that page.
 
 ## Extra features
 
 - Use cookies to refresh the status of logging.
-- Using LinkedIn api
