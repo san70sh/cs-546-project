@@ -13,6 +13,14 @@ Vinnakota, Bapiraju
 
 ## Introduction of the project
 
+This website application will be a central portal for job seekers and recruiters. Users can view the jobs and sign up with us.
+Users can apply for a job, save the jobs for later use, and recruiters can view the applicants in the same portal after logging in.
+
+Examples of the filters will location, Pay range, location, type of job( internship , full time ), company
+Also, this application will have abiltity ro sort the jobs according recent jobs and Payrange.
+
+The goal of this project is to centralise the job application processs and to reduce the turn around time with respect to application process for job seekers as well as recruiters.
+
 ## Core features
 
 - Main Page
@@ -48,3 +56,6 @@ Vinnakota, Bapiraju
 ## Extra features
 
 - Use cookies to refresh the status of logging.
+- Use statistics to match skills required by the recruiter with candidate's skills and give an estimated potential candidacy 
+  to the user.
+- Recuriters can use this statistic results to take the process ahead with the respective candidate. 
