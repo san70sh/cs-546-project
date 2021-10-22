@@ -39,7 +39,7 @@ The goal of this project is to centralize the job application process and to red
 
    - For job seekers:
      - During registration, apart from requesting basic information, they can upload their resume as an option.  
-     - They will be able to upload new resumes later in case of any update.
+     - They will be able to upload new resumes later in case of any update, they can also update their information manually.
      - They will be able to track the status of their applied jobs.
      - They will be able to save jobs in case they would want to apply later.
 
@@ -65,4 +65,3 @@ The goal of this project is to centralize the job application process and to red
   to the user.
 - Recruiters can use this statistic results to take the process ahead with the respective candidate.
 - to autofill the application profile using resume pdf.
-
