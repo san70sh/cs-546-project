@@ -52,10 +52,10 @@ The goal of this project is to centralize the job application process and to red
 
    - The overall job list page is the primary page, and every job has its own page.
    - Recruiters
-    - They can post new jobs as well as update/delete their job pages.
-    - They are able to accept or reject applications inside their job pages.
+     - They can post new jobs as well as update/delete their job pages.
+     - They are able to accept or reject applications inside their job pages.
    - Job seekers
-    - They can access the job page where additional information will be displayed and can apply from that page.
+     - They can access the job page where additional information will be displayed and can apply from that page.
 
 ## Extra features
 
