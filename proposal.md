@@ -27,7 +27,6 @@ The goal of this project is to centralise the job application processs and to re
   - The main page will contain a list of posted jobs; Users can sort and filter the jobs by Job Posted Date, Job Expiry date, Job Location.
   - There will be a search bar, where users can search for jobs based on companies, location and skills.
   - There will be a Login/Register button on the top right corner of the page.
-  - On logging in, the job seekers will be shown jobs related to them.
 
 - User Profile
   - Sign up and in as recruiters or job seekers.
