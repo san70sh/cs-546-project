@@ -38,9 +38,8 @@ The goal of this project is to centralize the job application process and to red
    - Sign up and in as recruiters or job seekers.
 
    - For job seekers:
-     - During registration, apart from requesting basic information, they can upload their resume as an option. Using their resume, we extract their details to store in our database, and fill the requested fields.
-     - We have an general resume template for job seekers. If there isn't sufficient information in their resume, we will ask them to fill them, in case the field is mandatory. Also, job seekers can fill the fields manually if they do not want to upload a resume.
-     - They will be able to upload new resumes later in case of any update.
+     - During registration, apart from requesting basic information, they can upload their resume as an option.  
+     - They will be able to upload new resumes later in case of any update, they can also update their information manually.
      - They will be able to track the status of their applied jobs.
      - They will be able to save jobs in case they would want to apply later.
 
@@ -54,6 +53,8 @@ The goal of this project is to centralize the job application process and to red
    - Recruiters
      - They can post new jobs as well as update/delete their job pages.
      - They are able to accept or reject applications inside their job pages.
+     - The recruiters would be able to see all the applicants on the jobs they have posted 
+
    - Job seekers
      - They can access the job page where additional information will be displayed and can apply from that page.
 
@@ -63,3 +64,4 @@ The goal of this project is to centralize the job application process and to red
 - Use statistics to match skills required by the recruiter with candidate's skills and give an estimated potential candidacy.
   to the user.
 - Recruiters can use this statistic results to take the process ahead with the respective candidate.
+- to autofill the application profile using resume pdf.
