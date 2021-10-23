@@ -1,8 +1,8 @@
 # Proposal
 
-## Github repo
+## Github Repository
 
-https://github.com/ywang408/cs-546-project
+[github.com/ywang408/cs-546-project](https://github.com/ywang408/cs-546-project)
 
 ## Group members
 
