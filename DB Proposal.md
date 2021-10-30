@@ -28,7 +28,7 @@ And optional features:
 
 + A profile picture(store on Google Clould Platfrom or other storage platform)
 + A list of jobs(one-to-many relationships with collection Job that users have saved and applied to)
-+ The status of their application with some default value(passed/rejected/pending).
++ The status of their application with some default value(passed/rejected/pending)
 + Other optional user information(gender, address, favor job, tags)
 
 A user can update their profile by logging in to the portal.
