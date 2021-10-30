@@ -16,26 +16,25 @@ Vinnakota, Bapiraju
 
 ## Users
 
-The user collection will contain all users registered with the portal, along with: mandatory required Information: 
+The user collection will contain all users registered with the portal, along with mandatory required Information:
 
-+ email id
-+ phone
-+  name
-+ Password(encrypted)
-
+- email id
+- phone
+- name
+- Password(encrypted)
 
 And optional features: 
 
-+ A profile picture(store on Google Clould Platfrom or other storage platform)
-+ A list of jobs(one-to-many relationships with collection Job that users have saved and applied to)
-+ The status of their application with some default value(passed/rejected/pending).
-+ Other optional user information(gender, address, favor job, tags)
+- A profile picture(store on Google Cloud Platform or other storage platform)
+- A list of jobs(one-to-many relationships with collection Job that users have saved and applied to)
+- The status of their application with some default value(passed/rejected/pending).
+- Other optional user information(gender, address, favor job, tags)
 
 A user can update their profile by logging in to the portal.
 
-`{`
-  `"_id": "7b7997a2-c0d2-4f8c-b27a-6a1d4b5b6310",
-  "Password": "$2a$08$XdvNkfdNIL8F8xsuIUeSbNOFgK0M0iV5HOskfVn7.PWncShU.O",
+```js
+  "_id": "7b7997a2-c0d2-4f8c-b27a-6a1d4b5b6310",
+  "Password":"$2a$08$XdvNkfdNIL8F8xsuIUeSbNOFgK0M0iV5HOskfVn7.PWncShU.O",
   "FirstName": "Liam",
   "LastName”: "James",
   "Email": "James@gmail.com",
@@ -43,14 +42,11 @@ A user can update their profile by logging in to the portal.
   "Gender": "M",
   "City": "Hoboken",
   "State": "NJ",
-  “Jobs”: [{"Job": "job1._id" , "statues": "pending"},`
-	   `{"Job": "job2._id" , "statues": "rejected"}],
+  “Jobs”: [{"Job": "job1._id" , "statues": "pending"},{"Job": "job2._id" , "statues": "rejected"}],
   "Profile": "image/pdf url",
-  "Favor": ["job3._id","job4._id","job5._id"],`
-  `"Tags": ["SDE", "frontend"]`
-`}`
-
-
+  "Favor": ["job3._id","job4._id","job5._id"],
+  "Tags": ["SDE", "frontend"]`
+```
 
 |   Name   |  Type  |                         Description                          |
 | :------: | :----: | :----------------------------------------------------------: |
