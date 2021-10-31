@@ -39,7 +39,7 @@ And optional features:
 
 A user can update their profile by logging in to the portal.
 
-```json
+```
   `"_id": "7b7997a2-c0d2-4f8c-b27a-6a1d4b5b6310",
   "Password": "$2a$08$XdvNkfdNIL8F8xsuIUeSbNOFgK0M0iV5HOskfVn7.PWncShU.O",
   "FirstName": "Liam",
@@ -90,9 +90,9 @@ And optional features:
 - pay range
 - company profile pic
 
-Recruiters can update the jobs 
+Recruiters can update the jobs
 
-```json
+```
 "_id": "7b7997a2-c0d2-4f8c-b27a-6a1d4b5b6310",
 "title":"Software development summer 2022 internship"
 "type": "internship",
