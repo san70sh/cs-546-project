@@ -94,11 +94,10 @@ The jobs collection will contain all users registered with the portal, along wit
 - Posted by
 - Post date
 - application deadline
-- job details (including about company, role details, benefits)
+- job details (Object about company, role details, skills, benefits)
 
 And optional features:
 
-- required skill set
 - pay range
 - company profile pic
 
@@ -115,20 +114,12 @@ Recruiters can update the jobs
 "location_State": "NJ",
 “PostedOn”: "today's date in MM/DD/YYY,
 "Deadline":"MM/DD/YYY"
-"JobDetails": "The Development Manager oversees day-to-day technical operations across projects and supports th development team in their personal growth, project successes, and job satisfaction. This role provides steering and guidance to the Development team members on their various projects and general workload and intercedes as necessary. They serve as both a mentor and an advocate and help build cross-departmental collaboration with the rest of the agency. 
-
-
-  Reports to: Director of Technology
-
-  Essential Functions & Responsibilities
-
-  Oversees day-to-day operations for the development team
-
-  Requirements
-
-  8+ years of development experience
-  Experience managing teams of people",
-  "required_skills":["JAVASCRIPT","MONGODB","NODEJS"],
+"JobDetails": {
+  "summary":"This is a abc company",
+  "Role_Discription":"This a devops role your responsibilities will be abc",
+  "rquired_Skills":["Java","Mongodb"],
+  "Benifits":"you will get travelling allowance,insurrance etc."
+},
   "payment range":" 50 - 100 $ PER HOUR"
   "company_pic": "image/pdf url"
 ```
@@ -145,7 +136,19 @@ Recruiters can update the jobs
 | location_state |    String    |               Name of the work state               |
 |    PosteOn     | Date(Object) |              current date of the post              |
 |    Deadline    | Date(Object) |             Date in MM/DD/YYYY format              |
-|   JobDetails   |    String    |    includes summary, responsibilities, benefits    |
-| RequiredSkills |    Array     |         ["JAVASCRIPT","MONGODB","NODEJS"]          |
+|   JobDetails   |    Object    |    includes summary, responsibilities, benefits    |
 | payment range  |    String    |                 "$20/25 per hour"                  |
 |  profile pic   |    String    |           "an url to display pictures "            |
+
+
+
+This the Job Details sub document all the fields in this object are optional
+
+
+|      Name      |     Type     |                    Description                     |
+|:--------------:|:------------:|:--------------------------------------------------:|
+|    summary     |    String    |      This the discription about the company        |
+|Role_Discription|    String    |                  Job responsibiltites              |
+|    Skills      |    Array     |                  ["Java","Mongodb"]                |
+|    Benifits    |    String    |                  Benifits of the Job               |
+| Recruiter_name |    String    | Name from recruiters collection using recruited id |
