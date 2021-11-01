@@ -16,31 +16,43 @@ Vinnakota, Bapiraju
 
 ## Users
 
-The user collection will contain all users registered with the portal, along with: mandatory required Information:
+The user collection will contain all users registered with the portal, along with the following information.
 
-// please add location/address to the fields here
+mandatory required Information:
 
 - email id
 - phone
 - name
 - Password(encrypted)
 
-And optional features:
+And optional features, these features must be fulfilled when they try to apply for jobs. It would be stored as a sub-document under `profile`.
 
-// please add features as we see on handshake like work exp education then achievements if any etc.
-// Again please refer handshake ans see what they are asking us to fill while creating an account
-// Make some fields to stored saved jobs as well.
-// All of these will come in optional features
+- ID photo(store on Google Cloud Platform or other storage platform)
+- Working Experience(Each experience is followed by one company and corresponding description)
+- Education(Each education is followed by one school and corresponding description)
+- Skills
+- Languages
+- Tags(Users' interested fields of jobs)
 
-- A profile picture(store on Google Clould Platfrom or other storage platform)
-- A list of jobs(one-to-many relationships with collection Job that users have saved and applied to)
-- The status of their application with some default value(passed/rejected/pending)
-- Other optional user information(gender, address, favor job, tags)
-
-A user can update their profile by logging in to the portal.
+Here's one example of sub-document `profile`:
 
 ```
-  `"_id": "7b7997a2-c0d2-4f8c-b27a-6a1d4b5b6310",
+"_id": "7b7997a2-c0d2-4f8c-b27a-6a1d4b5b6310",
+"photo": one url
+"experience":
+"education":
+"skills":
+"languages":
+"tags:"
+```
+
+We will initialize the following fields to be empty, and these fields will be added later.
+
+- jobs(Users' applied jobs and status)
+- favor(Users' interested jobs and they can save them in it for applying later)
+
+```
+  "_id": "7b7997a2-c0d2-4f8c-b27a-6a1d4b5b6310",
   "Password": "$2a$08$XdvNkfdNIL8F8xsuIUeSbNOFgK0M0iV5HOskfVn7.PWncShU.O",
   "FirstName": "Liam",
   "LastName”: "James",
@@ -52,17 +64,17 @@ A user can update their profile by logging in to the portal.
   “Jobs”: [{"Job": "job1._id", "statues": "pending"},{"Job": "job2._id", "statues": "rejected"}],
   "Profile": "image/pdf url",
   "Favor": ["job3._id","job4._id","job5._id"],`
-  `"Tags": ["SDE", "frontend"]`
+  "Tags": ["SDE", "frontend"]`
 ```
 
-|   Name   |  Type  |                         Description                          |
-| :------: | :----: | :----------------------------------------------------------: |
-|   _id    | String |     A globally unique identifier to represent the user.      |
-| Password | String |        Encrypted password use for login verification         |
-|   Jobs   | Array  |               A list of jobs that user applied               |
+|   Name   |  Type  |                           Description                           |
+|:--------:|:------:|:---------------------------------------------------------------:|
+|   _id    | String |       A globally unique identifier to represent the user.       |
+| Password | String |          Encrypted password use for login verification          |
+|   Jobs   | Array  |                A list of jobs that user applied                 |
 | Profile  | String | A URL point to the image/PDF style resumes stores for each user |
-|  Favor   | Array  |                     User's favorite job                      |
-|   Tags   | Array  |              Types of work users tend to choose              |
+|  Favor   | Array  |                       User's favorite job                       |
+|   Tags   | Array  |               Types of work users tend to choose                |
 
 ## Recruiters
 
