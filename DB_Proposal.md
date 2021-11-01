@@ -51,6 +51,8 @@ We will initialize the following fields to be empty, and these fields will be ad
 - jobs(Users' applied jobs and status)
 - favor(Users' interested jobs and they can save them in it for applying later)
 
+Here's one example of whole data for one user:
+
 ```
   "_id": "7b7997a2-c0d2-4f8c-b27a-6a1d4b5b6310",
   "Password": "$2a$08$XdvNkfdNIL8F8xsuIUeSbNOFgK0M0iV5HOskfVn7.PWncShU.O",
