@@ -98,7 +98,8 @@ A recruiter can update their profile by logging in to the portal.
   "Position":"Senior Recruiter",
   "Company": "ABC Inc.",
   "About": "I have been working as a strategic recruiter at ABC Inc. for the past 5 years where I have successfully recruited talent for various company specific roles. At ABC Inc., we always welcome fresh talent, so if you believe you're one of them, give me a ping."
-  “Jobs”: [{"Job": "job1._id", "applicants": [{"applicantId": "7b7997a2-c0d2-4f8c-b27a-6a1d4b5b6310", "firstName": "George", "lastName": "West", "Email": "James@gmail.com", "Phone": "848-242-6666", "resume": "pdf url"}]},
+  “Jobs”: [{"Job": "job1._id", "applicants": [
+            {"applicantId": "7b7997a2-c0d2-4f8c-b27a-6a1d4b5b6310", "firstName": "George", "lastName": "West", "Email": "James@gmail.com", "Phone": "848-242-6666", "resume": "pdf url"}]},
   "Profile": "image url"`
 ```
 
