@@ -20,63 +20,71 @@ The user collection will contain all users registered with the portal, along wit
 
 mandatory required Information:
 
-- email id
-- phone
-- name
-- Password(encrypted)
+- Email id
+- Phone
+- Name
+- Password
 
 And optional features, these features must be fulfilled when they try to apply for jobs. It would be stored as a sub-document under `profile`.
 
-- ID photo(store on Google Cloud Platform or other storage platform)
-- Working Experience(Each experience is followed by one company and corresponding description)
-- Education(Each education is followed by one school and corresponding description)
+- ID photo
+- Working Experience
+- Education
 - Skills
 - Languages
-- Tags(Users' interested fields of jobs)
+- Tags
 
 Here's one example of sub-document `profile`:
 
-```
+```json
 "_id": "7b7997a2-c0d2-4f8c-b27a-6a1d4b5b6310",
-"photo": one url
-"experience":
-"education":
-"skills":
-"languages":
-"tags:"
+"city": "Hoboken",
+"state": "NJ",
+"photo": "one url"
+"experience":[{"title":"Maintenance Engineer", "employment type": "full time", "Company name":"Apple","start date": "08/05/2017", "end date": "08/05/2018"}]
+"education":[
+{"school":"xxx university", "field of study":"computer science", "degree":"master of science", "start date": "08/05/2010", "end date": "08/05/2014"},
+{"school":"xxx university", "field of study":"computer science", "degree":"bachelor of science","start date": "08/05/2015", "end date": "08/05/2017"}]
+"skills":["Java", "JS"]
+"languages":["english"]
+"tags":["SDE","DS"]
 ```
+
+
+| Name       | Type   | Description                                                  |
+| ---------- | ------ | ------------------------------------------------------------ |
+| photo      | String | A URL point to the use's ID photo stores on Google Cloud Platform or other storage platform |
+| experience | Array  | Working history followed by one company and corresponding description |
+| education  | Array  | Education history followed by one school and corresponding description |
+| skills     | Array  | learned abilities of user.                                   |
+| Tags       | Array  | Users' interested fields of jobs                             |
+
+Here's one example of whole data for one user:
+
+```json
+"_id": "7b7997a2-c0d2-4f8c-b27a-6a1d4b5b6310",
+"email": "James@gmail.com",
+"phone": "848-242-6666",
+"firstName": "Liam",
+"lastName”: "James",
+"password": "$2a$08$XdvNkfdNIL8F8xsuIUeSbNOFgK0M0iV5HOskfVn7.PWncShU.O",
+“jobs”: [{"job": "job1._id", "statues": "pending"},{"job": "job2._id", "statues": "rejected"}],
+"profile": ["profile1._id","profile2._id"],
+"favor": ["job3._id","job4._id","job5._id"],
+```
+
+|   Name   |  Type  |                         Description                          |
+| :------: | :----: | :----------------------------------------------------------: |
+|   _id    | String |      A globally unique identifier to represent the user      |
+| password | String |        Encrypted password use for login verification         |
+|   jobs   | Array  | The reference of jobs that user applied with three status: pending, rejected, approved |
+| profile  | Array  |     User's detailed information likes experience, skills     |
+|  favor   | Array  |             The reference of user's favorite job             |
 
 We will initialize the following fields to be empty, and these fields will be added later.
 
 - jobs(Users' applied jobs and status)
 - favor(Users' interested jobs and they can save them in it for applying later)
-
-Here's one example of whole data for one user:
-
-```
-  "_id": "7b7997a2-c0d2-4f8c-b27a-6a1d4b5b6310",
-  "Password": "$2a$08$XdvNkfdNIL8F8xsuIUeSbNOFgK0M0iV5HOskfVn7.PWncShU.O",
-  "FirstName": "Liam",
-  "LastName”: "James",
-  "Email": "James@gmail.com",
-  "Phone": "848-242-6666",
-  "Gender": "M",
-  "City": "Hoboken",
-  "State": "NJ",
-  “Jobs”: [{"Job": "job1._id", "statues": "pending"},{"Job": "job2._id", "statues": "rejected"}],
-  "Profile": "image/pdf url",
-  "Favor": ["job3._id","job4._id","job5._id"],`
-  "Tags": ["SDE", "frontend"]`
-```
-
-|   Name   |  Type  |                           Description                           |
-|:--------:|:------:|:---------------------------------------------------------------:|
-|   _id    | String |       A globally unique identifier to represent the user.       |
-| Password | String |          Encrypted password use for login verification          |
-|   Jobs   | Array  |                A list of jobs that user applied                 |
-| Profile  | String | A URL point to the image/PDF style resumes stores for each user |
-|  Favor   | Array  |                       User's favorite job                       |
-|   Tags   | Array  |               Types of work users tend to choose                |
 
 ## Recruiters
 
