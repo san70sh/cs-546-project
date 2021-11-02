@@ -28,6 +28,9 @@ The user collection will contain all users registered with the portal, along wit
 2. Optional features, these features must be fulfilled when users try to apply for jobs. It would be stored as a sub-document under `profile`.
 
    - ID photo
+   - Gender
+   - City
+   - State
    - Working Experience
    - Education
    - Skills
@@ -38,9 +41,10 @@ The user collection will contain all users registered with the portal, along wit
 
   ```json
   "_id": "7b7997a2-c0d2-4f8c-b27a-6a1d4b5b6310",
+  "photo": "one url",
+  "gender": "m",
   "city": "Hoboken",
   "state": "NJ",
-  "photo": "one url"
   "experience":[{"title":"Maintenance Engineer", "employment type": "full time", "Company name":"Apple","start date": "08/05/2017", "end date": "08/05/2018"}]
   "education":[
   {"school":"xxx university", "field of study":"computer science", "degree":"master of science", "start date": "08/05/2010", "end date": "08/05/2014"},
@@ -84,7 +88,7 @@ Here's one example of whole data for one user:
   |   _id    | String |      A globally unique identifier to represent the user      |
   | password | String |        Encrypted password use for login verification         |
   |   jobs   | Array  | The reference of jobs that user applied with three status: pending, rejected, approved |
-  | profile  | Array  |     User's detailed information likes experience, skills     |
+  | profile  | Array  |     User's detailed information     |
   |  favor   | Array  |             The reference of user's favorite job             |
 
 ## Recruiters
@@ -100,31 +104,54 @@ The recruiters collection will contain information of the recruiter who have reg
 
 2. optional features(these feature will be saved into a sub-document `profile`, and must be fulfilled when recruiters try to post a job):
 
-   - A profile picture(store on Google Cloud Platform or other storage platform)
-   - company
-   - position
-   - A list of jobs posted by the recruiter with applicant details, if present
-   - Other optional recruiter information(about, gender, address, tags)
+   - ID photo(store on Google Cloud Platform or other storage platform)
+   - Gender
+   - State
+   - City
+   - company(An object including company name, position, and description)
 
 One example of sub-document `profile`:
 
-One example of whole recruiter data:
-
+```json
+  "_id": "7b7997a2-c0d2-4f8c-b27a-6a1d4b5b6310",
+  "photo": "one url",
+  "gender": "m",
+  "city": "Hoboken",
+  "state": "NJ",
+  "company": {"name":"xxx Inc", "position":"manager", "description":"I have been working as a strategic recruiter at ABC Inc. for the past 5 years where I have successfully recruited talent for various company specific roles. At ABC Inc., we always welcome fresh talent, so if you believe you're one of them, give me a ping."},
 ```
+
+3. We will also initialize the `jobs` field to be empty, and its value will be added later by users' operations.
+
+  Here's one example of `jobs`:
+  ```json
+  "jobs": [{"job_id":"7b7997a2-c0d2-4f8c-b27a-6a1d4b5b6310", "applicant_id": ["7b7997a2-c0d2-4f8c-b27a-65412b5b6310", "7b7543b2-c0d2-4f8c-b27a-6a1d4b5b6310"],},
+  {"job_id": "7b78942a2-c0d2-4f8c-b27a-6a1d4b5b6310", "applicant_id": ["7b7997a2-c0d2-4f8c-b27a-654125786412", "7b7543b2-c0d2-4f8c-b27a-6a1d541234510"],}
+  ]
+  ```
+
+  Here's the table of `jobs` field:
+  |      Name      |     Type     |                    Description                     |
+  |:--------------:|:------------:|:--------------------------------------------------:|
+  |   applicantID  |    String    |                 Id of the applicant                |
+  |      Name      |    String    |                 Name of the applicant              |
+  |  Phone Number  |    String    |             Phone number of the applicant          |
+  |     Email      |    String    |             Email address of the applicant         |
+  |     Resume     |    String    |     A URL point to the resume of the applicant     |
+
+Here's an example of whole recruiter data:
+
+```json
   "_id": "7b7997a2-c0d2-4f8c-b27a-6h87fhsk4j87",
-  "password": "$2a$08$XdvNkfdNIL8F8xsuIUeSbNOFgK0M0iV5HOskfVn7.PWncShU.O",
+  "password":"$2a$08$XdvNkfdNIL8F8xsuIUeSbNOFgK0M0iV5HOskfVn7.PWncShU.O",
   "firstName": "Adam",
   "lastName”: "Stone",
   "email": "astone@abc.com",
   "phone": "747-299-7453",
-  "gender": "M",
-  "city": "Hoboken",
-  "state": "NJ",
-  "position":"Senior Recruiter",
-  "company": "ABC Inc.",
-  "About": "I have been working as a strategic recruiter at ABC Inc. for the past 5 years where I have successfully recruited talent for various company specific roles. At ABC Inc., we always welcome fresh talent, so if you believe you're one of them, give me a ping."
-  “Jobs”: [{"Job": "job1._id", "applicants": [{"applicantId": "7b7997a2-c0d2-4f8c-b27a-6a1d4b5b6310"}]},
-  "Profile": "image url"
+  "profile": ["profile1", "profile2", "profile3"],
+  "jobs": [{"job_id":"7b7997a2-c0d2-4f8c-b27a-6a1d4b5b6310", "applicant_id": ["7b7997a2-c0d2-4f8c-b27a-65412b5b6310", "7b7543b2-c0d2-4f8c-b27a-6a1d4b5b6310"],},
+  {"job_id": "7b78942a2-c0d2-4f8c-b27a-6a1d4b5b6310", "applicant_id": ["7b7997a2-c0d2-4f8c-b27a-654125786412", "7b7543b2-c0d2-4f8c-b27a-6a1d541234510"],}
+  ]
 ```
 
 |     Name      |  Type  |                         Description                          |
@@ -140,16 +167,6 @@ One example of whole recruiter data:
 |     About     | String |              Brief Description of the recruiter              |
 |    Company    | String |                    Company of the recruiter                  |
 |     Jobs      | Array  |        A list of jobs that the recruiter has posted          |
-
-The Jobs array contains sub documents with the details of the applicants applied for this job.
-
-|      Name      |     Type     |                    Description                     |
-|:--------------:|:------------:|:--------------------------------------------------:|
-|   applicantID  |    String    |                 Id of the applicant                |
-|      Name      |    String    |                 Name of the applicant              |
-|  Phone Number  |    String    |             Phone number of the applicant          |
-|     Email      |    String    |             Email address of the applicant         |
-|     Resume     |    String    |     A URL point to the resume of the applicant     |
 
 ## JOBS
 
