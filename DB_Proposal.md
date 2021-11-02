@@ -18,46 +18,50 @@ Vinnakota, Bapiraju
 
 The user collection will contain all users registered with the portal, along with the following information.
 
-mandatory required Information:
+1. Mandatory required Information:
 
-- Email id
-- Phone
-- Name
-- Password
+   - Email id
+   - Phone
+   - Name
+   - Password
 
-And optional features, these features must be fulfilled when they try to apply for jobs. It would be stored as a sub-document under `profile`.
+2. Optional features, these features must be fulfilled when users try to apply for jobs. It would be stored as a sub-document under `profile`.
 
-- ID photo
-- Working Experience
-- Education
-- Skills
-- Languages
-- Tags
+   - ID photo
+   - Working Experience
+   - Education
+   - Skills
+   - Languages
+   - Tags
 
-Here's one example of sub-document `profile`:
+  Here's one example of sub-document `profile`:
 
-```json
-"_id": "7b7997a2-c0d2-4f8c-b27a-6a1d4b5b6310",
-"city": "Hoboken",
-"state": "NJ",
-"photo": "one url"
-"experience":[{"title":"Maintenance Engineer", "employment type": "full time", "Company name":"Apple","start date": "08/05/2017", "end date": "08/05/2018"}]
-"education":[
-{"school":"xxx university", "field of study":"computer science", "degree":"master of science", "start date": "08/05/2010", "end date": "08/05/2014"},
-{"school":"xxx university", "field of study":"computer science", "degree":"bachelor of science","start date": "08/05/2015", "end date": "08/05/2017"}]
-"skills":["Java", "JS"]
-"languages":["english"]
-"tags":["SDE","DS"]
-```
+  ```json
+  "_id": "7b7997a2-c0d2-4f8c-b27a-6a1d4b5b6310",
+  "city": "Hoboken",
+  "state": "NJ",
+  "photo": "one url"
+  "experience":[{"title":"Maintenance Engineer", "employment type": "full time", "Company name":"Apple","start date": "08/05/2017", "end date": "08/05/2018"}]
+  "education":[
+  {"school":"xxx university", "field of study":"computer science", "degree":"master of science", "start date": "08/05/2010", "end date": "08/05/2014"},
+  {"school":"xxx university", "field of study":"computer science", "degree":"bachelor of science","start date": "08/05/2015", "end date": "08/05/2017"}]
+  "skills":["Java", "JS"]
+  "languages":["english"]
+  "tags":["SDE","DS"]
+  ```
 
+  |   Name   |  Type  |                         Description                          |
+| :------: | :----: | :----------------------------------------------------------: |
+|   _id    | String |      A globally unique identifier to represent the user      |
+| password | String |        Encrypted password use for login verification         |
+|   jobs   | Array  | The reference of jobs that user applied with three status: pending, rejected, approved |
+| profile  | Array  |     User's detailed information likes experience, skills     |
+|  favor   | Array  |             The reference of user's favorite job             |
 
-| Name       | Type   | Description                                                  |
-| ---------- | ------ | ------------------------------------------------------------ |
-| photo      | String | A URL point to the use's ID photo stores on Google Cloud Platform or other storage platform |
-| experience | Array  | Working history followed by one company and corresponding description |
-| education  | Array  | Education history followed by one school and corresponding description |
-| skills     | Array  | learned abilities of user.                                   |
-| Tags       | Array  | Users' interested fields of jobs                             |
+3. We will initialize the following fields to be empty, and these fields will be added later.
+
+  - jobs(Users' applied jobs and status, status consists of pending, rejected, approved)
+  - favor(Users' interested jobs and they can save them in it for applying later)
 
 Here's one example of whole data for one user:
 
@@ -73,42 +77,39 @@ Here's one example of whole data for one user:
 "favor": ["job3._id","job4._id","job5._id"],
 ```
 
-|   Name   |  Type  |                         Description                          |
-| :------: | :----: | :----------------------------------------------------------: |
-|   _id    | String |      A globally unique identifier to represent the user      |
-| password | String |        Encrypted password use for login verification         |
-|   jobs   | Array  | The reference of jobs that user applied with three status: pending, rejected, approved |
-| profile  | Array  |     User's detailed information likes experience, skills     |
-|  favor   | Array  |             The reference of user's favorite job             |
-
-We will initialize the following fields to be empty, and these fields will be added later.
-
-- jobs(Users' applied jobs and status)
-- favor(Users' interested jobs and they can save them in it for applying later)
+| Name       | Type   | Description                                                  |
+| ---------- | ------ | ------------------------------------------------------------ |
+| photo      | String | A URL point to the use's ID photo stores on Google Cloud Platform or other storage platform |
+| experience | Array  | Working history followed by one company and corresponding description |
+| education  | Array  | Education history followed by one school and corresponding description |
+| skills     | Array  | learned abilities of user.                                   |
+| Tags       | Array  | Users' interested fields of jobs                             |
 
 ## Recruiters
 
-The recruiters collection will contain information of the recruiter who have registered with the portal, both mandatory and optional:
+The recruiters collection will contain information of the recruiter who have registered with the portal, both mandatory and optional.
 
+1. Mandatory data:
 
-- firstName
-- lastName
-- email id
-- phone
-- Password(encrypted)
-- position
-- company
+   - Email id
+   - Phone
+   - Name
+   - Password
 
-And optional features:
+2. optional features(these feature will be saved into a sub-document `profile`, and must be fulfilled when recruiters try to post a job):
 
-- A profile picture(store on Google Cloud Platfrom or other storage platform)
-- A list of jobs posted by the recruiter with applicant details, if present
-- Other optional recruiter information(about, gender, address, tags)
+   - A profile picture(store on Google Cloud Platfrom or other storage platform)
+   - company
+   - position
+   - A list of jobs posted by the recruiter with applicant details, if present
+   - Other optional recruiter information(about, gender, address, tags)
 
-A recruiter can update their profile by logging in to the portal.
+One example of sub-document `profile`:
+
+One example of whole recruiter data:
 
 ```
-  `"_id": "7b7997a2-c0d2-4f8c-b27a-6h87fhsk4j87",
+  "_id": "7b7997a2-c0d2-4f8c-b27a-6h87fhsk4j87",
   "Password": "$2a$08$XdvNkfdNIL8F8xsuIUeSbNOFgK0M0iV5HOskfVn7.PWncShU.O",
   "FirstName": "Adam",
   "LastName”: "Stone",
@@ -121,7 +122,7 @@ A recruiter can update their profile by logging in to the portal.
   "Company": "ABC Inc.",
   "About": "I have been working as a strategic recruiter at ABC Inc. for the past 5 years where I have successfully recruited talent for various company specific roles. At ABC Inc., we always welcome fresh talent, so if you believe you're one of them, give me a ping."
   “Jobs”: [{"Job": "job1._id", "applicants": [{"applicantId": "7b7997a2-c0d2-4f8c-b27a-6a1d4b5b6310", "firstName": "George", "lastName": "West", "Email": "James@gmail.com", "Phone": "848-242-6666", "resume": "pdf url"}]},
-  "Profile": "image url"`
+  "Profile": "image url"
 ```
 
 |     Name      |  Type  |                         Description                          |
@@ -139,7 +140,6 @@ A recruiter can update their profile by logging in to the portal.
 |     Jobs      | Array  |        A list of jobs that the recruiter has posted          |
 
 The Jobs array contains sub documents with the details of the applicants applied for this job.
-
 
 |      Name      |     Type     |                    Description                     |
 |:--------------:|:------------:|:--------------------------------------------------:|
