@@ -50,18 +50,20 @@ The user collection will contain all users registered with the portal, along wit
   "tags":["SDE","DS"]
   ```
 
-  |   Name   |  Type  |                         Description                          |
-| :------: | :----: | :----------------------------------------------------------: |
-|   _id    | String |      A globally unique identifier to represent the user      |
-| password | String |        Encrypted password use for login verification         |
-|   jobs   | Array  | The reference of jobs that user applied with three status: pending, rejected, approved |
-| profile  | Array  |     User's detailed information likes experience, skills     |
-|  favor   | Array  |             The reference of user's favorite job             |
+  Table of sub-document `profile`:
+
+  | Name       | Type   | Description                                                  |
+  | ---------- | ------ | ------------------------------------------------------------ |
+  | photo      | String | A URL point to the use's ID photo stores on Google Cloud Platform or other storage platform |
+  | experience | Array  | Working history followed by one company and corresponding description |
+  | education  | Array  | Education history followed by one school and corresponding description |
+  | skills     | Array  | learned abilities of user.                                   |
+  | tags       | Array  | Users' interested fields of jobs                             |
 
 3. We will initialize the following fields to be empty, and these fields will be added later.
 
-  - jobs(Users' applied jobs and status, status consists of pending, rejected, approved)
-  - favor(Users' interested jobs and they can save them in it for applying later)
+  - jobs(Users' applied jobs' id and status, status consists of pending, rejected, approved)
+  - favor(Users' interested jobs' id and they can save them in it for applying later)
 
 Here's one example of whole data for one user:
 
@@ -73,17 +75,17 @@ Here's one example of whole data for one user:
 "lastName": "James",
 "password": "$2a$08$XdvNkfdNIL8F8xsuIUeSbNOFgK0M0iV5HOskfVn7.PWncShU.O",
 "jobs”: [{"job": "job1._id", "statues": "pending"},{"job": "job2._id", "statues": "rejected"}],
-"profile": ["profile1._id","profile2._id"],
+"profile": ["profile1","profile2"],
 "favor": ["job3._id","job4._id","job5._id"],
 ```
 
-| Name       | Type   | Description                                                  |
-| ---------- | ------ | ------------------------------------------------------------ |
-| photo      | String | A URL point to the use's ID photo stores on Google Cloud Platform or other storage platform |
-| experience | Array  | Working history followed by one company and corresponding description |
-| education  | Array  | Education history followed by one school and corresponding description |
-| skills     | Array  | learned abilities of user.                                   |
-| Tags       | Array  | Users' interested fields of jobs                             |
+  |   Name   |  Type  |                         Description                          |
+  | :------: | :----: | :----------------------------------------------------------: |
+  |   _id    | String |      A globally unique identifier to represent the user      |
+  | password | String |        Encrypted password use for login verification         |
+  |   jobs   | Array  | The reference of jobs that user applied with three status: pending, rejected, approved |
+  | profile  | Array  |     User's detailed information likes experience, skills     |
+  |  favor   | Array  |             The reference of user's favorite job             |
 
 ## Recruiters
 
@@ -98,7 +100,7 @@ The recruiters collection will contain information of the recruiter who have reg
 
 2. optional features(these feature will be saved into a sub-document `profile`, and must be fulfilled when recruiters try to post a job):
 
-   - A profile picture(store on Google Cloud Platfrom or other storage platform)
+   - A profile picture(store on Google Cloud Platform or other storage platform)
    - company
    - position
    - A list of jobs posted by the recruiter with applicant details, if present
@@ -110,18 +112,18 @@ One example of whole recruiter data:
 
 ```
   "_id": "7b7997a2-c0d2-4f8c-b27a-6h87fhsk4j87",
-  "Password": "$2a$08$XdvNkfdNIL8F8xsuIUeSbNOFgK0M0iV5HOskfVn7.PWncShU.O",
-  "FirstName": "Adam",
-  "LastName”: "Stone",
-  "Email": "astone@abc.com",
-  "Phone": "747-299-7453",
-  "Gender": "M",
-  "City": "Hoboken",
-  "State": "NJ",
-  "Position":"Senior Recruiter",
-  "Company": "ABC Inc.",
+  "password": "$2a$08$XdvNkfdNIL8F8xsuIUeSbNOFgK0M0iV5HOskfVn7.PWncShU.O",
+  "firstName": "Adam",
+  "lastName”: "Stone",
+  "email": "astone@abc.com",
+  "phone": "747-299-7453",
+  "gender": "M",
+  "city": "Hoboken",
+  "state": "NJ",
+  "position":"Senior Recruiter",
+  "company": "ABC Inc.",
   "About": "I have been working as a strategic recruiter at ABC Inc. for the past 5 years where I have successfully recruited talent for various company specific roles. At ABC Inc., we always welcome fresh talent, so if you believe you're one of them, give me a ping."
-  “Jobs”: [{"Job": "job1._id", "applicants": [{"applicantId": "7b7997a2-c0d2-4f8c-b27a-6a1d4b5b6310", "firstName": "George", "lastName": "West", "Email": "James@gmail.com", "Phone": "848-242-6666", "resume": "pdf url"}]},
+  “Jobs”: [{"Job": "job1._id", "applicants": [{"applicantId": "7b7997a2-c0d2-4f8c-b27a-6a1d4b5b6310"}]},
   "Profile": "image url"
 ```
 
