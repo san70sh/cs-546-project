@@ -66,9 +66,9 @@ Here's one example of whole data for one user:
 "email": "James@gmail.com",
 "phone": "848-242-6666",
 "firstName": "Liam",
-"lastName”: "James",
+"lastName": "James",
 "password": "$2a$08$XdvNkfdNIL8F8xsuIUeSbNOFgK0M0iV5HOskfVn7.PWncShU.O",
-“jobs”: [{"job": "job1._id", "statues": "pending"},{"job": "job2._id", "statues": "rejected"}],
+"jobs”: [{"job": "job1._id", "statues": "pending"},{"job": "job2._id", "statues": "rejected"}],
 "profile": ["profile1._id","profile2._id"],
 "favor": ["job3._id","job4._id","job5._id"],
 ```
