@@ -56,13 +56,18 @@ The user collection will contain all users registered with the portal, along wit
 
   Table of sub-document `profile`:
 
-  | Name       | Type   | Description                                                  |
-  | ---------- | ------ | ------------------------------------------------------------ |
-  | photo      | String | A URL point to the use's ID photo stores on Google Cloud Platform or other storage platform |
-  | experience | Array  | Working history followed by one company and corresponding description |
-  | education  | Array  | Education history followed by one school and corresponding description |
-  | skills     | Array  | learned abilities of user.                                   |
-  | tags       | Array  | Users' interested fields of jobs                             |
+|    Name    |  Type  |                         Description                          |
+| :--------: | :----: | :----------------------------------------------------------: |
+|    _id     | String | A globally unique identifier to represent the user's profile |
+|   photo    | String | A URL point to the use's ID photo stores on Google Cloud Platform or other storage platform |
+|   gender   | String |                 'm' for male, 'f' for female                 |
+|    city    | String |                    User's city of living                     |
+|   state    | String |                    User's state of living                    |
+| experience | Array  | Working history followed by one company and corresponding description |
+| education  | Array  | Education history followed by one school and corresponding description |
+|   skills   | Array  |                  Learned abilities of user.                  |
+| languages  | Array  |              Languages that the user can speak               |
+|    tags    | Array  |               Users' interested fields of jobs               |
 
 3. We will initialize the following fields to be empty, and these fields will be added later.
 
@@ -83,13 +88,17 @@ Here's one example of whole data for one user:
 "favor": ["job3._id","job4._id","job5._id"],
 ```
 
-  |   Name   |  Type  |                         Description                          |
-  | :------: | :----: | :----------------------------------------------------------: |
-  |   _id    | String |      A globally unique identifier to represent the user      |
-  | password | String |        Encrypted password use for login verification         |
-  |   jobs   | Array  | The reference of jobs that user applied with three status: pending, rejected, approved |
-  | profile  | Array  |     User's detailed information     |
-  |  favor   | Array  |             The reference of user's favorite job             |
+|   Name    |  Type  |                         Description                          |
+| :-------: | :----: | :----------------------------------------------------------: |
+|    _id    | String |      A globally unique identifier to represent the user      |
+|   email   | String |                     User's email address                     |
+|   phone   | String |                      User's phonenumber                      |
+| firstName | String |                      User's first name                       |
+| lastName  | String |                       User's last name                       |
+| password  | String |        Encrypted password use for login verification         |
+|   jobs    | Array  | The reference of jobs that user applied with three status: pending, rejected, approved |
+|  profile  | Array  |                 User's detailed information                  |
+|   favor   | Array  |             The reference of user's favorite job             |
 
 ## Recruiters
 
