@@ -16,7 +16,7 @@ Vinnakota, Bapiraju
 
 ## Users
 
-The user collection will contain all users registered with the portal, along with the following information.
+The user collection will contain all users registered with the portal, along with mandatory required Information:
 
 1. Mandatory required Information:
 
@@ -60,7 +60,7 @@ The user collection will contain all users registered with the portal, along wit
 | :--------: | :----: | :----------------------------------------------------------: |
 |    _id     | String | A globally unique identifier to represent the user's profile |
 |   photo    | String | A URL point to the use's ID photo stores on Google Cloud Platform or other storage platform |
-|   gender   | String |                 'm' for male, 'f' for female                 |
+|   gender   | String |        m for male, f for female, others for non-binary       |
 |    city    | String |                    User's city of living                     |
 |   state    | String |                    User's state of living                    |
 | experience | Array  | Working history followed by one company and corresponding description |
@@ -74,7 +74,7 @@ The user collection will contain all users registered with the portal, along wit
   - jobs(Users' applied jobs' id and status, status consists of pending, rejected, approved)
   - favor(Users' interested jobs' id and they can save them in it for applying later)
 
-Here's one example of whole data for one user:
+A user can update their profile by logging in to the portal.
 
 ```json
 "_id": "7b7997a2-c0d2-4f8c-b27a-6a1d4b5b6310",
@@ -111,7 +111,7 @@ The recruiters collection will contain information of the recruiter who have reg
    - Name
    - Password
 
-2. optional features(these feature will be saved into a sub-document `profile`, and must be fulfilled when recruiters try to post a job):
+2. optional features(these features will be saved into a sub-document `profile`, and must be fulfilled when recruiters try to post a job):
 
    - ID photo(store on Google Cloud Platform or other storage platform)
    - Gender
@@ -127,8 +127,19 @@ One example of sub-document `profile`:
   "gender": "m",
   "city": "Hoboken",
   "state": "NJ",
-  "company": {"name":"xxx Inc", "position":"manager", "description":"I have been working as a strategic recruiter at ABC Inc. for the past 5 years where I have successfully recruited talent for various company specific roles. At ABC Inc., we always welcome fresh talent, so if you believe you're one of them, give me a ping."},
+  "company": {"name":"xxx Inc", "position":"manager", "description":"I have been working as a strategic recruiter at xxx Inc. for the past 5 years where I have successfully recruited talent for various company specific roles. At xxx Inc., we always welcome fresh talent, so if you believe you're one of them, give me a ping."},
 ```
+
+Here's the table of `profile` field:
+|     Name      |  Type    |                         Description                          |
+|   :------:    | :----:   | :----------------------------------------------------------: |
+|      _id      | ObjectId |     A globally unique identifier to represent the recruiter's profile.     |
+|     photo     |  String  | A URL point to the use's ID photo stores on Google Cloud Platform or other storage platform |
+|     gender    |  String  |        m for male, f for female, others for non-binary       |
+|      city     |  String  |                    City of the recruiter                     |
+|     state     |  String  |                  State of the recruiter                      |
+|    company    |  Object  |            Company Information of the recruiter              |
+
 
 3. We will also initialize the `jobs` field to be empty, and its value will be added later by users' operations.
 
@@ -142,11 +153,8 @@ One example of sub-document `profile`:
   Here's the table of `jobs` field:
   |      Name      |     Type     |                    Description                     |
   |:--------------:|:------------:|:--------------------------------------------------:|
-  |   applicantID  |    String    |                 Id of the applicant                |
-  |      Name      |    String    |                 Name of the applicant              |
-  |  Phone Number  |    String    |             Phone number of the applicant          |
-  |     Email      |    String    |             Email address of the applicant         |
-  |     Resume     |    String    |     A URL point to the resume of the applicant     |
+  |     job_id     |    String    |       Id of the Job posted by the recruiter        |
+  |  applicant_id  |    Array     |  Ids of the applicants who applied for this job    |
 
 Here's an example of whole recruiter data:
 
@@ -154,10 +162,10 @@ Here's an example of whole recruiter data:
   "_id": "7b7997a2-c0d2-4f8c-b27a-6h87fhsk4j87",
   "password":"$2a$08$XdvNkfdNIL8F8xsuIUeSbNOFgK0M0iV5HOskfVn7.PWncShU.O",
   "firstName": "Adam",
-  "lastName”: "Stone",
+  "lastName": "Stone",
   "email": "astone@abc.com",
   "phone": "747-299-7453",
-  "profile": ["profile1", "profile2", "profile3"],
+  "profile": {"_id": "7b7997a2-c0d2-4f8c-b27a-6h87fhsk4h98", "photo": "image url", "gender": "m", "company": {"position":"Strategic Recruiter", "company": "ABC Inc.", "city": "Hoboken", "state": "NJ", "about": "Brief description of the recruiter"},
   "jobs": [{"job_id":"7b7997a2-c0d2-4f8c-b27a-6a1d4b5b6310", "applicant_id": ["7b7997a2-c0d2-4f8c-b27a-65412b5b6310", "7b7543b2-c0d2-4f8c-b27a-6a1d4b5b6310"],},
   {"job_id": "7b78942a2-c0d2-4f8c-b27a-6a1d4b5b6310", "applicant_id": ["7b7997a2-c0d2-4f8c-b27a-654125786412", "7b7543b2-c0d2-4f8c-b27a-6a1d541234510"],}
   ]
@@ -166,16 +174,13 @@ Here's an example of whole recruiter data:
 |     Name      |  Type  |                         Description                          |
 |   :------:    | :----: | :----------------------------------------------------------: |
 |      _id      | String |     A globally unique identifier to represent the user.      |
-|    Password   | String |        Encrypted password use for login verification         |
-|   FirstName   | String |                First name of the recruiter                   |
-|    LastName   | String |                 Last name of the recruiter                   |
-|     Email     | String |                  Email of the recruiter                      |
-|  Phone Number | String |                 Last name of the recruiter                   |
-|    Profile    | String |          A URL point to the image of the recruiter           |
-|    Position   | String |              Title/Position of the recruiter                 |
-|     About     | String |              Brief Description of the recruiter              |
-|    Company    | String |                    Company of the recruiter                  |
-|     Jobs      | Array  |        A list of jobs that the recruiter has posted          |
+|    password   | String |        Encrypted password use for login verification         |
+|   firstName   | String |                First name of the recruiter                   |
+|    lastName   | String |                 Last name of the recruiter                   |
+|     email     | String |                  Email of the recruiter                      |
+|     phone     | String |                 Last name of the recruiter                   |
+|    profile    | Object |               Recruiter's detailed information               |
+|     jobs      | Array  |        A list of jobs that the recruiter has posted          |
 
 ## JOBS
 
