@@ -165,7 +165,7 @@ Here's an example of whole recruiter data:
   "lastName": "Stone",
   "email": "astone@abc.com",
   "phone": "747-299-7453",
-  "profile": {"photo": "image url", "gender": "m", "company": {"position":"Strategic Recruiter", "company": "ABC Inc.", "city": "Hoboken", "state": "NJ", "about": "Brief description of the recruiter"},
+  "profile": {"_id": "7b7997a2-c0d2-4f8c-b27a-6h87fhsk4h98", "photo": "image url", "gender": "m", "company": {"position":"Strategic Recruiter", "company": "ABC Inc.", "city": "Hoboken", "state": "NJ", "about": "Brief description of the recruiter"},
   "jobs": [{"job_id":"7b7997a2-c0d2-4f8c-b27a-6a1d4b5b6310", "applicant_id": ["7b7997a2-c0d2-4f8c-b27a-65412b5b6310", "7b7543b2-c0d2-4f8c-b27a-6a1d4b5b6310"],},
   {"job_id": "7b78942a2-c0d2-4f8c-b27a-6a1d4b5b6310", "applicant_id": ["7b7997a2-c0d2-4f8c-b27a-654125786412", "7b7543b2-c0d2-4f8c-b27a-6a1d541234510"],}
   ]
@@ -179,7 +179,7 @@ Here's an example of whole recruiter data:
 |    lastName   | String |                 Last name of the recruiter                   |
 |     email     | String |                  Email of the recruiter                      |
 |     phone     | String |                 Last name of the recruiter                   |
-|    profile    | String |               Recruiter's detailed information               |
+|    profile    | Object |               Recruiter's detailed information               |
 |     jobs      | Array  |        A list of jobs that the recruiter has posted          |
 
 ## JOBS
