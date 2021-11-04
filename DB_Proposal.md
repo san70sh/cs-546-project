@@ -18,115 +18,169 @@ Vinnakota, Bapiraju
 
 The user collection will contain all users registered with the portal, along with mandatory required Information:
 
-// please add location/address to the fields here
+1. Mandatory required Information:
 
-- email id
-- phone
-- name
-- Password(encrypted)
+   - Email id
+   - Phone
+   - Name
+   - Password
 
-And optional features:
+2. Optional features, these features must be fulfilled when users try to apply for jobs. It would be stored as a sub-document under `profile`.
 
-// please add features as we see on handshake like work exp education then achievements if any etc.
-// Again please refer handshake ans see what they are asking us to fill while creating an account
-// Make some fields to stored saved jobs as well.
-// All of these will come in optional features
+   - ID photo
+   - Gender
+   - City
+   - State
+   - Working Experience
+   - Education
+   - Skills
+   - Languages
+   - Tags
 
-- A profile picture(store on Google Clould Platfrom or other storage platform)
-- A list of jobs(one-to-many relationships with collection Job that users have saved and applied to)
-- The status of their application with some default value(passed/rejected/pending)
-- Other optional user information(gender, address, favor job, tags)
+  Here's one example of sub-document `profile`:
+
+  ```json
+  "_id": "7b7997a2-c0d2-4f8c-b27a-6a1d4b5b6310",
+  "photo": "one url",
+  "gender": "m",
+  "city": "Hoboken",
+  "state": "NJ",
+  "experience":[{"title":"Maintenance Engineer", "employment type": "full time", "Company name":"Apple","start date": "08/05/2017", "end date": "08/05/2018"}]
+  "education":[
+  {"school":"xxx university", "field of study":"computer science", "degree":"master of science", "start date": "08/05/2010", "end date": "08/05/2014"},
+  {"school":"xxx university", "field of study":"computer science", "degree":"bachelor of science","start date": "08/05/2015", "end date": "08/05/2017"}]
+  "skills":["Java", "JS"]
+  "languages":["english"]
+  "tags":["SDE","DS"]
+  ```
+
+  Table of sub-document `profile`:
+
+|    Name    |  Type  |                         Description                          |
+| :--------: | :----: | :----------------------------------------------------------: |
+|    _id     | String | A globally unique identifier to represent the user's profile |
+|   photo    | String | A URL point to the use's ID photo stores on Google Cloud Platform or other storage platform |
+|   gender   | String |        m for male, f for female, others for non-binary       |
+|    city    | String |                    User's city of living                     |
+|   state    | String |                    User's state of living                    |
+| experience | Array  | Working history followed by one company and corresponding description |
+| education  | Array  | Education history followed by one school and corresponding description |
+|   skills   | Array  |                  Learned abilities of user.                  |
+| languages  | Array  |              Languages that the user can speak               |
+|    tags    | Array  |               Users' interested fields of jobs               |
+
+3. We will initialize the following fields to be empty, and these fields will be added later.
+
+  - jobs(Users' applied jobs' id and status, status consists of pending, rejected, approved)
+  - favor(Users' interested jobs' id and they can save them in it for applying later)
 
 A user can update their profile by logging in to the portal.
 
-```
-  `"_id": "7b7997a2-c0d2-4f8c-b27a-6a1d4b5b6310",
-  "Password": "$2a$08$XdvNkfdNIL8F8xsuIUeSbNOFgK0M0iV5HOskfVn7.PWncShU.O",
-  "FirstName": "Liam",
-  "LastName”: "James",
-  "Email": "James@gmail.com",
-  "Phone": "848-242-6666",
-  "Gender": "M",
-  "City": "Hoboken",
-  "State": "NJ",
-  “Jobs”: [{"Job": "job1._id", "statues": "pending"},{"Job": "job2._id", "statues": "rejected"}],
-  "Profile": "image/pdf url",
-  "Favor": ["job3._id","job4._id","job5._id"],`
-  `"Tags": ["SDE", "frontend"]`
+```json
+"_id": "7b7997a2-c0d2-4f8c-b27a-6a1d4b5b6310",
+"email": "James@gmail.com",
+"phone": "848-242-6666",
+"firstName": "Liam",
+"lastName": "James",
+"password": "$2a$08$XdvNkfdNIL8F8xsuIUeSbNOFgK0M0iV5HOskfVn7.PWncShU.O",
+"jobs”: [{"job": "job1._id", "statues": "pending"},{"job": "job2._id", "statues": "rejected"}],
+"profile": ["profile1","profile2"],
+"favor": ["job3._id","job4._id","job5._id"],
 ```
 
-|   Name   |  Type  |                         Description                          |
-| :------: | :----: | :----------------------------------------------------------: |
-|   _id    | String |     A globally unique identifier to represent the user.      |
-| Password | String |        Encrypted password use for login verification         |
-|   Jobs   | Array  |               A list of jobs that user applied               |
-| Profile  | String | A URL point to the image/PDF style resumes stores for each user |
-|  Favor   | Array  |                     User's favorite job                      |
-|   Tags   | Array  |              Types of work users tend to choose              |
+|   Name    |  Type  |                         Description                          |
+| :-------: | :----: | :----------------------------------------------------------: |
+|    _id    | String |      A globally unique identifier to represent the user      |
+|   email   | String |                     User's email address                     |
+|   phone   | String |                      User's phonenumber                      |
+| firstName | String |                      User's first name                       |
+| lastName  | String |                       User's last name                       |
+| password  | String |        Encrypted password use for login verification         |
+|   jobs    | Array  | The reference of jobs that user applied with three status: pending, rejected, approved |
+|  profile  | Array  |                 User's detailed information                  |
+|   favor   | Array  |             The reference of user's favorite job             |
 
 ## Recruiters
 
-The recruiters collection will contain information of the recruiter who have registered with the portal, both mandatory and optional:
+The recruiters collection will contain information of the recruiter who have registered with the portal, both mandatory and optional.
 
+1. Mandatory data:
 
-- firstName
-- lastName
-- email id
-- phone
-- Password(encrypted)
-- position
-- company
+   - Email id
+   - Phone
+   - Name
+   - Password
 
-And optional features:
+2. optional features(these features will be saved into a sub-document `profile`, and must be fulfilled when recruiters try to post a job):
 
-- A profile picture(store on Google Cloud Platfrom or other storage platform)
-- A list of jobs posted by the recruiter with applicant details, if present
-- Other optional recruiter information(about, gender, address, tags)
+   - ID photo(store on Google Cloud Platform or other storage platform)
+   - Gender
+   - State
+   - City
+   - company(An object including company name, position, and description)
 
-A recruiter can update their profile by logging in to the portal.
+One example of sub-document `profile`:
 
+```json
+  "_id": "7b7997a2-c0d2-4f8c-b27a-6a1d4b5b6310",
+  "photo": "one url",
+  "gender": "m",
+  "city": "Hoboken",
+  "state": "NJ",
+  "company": {"name":"xxx Inc", "position":"manager", "description":"I have been working as a strategic recruiter at xxx Inc. for the past 5 years where I have successfully recruited talent for various company specific roles. At xxx Inc., we always welcome fresh talent, so if you believe you're one of them, give me a ping."},
 ```
-  `"_id": "7b7997a2-c0d2-4f8c-b27a-6h87fhsk4j87",
-  "Password": "$2a$08$XdvNkfdNIL8F8xsuIUeSbNOFgK0M0iV5HOskfVn7.PWncShU.O",
-  "FirstName": "Adam",
-  "LastName”: "Stone",
-  "Email": "astone@abc.com",
-  "Phone": "747-299-7453",
-  "Gender": "M",
-  "City": "Hoboken",
-  "State": "NJ",
-  "Position":"Senior Recruiter",
-  "Company": "ABC Inc.",
-  "About": "I have been working as a strategic recruiter at ABC Inc. for the past 5 years where I have successfully recruited talent for various company specific roles. At ABC Inc., we always welcome fresh talent, so if you believe you're one of them, give me a ping."
-  “Jobs”: [{"Job": "job1._id", "applicants": [
-            {"applicantId": "7b7997a2-c0d2-4f8c-b27a-6a1d4b5b6310", "firstName": "George", "lastName": "West", "Email": "James@gmail.com", "Phone": "848-242-6666", "resume": "pdf url"}]},
-  "Profile": "image url"`
+
+Here's the table of `profile` field:
+|     Name      |  Type    |                         Description                          |
+|   :------:    | :----:   | :----------------------------------------------------------: |
+|      _id      | ObjectId |     A globally unique identifier to represent the recruiter's profile.     |
+|     photo     |  String  | A URL point to the use's ID photo stores on Google Cloud Platform or other storage platform |
+|     gender    |  String  |        m for male, f for female, others for non-binary       |
+|      city     |  String  |                    City of the recruiter                     |
+|     state     |  String  |                  State of the recruiter                      |
+|    company    |  Object  |            Company Information of the recruiter              |
+
+
+3. We will also initialize the `jobs` field to be empty, and its value will be added later by users' operations.
+
+  Here's one example of `jobs`:
+  ```json
+  "jobs": [{"job_id":"7b7997a2-c0d2-4f8c-b27a-6a1d4b5b6310", "applicant_id": ["7b7997a2-c0d2-4f8c-b27a-65412b5b6310", "7b7543b2-c0d2-4f8c-b27a-6a1d4b5b6310"],},
+  {"job_id": "7b78942a2-c0d2-4f8c-b27a-6a1d4b5b6310", "applicant_id": ["7b7997a2-c0d2-4f8c-b27a-654125786412", "7b7543b2-c0d2-4f8c-b27a-6a1d541234510"],}
+  ]
+  ```
+
+  Here's the table of `jobs` field:
+  |      Name      |     Type     |                    Description                     |
+  |:--------------:|:------------:|:--------------------------------------------------:|
+  |     job_id     |    String    |       Id of the Job posted by the recruiter        |
+  |  applicant_id  |    Array     |  Ids of the applicants who applied for this job    |
+
+Here's an example of whole recruiter data:
+
+```json
+  "_id": "7b7997a2-c0d2-4f8c-b27a-6h87fhsk4j87",
+  "password":"$2a$08$XdvNkfdNIL8F8xsuIUeSbNOFgK0M0iV5HOskfVn7.PWncShU.O",
+  "firstName": "Adam",
+  "lastName": "Stone",
+  "email": "astone@abc.com",
+  "phone": "747-299-7453",
+  "profile": {"photo": "image url", "gender": "m", "company": {"position":"Strategic Recruiter", "company": "ABC Inc.", "city": "Hoboken", "state": "NJ", "about": "Brief description of the recruiter"},
+  "jobs": [{"job_id":"7b7997a2-c0d2-4f8c-b27a-6a1d4b5b6310", "applicant_id": ["7b7997a2-c0d2-4f8c-b27a-65412b5b6310", "7b7543b2-c0d2-4f8c-b27a-6a1d4b5b6310"],},
+  {"job_id": "7b78942a2-c0d2-4f8c-b27a-6a1d4b5b6310", "applicant_id": ["7b7997a2-c0d2-4f8c-b27a-654125786412", "7b7543b2-c0d2-4f8c-b27a-6a1d541234510"],}
+  ]
 ```
 
 |     Name      |  Type  |                         Description                          |
 |   :------:    | :----: | :----------------------------------------------------------: |
 |      _id      | String |     A globally unique identifier to represent the user.      |
-|    Password   | String |        Encrypted password use for login verification         |
-|   FirstName   | String |                First name of the recruiter                   |
-|    LastName   | String |                 Last name of the recruiter                   |
-|     Email     | String |                  Email of the recruiter                      |
-|  Phone Number | String |                 Last name of the recruiter                   |
-|    Profile    | String |          A URL point to the image of the recruiter           |
-|    Position   | String |              Title/Position of the recruiter                 |
-|     About     | String |              Brief Description of the recruiter              |
-|    Company    | String |                    Company of the recruiter                  |
-|     Jobs      | Array  |        A list of jobs that the recruiter has posted          |
-
-The Jobs array contains sub documents with the details of the applicants applied for this job.
-
-
-|      Name      |     Type     |                    Description                     |
-|:--------------:|:------------:|:--------------------------------------------------:|
-|   applicantID  |    String    |                 Id of the applicant                |
-|      Name      |    String    |                 Name of the applicant              |
-|  Phone Number  |    String    |             Phone number of the applicant          |
-|     Email      |    String    |             Email address of the applicant         |
-|     Resume     |    String    |     A URL point to the resume of the applicant     |
+|    password   | String |        Encrypted password use for login verification         |
+|   firstName   | String |                First name of the recruiter                   |
+|    lastName   | String |                 Last name of the recruiter                   |
+|     email     | String |                  Email of the recruiter                      |
+|     phone     | String |                 Last name of the recruiter                   |
+|    profile    | String |               Recruiter's detailed information               |
+|     jobs      | Array  |        A list of jobs that the recruiter has posted          |
 
 ## JOBS
 
