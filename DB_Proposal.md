@@ -1,20 +1,13 @@
-# DB Proposal
-
-## Github Repository
+---
+title: Database Proposal
+author: 'Chen Yuyun, Joshi Ashwin, Wang You, Vinnakota Bapiraju'
+date: 11/05/2021
+---
+# Github Repository
 
 [github.com/ywang408/cs-546-project](https://github.com/ywang408/cs-546-project)
 
-## Group members
-
-Chen, Yuyun
-
-Joshi, Ashwin
-
-Wang, You
-
-Vinnakota, Bapiraju
-
-## Users
+# Users
 
 The user collection will contain all users registered with the portal, along with mandatory required Information:
 
@@ -45,10 +38,12 @@ The user collection will contain all users registered with the portal, along wit
   "gender": "m",
   "city": "Hoboken",
   "state": "NJ",
-  "experience":[{"title":"Maintenance Engineer", "employment type": "full time", "Company name":"Apple","start date": "08/05/2017", "end date": "08/05/2018"}]
+  "experience":[{"title":"Maintenance Engineer", "employment type": "full time", 
+  "Company name":"Apple","start date": "08/05/2017", "end date": "08/05/2018"}]
   "education":[
-  {"school":"xxx university", "field of study":"computer science", "degree":"master of science", "start date": "08/05/2010", "end date": "08/05/2014"},
-  {"school":"xxx university", "field of study":"computer science", "degree":"bachelor of science","start date": "08/05/2015", "end date": "08/05/2017"}]
+  {"school":"xxx university", "field of study":"computer science", 
+  "degree":"master of science", 
+  "start date": "08/05/2010", "end date": "08/05/2014"}]
   "skills":["Java", "JS"]
   "languages":["english"]
   "tags":["SDE","DS"]
@@ -56,18 +51,18 @@ The user collection will contain all users registered with the portal, along wit
 
   Table of sub-document `profile`:
 
-|    Name    |  Type  |                         Description                          |
-| :--------: | :----: | :----------------------------------------------------------: |
-|    _id     | String | A globally unique identifier to represent the user's profile |
+|    Name    |  Type  |                                         Description                                         |
+|:----------:|:------:|:-------------------------------------------------------------------------------------------:|
+|    _id     | String |                A globally unique identifier to represent the user's profile                 |
 |   photo    | String | A URL point to the use's ID photo stores on Google Cloud Platform or other storage platform |
-|   gender   | String |        m for male, f for female, others for non-binary       |
-|    city    | String |                    User's city of living                     |
-|   state    | String |                    User's state of living                    |
-| experience | Array  | Working history followed by one company and corresponding description |
-| education  | Array  | Education history followed by one school and corresponding description |
-|   skills   | Array  |                  Learned abilities of user.                  |
-| languages  | Array  |              Languages that the user can speak               |
-|    tags    | Array  |               Users' interested fields of jobs               |
+|   gender   | String |                       m for male, f for female, others for non-binary                       |
+|    city    | String |                                    User's city of living                                    |
+|   state    | String |                                   User's state of living                                    |
+| experience | Array  |            Working history followed by one company and corresponding description            |
+| education  | Array  |           Education history followed by one school and corresponding description            |
+|   skills   | Array  |                                 Learned abilities of user.                                  |
+| languages  | Array  |                              Languages that the user can speak                              |
+|    tags    | Array  |                              Users' interested fields of jobs                               |
 
 3. We will initialize the following fields to be empty, and these fields will be added later.
 
@@ -88,19 +83,19 @@ A user can update their profile by logging in to the portal.
 "favor": ["job3._id","job4._id","job5._id"],
 ```
 
-|   Name    |  Type  |                         Description                          |
-| :-------: | :----: | :----------------------------------------------------------: |
-|    _id    | String |      A globally unique identifier to represent the user      |
-|   email   | String |                     User's email address                     |
-|   phone   | String |                      User's phonenumber                      |
-| firstName | String |                      User's first name                       |
-| lastName  | String |                       User's last name                       |
-| password  | String |        Encrypted password use for login verification         |
+|   Name    |  Type  |                                      Description                                       |
+|:---------:|:------:|:--------------------------------------------------------------------------------------:|
+|    _id    | String |                   A globally unique identifier to represent the user                   |
+|   email   | String |                                  User's email address                                  |
+|   phone   | String |                                  User's phone number                                   |
+| firstName | String |                                   User's first name                                    |
+| lastName  | String |                                    User's last name                                    |
+| password  | String |                     Encrypted password use for login verification                      |
 |   jobs    | Array  | The reference of jobs that user applied with three status: pending, rejected, approved |
-|  profile  | Array  |                 User's detailed information                  |
-|   favor   | Array  |             The reference of user's favorite job             |
+|  profile  | Array  |                         A list of User's detailed information                          |
+|   favor   | Array  |                          The reference of user's favorite job                          |
 
-## Recruiters
+# Recruiters
 
 The recruiters collection will contain information of the recruiter who have registered with the portal, both mandatory and optional.
 
@@ -127,30 +122,39 @@ One example of sub-document `profile`:
   "gender": "m",
   "city": "Hoboken",
   "state": "NJ",
-  "company": {"name":"xxx Inc", "position":"manager", "description":"I have been working as a strategic recruiter at xxx Inc. for the past 5 years where I have successfully recruited talent for various company specific roles. At xxx Inc., we always welcome fresh talent, so if you believe you're one of them, give me a ping."},
-```
+  "company": {"name":"xxx Inc", "position":"manager", 
+  "description":"I have been working as a strategic recruiter at xxx Inc. for the past 5 years 
+  where I have successfully recruited talent for various company specific roles. 
+  At xxx Inc., we always welcome fresh talent, 
+  so if you believe you're one of them, give me a ping."}
+  ```
 
 Here's the table of `profile` field:
-|     Name      |  Type    |                         Description                          |
-|   :------:    | :----:   | :----------------------------------------------------------: |
-|      _id      | ObjectId |     A globally unique identifier to represent the recruiter's profile.     |
-|     photo     |  String  | A URL point to the use's ID photo stores on Google Cloud Platform or other storage platform |
-|     gender    |  String  |        m for male, f for female, others for non-binary       |
-|      city     |  String  |                    City of the recruiter                     |
-|     state     |  String  |                  State of the recruiter                      |
-|    company    |  Object  |            Company Information of the recruiter              |
 
+|  Name   |   Type   |                                         Description                                         |
+|:-------:|:--------:|:-------------------------------------------------------------------------------------------:|
+|   _id   | ObjectId |             A globally unique identifier to represent the recruiter's profile.              |
+|  photo  |  String  | A URL point to the use's ID photo stores on Google Cloud Platform or other storage platform |
+| gender  |  String  |                       m for male, f for female, others for non-binary                       |
+|  city   |  String  |                                    City of the recruiter                                    |
+|  state  |  String  |                                   State of the recruiter                                    |
+| company |  Object  |                            Company Information of the recruiter                             |
 
 3. We will also initialize the `jobs` field to be empty, and its value will be added later by users' operations.
 
   Here's one example of `jobs`:
   ```json
-  "jobs": [{"job_id":"7b7997a2-c0d2-4f8c-b27a-6a1d4b5b6310", "applicant_id": ["7b7997a2-c0d2-4f8c-b27a-65412b5b6310", "7b7543b2-c0d2-4f8c-b27a-6a1d4b5b6310"],},
-  {"job_id": "7b78942a2-c0d2-4f8c-b27a-6a1d4b5b6310", "applicant_id": ["7b7997a2-c0d2-4f8c-b27a-654125786412", "7b7543b2-c0d2-4f8c-b27a-6a1d541234510"],}
+  "jobs": [{"job_id":"7b7997a2-c0d2-4f8c-b27a-6a1d4b5b6310", 
+  "applicant_id": ["7b7997a2-c0d2-4f8c-b27a-65412b5b6310", 
+  "7b7543b2-c0d2-4f8c-b27a-6a1d4b5b6310"],},
+  {"job_id": "7b78942a2-c0d2-4f8c-b27a-6a1d4b5b6310",
+  "applicant_id": ["7b7997a2-c0d2-4f8c-b27a-654125786412", 
+  "7b7543b2-c0d2-4f8c-b27a-6a1d541234510"],}
   ]
   ```
 
   Here's the table of `jobs` field:
+
   |      Name      |     Type     |                    Description                     |
   |:--------------:|:------------:|:--------------------------------------------------:|
   |     job_id     |    String    |       Id of the Job posted by the recruiter        |
@@ -165,9 +169,19 @@ Here's an example of whole recruiter data:
   "lastName": "Stone",
   "email": "astone@abc.com",
   "phone": "747-299-7453",
-  "profile": {"_id": "7b7997a2-c0d2-4f8c-b27a-6h87fhsk4h98", "photo": "image url", "gender": "m", "company": {"position":"Strategic Recruiter", "company": "ABC Inc.", "city": "Hoboken", "state": "NJ", "about": "Brief description of the recruiter"},
-  "jobs": [{"job_id":"7b7997a2-c0d2-4f8c-b27a-6a1d4b5b6310", "applicant_id": ["7b7997a2-c0d2-4f8c-b27a-65412b5b6310", "7b7543b2-c0d2-4f8c-b27a-6a1d4b5b6310"],},
-  {"job_id": "7b78942a2-c0d2-4f8c-b27a-6a1d4b5b6310", "applicant_id": ["7b7997a2-c0d2-4f8c-b27a-654125786412", "7b7543b2-c0d2-4f8c-b27a-6a1d541234510"],}
+  "profile": {
+    "_id": "7b7997a2-c0d2-4f8c-b27a-6h87fhsk4h98", 
+    "photo": "image url", "gender": "m", 
+    "company": {"position":"Strategic Recruiter", "company": "ABC Inc.", 
+    "city": "Hoboken", "state": "NJ", 
+    "about": "Brief description of the recruiter"},
+  "jobs": [
+    {"job_id":"7b7997a2-c0d2-4f8c-b27a-6a1d4b5b6310", 
+    "applicant_id": ["7b7997a2-c0d2-4f8c-b27a-65412b5b6310", 
+    "7b7543b2-c0d2-4f8c-b27a-6a1d4b5b6310"],},
+    {"job_id": "7b78942a2-c0d2-4f8c-b27a-6a1d4b5b6310", "applicant_id": 
+    ["7b7997a2-c0d2-4f8c-b27a-654125786412", 
+    "7b7543b2-c0d2-4f8c-b27a-6a1d541234510"],}
   ]
 ```
 
@@ -182,73 +196,82 @@ Here's an example of whole recruiter data:
 |    profile    | Object |               Recruiter's detailed information               |
 |     jobs      | Array  |        A list of jobs that the recruiter has posted          |
 
-## JOBS
+# JOBS
 
-The jobs collection will contain all the Jobs info provided by recruiter. This collection will only store the active Jobs.
+1. The jobs collection will contain all the Jobs info provided by recruiter. This collection will only store the active Jobs.
 
-- title
-- type of job
-- employer company
-- contact email/website
-- location
-- Posted by
-- Post date
-- application deadline
-- job details (Object about company, role details, skills, benefits)
+   - title
+   - type of job
+   - employer company
+   - contact email/website
+   - location
+   - Poster
+   - Post date
+   - Expiry date
+   - job details (Object about company, role details, skills, benefits)
 
-And optional features:
+2. Job details will be a sub-document, here's one example of `details`:
 
-- pay range
-- company profile pic
+  ```json
+  "details": {
+    "summary":"This is a abc company",
+    "description":"This a devops role your responsibilities will be abc",
+    "required":["Java","Mongodb"],
+    "benefits":"you will get travelling allowance,insurance etc."
+  },
+  ```
+
+  Table for `details`:
+
+  |    Name     |  Type  |              Description               |
+  |:-----------:|:------:|:--------------------------------------:|
+  |   summary   | String | This the description about the company |
+  | description | String |          Job responsibilities          |
+  |  required   | Array  |           ["Java","Mongodb"]           |
+  |  benefits   | String |          Benifits of the Job           |
+
+3. Optional features:
+
+   - pay range
+   - company profile pic
 
 Recruiters can update the jobs
 
-```
+```json
 "_id": "7b7997a2-c0d2-4f8c-b27a-6a1d4b5b6310",
 "title":"Software development summer 2022 internship"
 "type": "internship",
 "company: "Stevens",
-"Recruiter_name": "get it from recruiter id from recruiter collection",
+"poster": "get it from recruiter id from recruiter collection",
 "contact": "stevens.edu",
-"location_city": "Hoboken",
-"location_State": "NJ",
-“PostedOn”: "today's date in MM/DD/YYYY,
-"Deadline":"MM/DD/YYY"
-"JobDetails": {
+"city": "Hoboken",
+"state": "NJ",
+“postDate”: "today's date in MM/DD/YYYY,
+"expiryDate":"MM/DD/YYY"
+"details": {
   "summary":"This is a abc company",
-  "Role_Description":"This a devops role your responsibilities will be abc",
-  "required_Skills":["Java","Mongodb"],
-  "Benefits":"you will get travelling allowance,insurance etc."
+  "description":"This a devops role your responsibilities will be abc",
+  "required":["Java","Mongodb"],
+  "benefits":"you will get travelling allowance,insurance etc."
 },
-  "payment range":" 50 - 100 $ PER HOUR"
-  "company_pic": "image/pdf url"
+  "pay range":" 50 - 100 $ PER HOUR"
+  "companyPic": "image/pdf url"
 ```
 
-|      Name      |     Type     |                    Description                     |
-|:--------------:|:------------:|:--------------------------------------------------:|
-|      _id       |    String    | A globally unique identifier to represent the job. |
-|     title      |    String    |                  Title of the job                  |
-|      type      |    string    |       Internship/Full time/ part time/ Coop        |
-|    company     |    String    |            Name of the employer company            |
-| Recruiter_name |    String    | Name from recruiters collection using recruiter id |
-|    contact     |    String    |                  website/email id                  |
-| location_city  |    String    |               Name of the work city                |
-| location_state |    String    |               Name of the work state               |
-|    PosteOn     | Date(Object) |              current date of the post              |
-|    Deadline    | Date(Object) |             Date in MM/DD/YYYY format              |
-|   JobDetails   |    Object    |    includes summary, responsibilities, benefits    |
-| payment range  |    String    |                 "$20/25 per hour"                  |
-|  profile pic   |    String    |           "an url to display pictures "            |
+|    Name    |     Type     |                    Description                     |
+|:----------:|:------------:|:--------------------------------------------------:|
+|    _id     |    String    | A globally unique identifier to represent the job. |
+|   title    |    String    |                  Title of the job                  |
+|    type    |    string    |       Internship/Full time/ part time/ Coop        |
+|  company   |    String    |            Name of the employer company            |
+|   poster   |    String    | Name from recruiters collection using recruiter id |
+|  contact   |    String    |                  website/email id                  |
+|    city    |    String    |               Name of the work city                |
+|   state    |    String    |               Name of the work state               |
+|  postDate  | Date(Object) |              current date of the post              |
+| expiryDate | Date(Object) |             Date in MM/DD/YYYY format              |
+|  details   |    Object    |    includes summary, responsibilities, benefits    |
+| pay range  |    String    |                 "$20/25 per hour"                  |
+| companyPic |    String    |           "an url to display pictures "            |
 
-
-
-This the Job Details sub document all the fields in this object are optional
-
-
-|      Name      |     Type     |                    Description                     |
-|:--------------:|:------------:|:--------------------------------------------------:|
-|    summary     |    String    |      This the description about the company        |
-|Role_Description|    String    |                  Job responsibilities              |
-|    Skills      |    Array     |                  ["Java","Mongodb"]                |
-|    Benefits    |    String    |                  Benifits of the Job               |
-| Recruiter_name |    String    | Name from recruiters collection using recruiter id |
+This the `details` sub document all the fields in this object are optional
