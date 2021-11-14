@@ -64,12 +64,14 @@ Used to update the sub-document `profile` of users with `profileId`. The logic s
 
 ## `remove(id)`
 
-If the removal succeeds, return the name of the `user` and the text " has been successfully deleted!"
+- If the removal succeeds, return the name of the `user` and the text " has been successfully deleted!"
+- Also update the job under recruiter collection with this `jobId`: remove the `userId` from `applicantId`.
 
 ## `apply(jobId)`
 
 - Add this `jobId` to user's `jobs` field, and its `status` should be "pending`.
 - Cannot apply jobs that already be applied.
+- Also update the job under recruiter collection with this `jobId`: add the `userId` to `applicantId`.
 
 ## `save`
 
@@ -93,3 +95,48 @@ When given an id, this function will return a user from the database.
 Return all of the users from the database.
 
 # Recruiters Functions
+
+## `createProfile(userId, photo, gender, city, state, company)`
+
+This function is used to create sub-document `profile` for the recruiter with `userId`, All fields need to match the type specified in [DB_proposal](https://github.com/ywang408/cs-546-project/blob/main/proposals/DB_Proposal.md). It will return newly created `profile`.
+
+## `create(email, phone, firstname, lastname, password, profile)`
+
+Used to create an account for user:
+
+- all the fields must be valid except for `profile`.
+- For `profile`, it should be an object(all fields must be valid) and we use `createProfile` to help us create the recruiter's profile.
+- `jobs` will be initialized with empty arrays.
+- password must be encoded and then be saved to database. (encode and decode function to be determined later)
+- will return newly created recruiter info.
+
+## `update` and `updateProfile` will have the same logic with previous functions
+
+## `post(title, type, company, contact, city, state, expiryDate, details, payRange, companyPic)`
+
+- All the fields must match fields in [DB_proposal](https://github.com/ywang408/cs-546-project/blob/main/proposals/DB_Proposal.md), except for `payRange` and `companyPic`, they are optional features.
+- Automatically set `postDate` to today's date and `poster` to the recruiter.
+- Return the newly added `job`.
+
+## `updateJob(jobId, title, type, company, contact, city, state, expiryDate, details, payRange, companyPic)`
+
+Similar with `post`.
+
+## `removeJob(id)`
+
+- Remove all the applicants applied with this job.
+- Remove saved jobs with this id
+- Remove this job.
+
+## `removeAllJob()`
+
+Recursively use `removeJob(id)`.
+
+## `remove(id)`
+
+`remove` will take the following steps:
+
+1. With this `id`, first find the `jobs` field, then find the `applicantId` under `jobs`, remove these applicants applied jobs in `user` collection.
+2. Remove jobs posted by this recruiter from `job` collection. (Step 1 and step 2 can use `removeAllJob`)
+3. Remove recruiter with this `id`fine.
+4. If the removal succeeds, return the name of the `user` and the text " has been successfully deleted!".
