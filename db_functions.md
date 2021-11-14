@@ -5,20 +5,91 @@ date: 11/11/2021
 
 # User Functions
 
-## `createProfile`
+## `createProfile(userId, photo, gender, city, state, experience, education, skills, languages, tags)`
 
-This function is used to create sub-document `profile` for user collection.
+This function is used to create sub-document `profile` for the user with `userId`, All fields need to match the type specified in [DB_proposal](https://github.com/ywang408/cs-546-project/blob/main/proposals/DB_Proposal.md). It will return newly created `profile`.
 
-## `create`
+The following is one example:
 
-Used to create an account for user.
+```json
+"_id": "7b7997a2-c0d2-4f8c-b27a-6a1d4b5b6310",
+"photo": "one url",
+"gender": "m",
+"city": "Hoboken",
+"state": "NJ",
+"experience":[{"title":"Maintenance Engineer", "employment type": "full time", 
+"Company name":"Apple","start date": "08/05/2017", "end date": "08/05/2018"}]
+"education":[
+{"school":"xxx university", "field of study":"computer science", 
+"degree":"master of science", 
+"start date": "08/05/2010", "end date": "08/05/2014"}]
+"skills":["Java", "JS"]
+"languages":["english"]
+"tags":["SDE","DS"]
+```
 
-## `updateProfile`
+## `create(email, phone, firstname, lastname, password, profile)`
 
-Used to update the `profile` of users
+Used to create an account for user:
 
-## `update(email, phone, firstname, lastname, password)`
+- all the fields must be valid except for `profile`. 
+- For `profile`, if it's a pdf, we will use functions in package to parse it, and then use `createProfile` to create a profile. If `profile` is empty, it would also be fine.
+- `jobs` and `favour` will be initialized with empty arrays.
+- password must be encoded and then be saved to database. (encode and decode function to be determined later)
+- will return newly created user info.
 
-- This function will update **all** the data of the restaurant currently in the database
+One example:
+
+```json
+"_id": "7b7997a2-c0d2-4f8c-b27a-6a1d4b5b6310",
+"email": "James@gmail.com",
+"phone": "848-242-6666",
+"firstName": "Liam",
+"lastName": "James",
+"password": "$2a$08$XdvNkfdNIL8F8xsuIUeSbNOFgK0M0iV5HOskfVn7.PWncShU.O",
+"jobs”: [],
+"profile": ["profile1"]
+"favor": []
+```
+
+## `updateProfile(profileId, userId, photo, gender, city, state, experience, education, skills, languages, tags)`
+
+Used to update the sub-document `profile` of users with `profileId`. The logic should be the same with function `createProfile`.
+
+## `update(id, email, phone, firstname, lastname, password)`
+
+- This function will update **all** the mandatory required data of this `user` currently in the database
 - All fields need to have valid values.
-- If the update succeeds, return the entire restaurant object as it is after it is updated.
+- If the update succeeds, return the entire `user` object as it is after it is updated.
+
+## `remove(id)`
+
+If the removal succeeds, return the name of the `user` and the text " has been successfully deleted!"
+
+## `apply(jobId)`
+
+- Add this `jobId` to user's `jobs` field, and its `status` should be "pending`.
+- Cannot apply jobs that already be applied.
+
+## `save`
+
+- Add this `jobId` to user's `favour` field.
+- Cannot save jobs that already be saved.
+
+## `track(jobId)`
+
+Return the `status` of this `jobId`.
+
+## `trackAll()`
+
+Return all of jobs along with their `status`.
+
+## `get(id)`
+
+When given an id, this function will return a user from the database.
+
+## `getAll()`
+
+Return all of the users from the database.
+
+# Recruiters Functions
