@@ -1,0 +1,11 @@
+{
+  "name": "group1_jobhunt",
+  "version": "1.0.0",
+  "description": "This is a JobHunt application",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "CS_546_C_GROUP1",
+  "license": "ISC"
+}
