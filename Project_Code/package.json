@@ -9,6 +9,7 @@
   "author": "CS_546_C_GROUP1",
   "license": "ISC",
   "dependencies": {
+    "bcrypt": "^5.0.1",
     "express": "^4.17.1",
     "express-handlebars": "^6.0.1",
     "mongodb": "^4.2.0"

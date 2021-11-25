@@ -150,3 +150,111 @@ update and updateProfile will have the same logic with previous functions
 
 
 */
+
+///          ###################### Code starts here ###########################
+
+// All the imports should be here
+
+const mongoCollections = require('../config/mongoCollections');
+const users = mongoCollections.users;
+var ObjectId = require('mongodb').ObjectId;
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
+
+// createUser mandatory function for apply 
+
+// write check function for the createUser 
+
+async function createUser(email, phone, firstName, lastName, password){
+
+    /* Schema to be followed :
+
+    ##################### Note : favor attribute has changed to "saved"      #######################
+
+    "_id": "7b7997a2-c0d2-4f8c-b27a-6a1d4b5b6310",
+    "email": "James@gmail.com",
+    "phone": "848-242-6666",
+    "firstName": "Liam",
+    "lastName": "James",
+    "password": "$2a$08$XdvNkfdNIL8F8xsuIUeSbNOFgK0M0iV5HOskfVn7.PWncShU.O",
+    "jobs”: [],
+    "profile": ["profile1","profile2"]
+    "saved": []
+
+    */
+
+    // ######## call the error check function here ###########
+
+
+
+
+
+
+    const usersCollection = await users();
+
+    // check function to find the email already in the database 
+    
+    // variable "hash used to store in the database"
+    const hash = await bcrypt.hash(password, saltRounds);
+
+    // "user" variable for creating an object to insert it into db 
+    let user = {
+        email: email,
+        phone: phone,
+        phoneNumber: phoneNumber,
+        firstName: firstName,
+        lastName: lastName,
+        password: hash,
+        jobs: [],
+        profile: [],
+        reviews: []
+    };
+
+    const insertInfo = await usersCollection.insertOne(user);
+    //console.log(insertInfo);
+    if (insertInfo.insertedCount === 0) throw 'Could not add restaurant';
+    
+    const newId = insertInfo.insertedId.toString();
+ 
+
+    let res = await this.get(newId);
+     
+    res._id = res._id.toString();
+
+  
+    return res;
+}
+
+
+async function checkUser ( email, password ){
+    // write a check function for valid email and password 
+
+
+    email = email.trim().toLowerCase();
+    password = password.trim();
+
+    const usersCollection = await users();
+
+    const res = await usersCollection.findOne( {email : email} );
+
+    if(!res){
+        throw `User not found in the users db`;
+    }
+
+    let comp = await bcrypt.compare(password, res.password);
+
+    if(comp){
+        //console.log("here1");
+        return {authenticated: true};
+    }else{
+
+        throw ` Password is invalid `;
+        
+    }
+
+
+
+}
+
+
+
