@@ -193,6 +193,12 @@ async function createUser(email, phone, firstName, lastName, password){
     const usersCollection = await users();
 
     // check function to find the email already in the database 
+
+    const res = await usersCollection.findOne( {email : email} );
+
+    if(res){
+        throw `User not found in the users db`;
+    }
     
     // variable "hash used to store in the database"
     const hash = await bcrypt.hash(password, saltRounds);
@@ -226,6 +232,8 @@ async function createUser(email, phone, firstName, lastName, password){
 }
 
 
+// THIS IS CHECKuSER FUNCTION FOR THE LOGIN PURPOSES.
+
 async function checkUser ( email, password ){
     // write a check function for valid email and password 
 
@@ -253,8 +261,70 @@ async function checkUser ( email, password ){
     }
 
 
-
 }
+
+// function to create a profile and add it to the Users profile array
+async function createProfile(userId, photo, gender, city, state, experience, education, skills, languages, tags){
+
+    //checkcreateProfile(); this function should do all the error handling for the function.
+
+    // user id will be used for checking the user in the db 
+    // user id should be passed as a string:
+
+
+    //console.log("debug here  1111");
+
+    
+
+    //console.log("debug here  1111");
+
+    let checkForRes = await restaurantMethods.get(restaurantId);
+
+    //console.log("here ",checkForRes);
+
+    // newProfile variable to create a new temporary profile : 
+
+    const newProfile = {
+        _id  : ObjectId(),
+        photo : false,
+        gender : gender,
+        city : city,
+        // to check if the experience provided is in this format 
+        /*
+          ALso experience should be an array
+        */
+        education : education,
+
+        // skills should be ans array as well in lower case
+        skills : skills,
+
+        //languages should be an array.
+
+        languages : languages,
+
+        // tags to display the profiles in users 
+
+        tags : tags
+
+    };
+
+    const usersCollection = await users();
+    const updatedInfo1  = await usersCollection.updateOne({_id : new ObjectId(userId) },{$push: { profile : newProfile}});
+    if (updatedInfo1.modifiedCount === 0) {
+        throw 'could not update post successfully';
+      }
+
+
+    //console.log(result);
+    return newProfile;
+}
+
+
+// this function is to apply for jobs:
+async function apply(jobId){
+    
+}
+
 
 
 
