@@ -319,10 +319,57 @@ async function deleteJob(id) {
 
   //deleteJob("61a265847c37bc10cde5dfb8");
 
+// function for searching the jobs by title
+
+async function getJobByTitle(title){
+    if(!title) throw `please provide a valid title`;
+    if(typeof title !== 'string') throw `please provide a valid string`;
+
+    const jobCollection = await jobs();
+    return await jobCollection
+      .find({ title: title })
+      .toArray();
+}
+
+// function to get by location state
+
+async function getJobByState(state){
+
+    if(!state) throw `please provide a valid title`;
+    if(typeof state !== 'string') throw `please provide a valid string`;
+
+    const jobCollection = await jobs();
+    return await jobCollection
+      .find({ state: state })
+      .toArray();
+
+}
+
+// function to get by location state
+
+async function getJobByCity(city){
+
+    if(!city) throw `please provide a valid title`;
+    if(typeof city !== 'string') throw `please provide a valid string`;
+
+    const jobCollection = await jobs();
+    return await jobCollection
+      .find({ city: city })
+      .toArray();
+
+}
+
+// function for sorting the db data by date
+
+
 module.exports = {
     getJobsById,
     getAllJobs,
     createJob,
     updateJob,
-    deleteJob
+    deleteJob,
+    getJobByTitle,
+    getJobByState,
+    getJobByCity
+
 }  
