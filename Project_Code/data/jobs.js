@@ -323,11 +323,13 @@ async function deleteJob(id) {
 
 async function getJobByTitle(title){
     if(!title) throw `please provide a valid title`;
+    
     if(typeof title !== 'string') throw `please provide a valid string`;
+    if(title.trim().length < 1) throw `please enter a valid title`;
 
     const jobCollection = await jobs();
     return await jobCollection
-      .find({ title: title })
+      .find({ title: title.trim().toLowerCase() })
       .toArray();
 }
 
@@ -336,11 +338,13 @@ async function getJobByTitle(title){
 async function getJobByState(state){
 
     if(!state) throw `please provide a valid title`;
-    if(typeof state !== 'string') throw `please provide a valid string`;
+    
+    if(typeof state !== 'string') throw `please provide a valid state`;
+    if(state.trim().length < 1) throw `please enter a valid state`;
 
     const jobCollection = await jobs();
     return await jobCollection
-      .find({ state: state })
+      .find({ state: state.trim().toLowerCase() })
       .toArray();
 
 }
@@ -351,10 +355,11 @@ async function getJobByCity(city){
 
     if(!city) throw `please provide a valid title`;
     if(typeof city !== 'string') throw `please provide a valid string`;
+    if(city.trim().length < 1) throw `please enter a valid state`;
 
     const jobCollection = await jobs();
     return await jobCollection
-      .find({ city: city })
+      .find({ city: city.trim().toLowerCase() })
       .toArray();
 
 }
