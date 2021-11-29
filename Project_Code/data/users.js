@@ -129,13 +129,12 @@ const createProfile = async(userId, photo, gender, city, state, experience, educ
         { _id: userId },
         { $addToSet: { profile: newProfiles } }
     );
-    console.log(insertInfo);
     if (insertInfo.modifiedCount === 0) throw 'Could not add the profile';
 }
 
 const create = async(email, phone, firstname, lastname, password, newProfile) => {
     if (typeof email !== 'string' || typeof phone !== 'string' || typeof firstname !== 'string' || typeof lastname !== 'string' || typeof password !== 'string') {
-        throw 'uesr\'s email, phone. firstname, lastname, password must be string';
+        throw 'user\'s email, phone. firstname, lastname, password must be string';
     }
     if (email.trim().length === 0 || phone.trim().length === 0 ||firstname.trim().length === 0 ||lastname.trim().length === 0 ||password.trim().length === 0) {
         throw 'uesr\'s email, phone. firstname, lastname, password can\'t be empty or just spaces';
@@ -162,8 +161,7 @@ const create = async(email, phone, firstname, lastname, password, newProfile) =>
         favor
     }
     const insertInfo = await usersCollection.insertOne(newUser);
-    console.log(insertInfo.insertedId)
-    if (insertInfo.modifiedCount === 0) throw 'Could not add the User';
+    if (!insertInfo.acknowledged) throw 'Could not add the User';
     if (newProfile !== undefined) {
         newProfile.forEach(ele => {
             createProfile(insertInfo.insertedId, ele.userId, ele.photo, ele.gender, ele.city, ele.state, ele.experience, ele.education, ele.skills, ele.languages, ele.tags);
@@ -171,23 +169,80 @@ const create = async(email, phone, firstname, lastname, password, newProfile) =>
     }
 }
 
-//checkEx([{title:"Maintenance Engineer", employmentType: "full time", companyName:"Apple",startDate: "08/05/2017", endDate: "08/05/2018"}])
-//checkEd([{school:"SIT", major: "CE", degree:"master of science",startDate: "08/05/2017", endDate: "08/05/2018"}])
-//console.log(ObjectId.isValid('timtomtamted'));
+const updateProfile = async(profileId, userId, photo, gender, city, state, experience, education, skills, languages, tags) => {
+    if (typeof userId !== 'string' || typeof photo !== 'string' || typeof gender !== 'string'|| typeof city !== 'string' || typeof state !== 'string') {
+        throw 'photo, gender, city must be stirng type and can\'t be null';
+    }
+    if (!ObjectId.isValid(userId)) {
+        throw 'Invalid userID'
+    } else {
+        userId = ObjectId(userId); 
+    }
+    if (!ObjectId.isValid(profileId)) {
+        throw 'Invalid profileId'
+    } else {
+        profileId = ObjectId(profileId); 
+    }
+    if (photo.trim().length === 0 || gender.trim().length === 0 || city.trim().length === 0 || state.trim().length === 0) { // not optional, the user must fill in this data when regiester
+        throw 'name, location, phoneNumber, website, priceRange can\'t be empty or just spaces'
+    }
+    if (gender !== 'M' && gender !== 'F') {
+        throw 'gender must be M(male) or F(female)';
+    }
+    //checkWeb(photo);
+    checkEx(experience);
+    checkEd(education);
+    checkSk(skills);
+    checkTa(tags);
+    checkLa(languages);
+    const usersCollection = await users();
+    let newProfiles = {
+        _id:profileId,
+        photo,
+        gender,
+        city,
+        state,
+        experience,
+        education,
+        skills,
+        languages,
+        tags
+    };
+    const insertInfo = await usersCollection.updateOne(
+        { _id: userId, "profile._id": profileId},
+        { $set: { "profile.$": newProfiles } }
+    );
+    if (insertInfo.modifiedCount === 0) throw 'Could not update the profile';
+}
 
-
-// createProfile(
-//     "61a33e54ded974aae50bb725",
-//     "one url",
-//     "M",
-//     "Hoboken",
-//     "NJ",
-//     [{title:"Maintenance Engineer", employmentType: "full time", companyName:"Apple",startDate: "08/05/2017", endDate: "08/05/2018"}],
-//     [{school:"SIT", major: "CE", degree:"master of science",startDate: "08/05/2017", endDate: "08/05/2018"}],
-//     ["Java", "JS"],
-//     ["english"],
-//     ["SDE","DS"]
-// ).catch(e => log(e));
-//tmp = 
-
-//create("James@gmail.com", "848-242-6666", "Liam", "James", "$2a$08$XdvNkfdNIL8F8xsuIUeSbNOFgK0M0iV5HOskfVn7.PWncShU.O", undefined)
+const update = async(userId, email, phone, firstname, lastname, password) => {
+    if (typeof userId !== 'string'||typeof email !== 'string' || typeof phone !== 'string' || typeof firstname !== 'string' || typeof lastname !== 'string' || typeof password !== 'string') {
+        throw 'user\'s email, phone. firstname, lastname, password must be string';
+    }
+    
+    if (userId.trim().length === 0 || email.trim().length === 0 || phone.trim().length === 0 ||firstname.trim().length === 0 ||lastname.trim().length === 0 ||password.trim().length === 0) {
+        throw 'uesr\'s email, phone. firstname, lastname, password can\'t be empty or just spaces';
+    }
+    const phoneCheck = /^([0-9]{3})[-]([0-9]{3})[-]([0-9]{4})$/;
+    if (! phoneCheck.test(phone)) {
+        throw 'Wrong phoneNo formate xxx-xxx-xxxx';
+    }
+    if (!ObjectId.isValid(userId)) {
+        throw 'Invalid userID'
+    } else {
+        userId = ObjectId(userId); 
+    }
+    const usersCollection = await users();
+    let newUser = {
+        email,
+        phone,
+        firstname,
+        lastname,
+        password
+    }
+    const insertInfo = await usersCollection.updateOne(
+        { _id: userId},
+        {$set : newUser}
+    );
+    if (insertInfo.modifiedCount === 0) throw 'Could not update the user';
+}
