@@ -1,330 +1,248 @@
-/* Hi all these are the specs for the db connection.
-
-dbname : 'JobHunt_db'
-
-NOTE : please add your variables and specs while implementing here 
-
-PLEASE MAKE SURE YOU ADD THE VARIABLE SPECS HERE AND USE CONSISTENT VARIABLE NAMING IN YOU CODE !!!!!!!!!!!!!!!
-PLEASE ADD YOUR NAMES WITH THE VARIABLES AS 
-
-FOR EX.
-1) ASHWIN : 
-   
-   VARIABLENAMEs : users, recruiters, jobs 
-   TYPE    : MONGO collection
-   FUNCTION : to redirect it to respective data pages 
-
-
-2) BAPI:
-
-    Bapi add your variable here you don't need to follow the foramat above.
-
-
-3) YOU:
-
-
-
-
-
-4) ANDY:
-
-
-
-
-
-# THIS WILL HELP EVERYBODY FOR DEBUGGING.
-
-
-
-
-
-
-AS of now I can think of only four collections
-
-1) USERS
-2) RECRUITERS
-3) JOBS
-4) USERNAME AND PASSWORD STORE WITH RESPECT TO USERS AND RECRUITES :- Key store 
-
-Please refer to the You's spec sheet
-
-#################################################################################
-
-PLEASE MAKE SURE YOU ADD A FUNCTION TO ADD JOB TO SAVED AND APPLIED LIST AS WELL 
-
-title	date
-Functions of Database Operations
-11/11/2021
-
-User Functions
-createProfile(userId, photo, gender, city, state, experience, education, skills, languages, tags)
-This function is used to create sub-document profile for the user with userId, All fields need to match the type specified in DB_proposal. It will return newly created profile.
-
-The following is one example:
-
-"_id": "7b7997a2-c0d2-4f8c-b27a-6a1d4b5b6310",
-"photo": "one url",
-"gender": "m",
-"city": "Hoboken",
-"state": "NJ",
-"experience":[{"title":"Maintenance Engineer", "employment type": "full time", 
-"Company name":"Apple","start date": "08/05/2017", "end date": "08/05/2018"}]
-"education":[
-{"school":"xxx university", "field of study":"computer science", 
-"degree":"master of science", 
-"start date": "08/05/2010", "end date": "08/05/2014"}]
-"skills":["Java", "JS"]
-"languages":["english"]
-"tags":["SDE","DS"]
-create(email, phone, firstname, lastname, password, profile)
-Used to create an account for user:
-
-all the fields must be valid except for profile.
-For profile, if it's a pdf, we will use functions in package to parse it, and then use createProfile to create a profile. If profile is empty, set it with an empty object.
-jobs and favour will be initialized with empty arrays.
-password must be encoded and then be saved to database. (encode and decode function to be determined later)
-will return newly created user info.
-One example:
-
-"_id": "7b7997a2-c0d2-4f8c-b27a-6a1d4b5b6310",
-"email": "James@gmail.com",
-"phone": "848-242-6666",
-"firstName": "Liam",
-"lastName": "James",
-"password": "$2a$08$XdvNkfdNIL8F8xsuIUeSbNOFgK0M0iV5HOskfVn7.PWncShU.O",
-"jobs”: [],
-"profile": ["profile1"]
-"favor": []
-
-
-updateProfile(profileId, userId, photo, gender, city, state, experience, education, skills, languages, tags)
-Used to update the sub-document profile of users with profileId. The logic should be the same with function createProfile.
-
-update(id, email, phone, firstname, lastname, password)
-This function will update all the mandatory required data of this user currently in the database
-All fields need to have valid values.
-If the update succeeds, return the entire user object as it is after it is updated.
-
-remove(id)
-If the removal succeeds, return the name of the user and the text " has been successfully deleted!"
-Also update the job under recruiter collection with this jobId: remove the userId from applicantId.
-
-
-apply(jobId)
-Add this jobId to user's jobs field, and its status should be pending.
-Cannot apply jobs that already be applied.
-Also update the job under recruiter collection with this jobId: add the userId to applicantId.
-save
-Add this jobId to user's favour field.
-Cannot save jobs that already be saved.
-
-cancel(jobId)(which used to cancel application for a job)
-remove this jobId from user's jobs field
-Also update the job under recruiter collection with this jobId: remove the userId from applicantId.
-
-track(jobId)
-Return the status of this jobId.
-
-trackAll()
-Return all of jobs along with their status.
-
-get(id)
-When given an id, this function will return a user from the database.
-
-getAll()
-Return all of the users from the database.
-
-
-loginCheck(username, password)
-
-all the fields must be valid except for profile.
-if profile is empty, set it with empty object.
-For profile, it should be an object(all fields must be valid) and we use createProfile to help us create the recruiter's profile.
-jobs will be initialized with empty arrays.
-password must be encoded and then be saved to database. (encode and decode function to be determined later)
-will return newly created recruiter info.
-update and updateProfile will have the same logic with previous functions
-
-
-
-
-
-*/
-
-///          ###################### Code starts here ###########################
-
-// All the imports should be here
-
 const mongoCollections = require('../config/mongoCollections');
 const users = mongoCollections.users;
-var ObjectId = require('mongodb').ObjectId;
-const bcrypt = require('bcrypt');
-const saltRounds = 10;
+let { ObjectId } = require('mongodb');
 
-// createUser mandatory function for apply 
+// const checkWeb = (web) => {
+// //depends on the url link
+// }
 
-// write check function for the createUser 
-
-async function createUser(email, phone, firstName, lastName, password){
-
-    /* Schema to be followed :
-
-    ##################### Note : favor attribute has changed to "saved"      #######################
-
-    "_id": "7b7997a2-c0d2-4f8c-b27a-6a1d4b5b6310",
-    "email": "James@gmail.com",
-    "phone": "848-242-6666",
-    "firstName": "Liam",
-    "lastName": "James",
-    "password": "$2a$08$XdvNkfdNIL8F8xsuIUeSbNOFgK0M0iV5HOskfVn7.PWncShU.O",
-    "jobs”: [],
-    "profile": ["profile1","profile2"]
-    "saved": []
-
-    */
-
-    // ######## call the error check function here ###########
-
-
-
-
-
-
-    const usersCollection = await users();
-
-    // check function to find the email already in the database 
-
-    const res = await usersCollection.findOne( {email : email} );
-
-    if(res){
-        throw `User not found in the users db`;
+const checkEx = (experience) => {
+    if (experience === undefined) {//optional user deside whether they want to fill in
+        return;
     }
-    
-    // variable "hash used to store in the database"
-    const hash = await bcrypt.hash(password, saltRounds);
+    if (!Array.isArray(experience)) {
+        throw 'experience must be an array';
+    }
+    experience.forEach(ele => {
+        if (typeof ele.title != 'string' || typeof ele.employmentType != 'string' || typeof ele.companyName != 'string' || typeof ele.startDate != 'string' || typeof ele.endDate != 'string') {
+            throw 'Value of experience in each elements must be string'
+        }
+        if (ele.title.trim().length === 0 || ele.employmentType.trim().length === 0 || ele.companyName.trim().length === 0 || ele.startDate.trim().length === 0 || ele.endDate.trim().length === 0) { // not optional, the user must fill in this data when regiester
+            throw 'Value of experience in each elements can\'t be empty or just spaces'
+        }
+        date_regex = /^\d{2}\/\d{2}\/\d{4}$/;
+        if (! date_regex.test(ele.startDate) && date_regex.test(ele.endDate)) {
+            throw 'Wrong date formate MM/DD/YYYY';
+        }
+    });
+}
 
-    // "user" variable for creating an object to insert it into db 
-    let user = {
-        email: email,
-        phone: phone,
-        phoneNumber: phoneNumber,
-        firstName: firstName,
-        lastName: lastName,
-        password: hash,
-        jobs: [],
-        profile: [],
-        reviews: []
+const checkEd = education => {
+    if (education === undefined) {//optional user deside whether they want to fill in
+        return;
+    }
+    if (!Array.isArray(education)) {
+        throw 'education must be an array';
+    }
+    education.forEach(ele => {
+        if (typeof ele.school != 'string' || typeof ele.major != 'string' || typeof ele.degree != 'string' || typeof ele.startDate != 'string' || typeof ele.endDate != 'string') {
+            throw 'Value of education in each elements must be string'
+        }
+        if (ele.school.trim().length === 0 || ele.major.trim().length === 0 || ele.degree.trim().length === 0 || ele.startDate.trim().length === 0 || ele.endDate.trim().length === 0) { // not optional, the user must fill in this data when regiester
+            throw 'Value of education in each elements can\'t be empty or just spaces'
+        }
+        date_regex = /^\d{2}\/\d{2}\/\d{4}$/;
+        if (! date_regex.test(ele.startDate) && date_regex.test(ele.endDate)) {
+            throw 'Wrong date formate MM/DD/YYYY';
+        }
+    });
+}
+
+const checkSk = skills => {
+    if (skills === undefined) {//optional user deside whether they want to fill in
+        return;
+    }
+    if (!Array.isArray(skills)) {
+        throw 'skills must be an array';
+    }
+    skills.forEach(ele => {
+        if (typeof ele !== 'string') {
+            throw "skills value must be string";
+        }
+    });
+}
+const checkTa = tags => {
+    if (tags === undefined) {//optional user deside whether they want to fill in
+        return;
+    }
+    if (!Array.isArray(tags)) {
+        throw 'tags must be an array';
+    }
+    tags.forEach(ele => {
+        if (typeof ele !== 'string') {
+            throw "tags value must be string";
+        }
+    });
+}
+
+
+const checkLa = languages => {
+    if (languages === undefined) {//optional user deside whether they want to fill in
+        return;
+    }
+    if (!Array.isArray(languages)) {
+        throw 'languages must be an array';
+    }
+    languages.forEach(ele => {
+        if (typeof ele !== 'string') {
+            throw "languages value must be string";
+        }
+    });
+}
+
+const createProfile = async(userId, photo, gender, city, state, experience, education, skills, languages, tags) => {
+    if (typeof userId !== 'string' || typeof photo !== 'string' || typeof gender !== 'string'|| typeof city !== 'string' || typeof state !== 'string') {
+        throw 'photo, gender, city must be stirng type and can\'t be null';
+    }
+    if (!ObjectId.isValid(userId)) {
+        throw 'Invalid userID'
+    } else {
+        userId = ObjectId(userId); 
+    }
+    if (photo.trim().length === 0 || gender.trim().length === 0 || city.trim().length === 0 || state.trim().length === 0) { // not optional, the user must fill in this data when regiester
+        throw 'name, location, phoneNumber, website, priceRange can\'t be empty or just spaces'
+    }
+    if (gender !== 'M' && gender !== 'F') {
+        throw 'gender must be M(male) or F(female)';
+    }
+    //checkWeb(photo);
+    checkEx(experience);
+    checkEd(education);
+    checkSk(skills);
+    checkTa(tags);
+    checkLa(languages);
+    const usersCollection = await users();
+    let _id = ObjectId();
+    let newProfiles = {
+        _id,
+        photo,
+        gender,
+        city,
+        state,
+        experience,
+        education,
+        skills,
+        languages,
+        tags
     };
-
-    const insertInfo = await usersCollection.insertOne(user);
-    //console.log(insertInfo);
-    if (insertInfo.insertedCount === 0) throw 'Could not add restaurant';
-    
-    const newId = insertInfo.insertedId.toString();
- 
-
-    let res = await this.get(newId);
-     
-    res._id = res._id.toString();
-
-  
-    return res;
+    const insertInfo = await usersCollection.updateOne(
+        { _id: userId },
+        { $addToSet: { profile: newProfiles } }
+    );
+    if (insertInfo.modifiedCount === 0) throw 'Could not add the profile';
 }
 
-
-// THIS IS CHECKuSER FUNCTION FOR THE LOGIN PURPOSES.
-
-async function checkUser ( email, password ){
-    // write a check function for valid email and password 
-
-
-    email = email.trim().toLowerCase();
-    password = password.trim();
-
+const create = async(email, phone, firstname, lastname, password, newProfile) => {
+    if (typeof email !== 'string' || typeof phone !== 'string' || typeof firstname !== 'string' || typeof lastname !== 'string' || typeof password !== 'string') {
+        throw 'user\'s email, phone. firstname, lastname, password must be string';
+    }
+    if (email.trim().length === 0 || phone.trim().length === 0 ||firstname.trim().length === 0 ||lastname.trim().length === 0 ||password.trim().length === 0) {
+        throw 'uesr\'s email, phone. firstname, lastname, password can\'t be empty or just spaces';
+    }
+    const phoneCheck = /^([0-9]{3})[-]([0-9]{3})[-]([0-9]{4})$/;
+    if (! phoneCheck.test(phone)) {
+        throw 'Wrong phoneNo formate xxx-xxx-xxxx';
+    }
+    if (newProfile !== undefined && !Array.isArray(newProfile)) {
+        throw 'Profile must be array';
+    }
+    const jobs = [];
+    const profile = [];
+    const favor = [];
     const usersCollection = await users();
-
-    const res = await usersCollection.findOne( {email : email} );
-
-    if(!res){
-        throw `User not found in the users db`;
+    let newUser = {
+        email,
+        phone,
+        firstname,
+        lastname,
+        password,
+        jobs,
+        profile,
+        favor
     }
-
-    let comp = await bcrypt.compare(password, res.password);
-
-    if(comp){
-        //console.log("here1");
-        return {authenticated: true};
-    }else{
-
-        throw ` Password is invalid `;
-        
+    const insertInfo = await usersCollection.insertOne(newUser);
+    if (!insertInfo.acknowledged) throw 'Could not add the User';
+    if (newProfile !== undefined) {
+        newProfile.forEach(ele => {
+            createProfile(insertInfo.insertedId, ele.userId, ele.photo, ele.gender, ele.city, ele.state, ele.experience, ele.education, ele.skills, ele.languages, ele.tags);
+        });
     }
-
-
 }
 
-// function to create a profile and add it to the Users profile array
-async function createProfile(userId, photo, gender, city, state, experience, education, skills, languages, tags){
-
-    //checkcreateProfile(); this function should do all the error handling for the function.
-
-    // user id will be used for checking the user in the db 
-    // user id should be passed as a string:
-
-
-    //console.log("debug here  1111");
-
-    
-
-    //console.log("debug here  1111");
-
-    let checkForRes = await restaurantMethods.get(restaurantId);
-
-    //console.log("here ",checkForRes);
-
-    // newProfile variable to create a new temporary profile : 
-
-    const newProfile = {
-        _id  : ObjectId(),
-        photo : false,
-        gender : gender,
-        city : city,
-        // to check if the experience provided is in this format 
-        /*
-          ALso experience should be an array
-        */
-        education : education,
-
-        // skills should be ans array as well in lower case
-        skills : skills,
-
-        //languages should be an array.
-
-        languages : languages,
-
-        // tags to display the profiles in users 
-
-        tags : tags
-
+const updateProfile = async(profileId, userId, photo, gender, city, state, experience, education, skills, languages, tags) => {
+    if (typeof userId !== 'string' || typeof photo !== 'string' || typeof gender !== 'string'|| typeof city !== 'string' || typeof state !== 'string') {
+        throw 'photo, gender, city must be stirng type and can\'t be null';
+    }
+    if (!ObjectId.isValid(userId)) {
+        throw 'Invalid userID'
+    } else {
+        userId = ObjectId(userId); 
+    }
+    if (!ObjectId.isValid(profileId)) {
+        throw 'Invalid profileId'
+    } else {
+        profileId = ObjectId(profileId); 
+    }
+    if (photo.trim().length === 0 || gender.trim().length === 0 || city.trim().length === 0 || state.trim().length === 0) { // not optional, the user must fill in this data when regiester
+        throw 'name, location, phoneNumber, website, priceRange can\'t be empty or just spaces'
+    }
+    if (gender !== 'M' && gender !== 'F') {
+        throw 'gender must be M(male) or F(female)';
+    }
+    //checkWeb(photo);
+    checkEx(experience);
+    checkEd(education);
+    checkSk(skills);
+    checkTa(tags);
+    checkLa(languages);
+    const usersCollection = await users();
+    let newProfiles = {
+        _id:profileId,
+        photo,
+        gender,
+        city,
+        state,
+        experience,
+        education,
+        skills,
+        languages,
+        tags
     };
-
-    const usersCollection = await users();
-    const updatedInfo1  = await usersCollection.updateOne({_id : new ObjectId(userId) },{$push: { profile : newProfile}});
-    if (updatedInfo1.modifiedCount === 0) {
-        throw 'could not update post successfully';
-      }
-
-
-    //console.log(result);
-    return newProfile;
+    const insertInfo = await usersCollection.updateOne(
+        { _id: userId, "profile._id": profileId},
+        { $set: { "profile.$": newProfiles } }
+    );
+    if (insertInfo.modifiedCount === 0) throw 'Could not update the profile';
 }
 
-
-// this function is to apply for jobs:
-async function apply(jobId){
+const update = async(userId, email, phone, firstname, lastname, password) => {
+    if (typeof userId !== 'string'||typeof email !== 'string' || typeof phone !== 'string' || typeof firstname !== 'string' || typeof lastname !== 'string' || typeof password !== 'string') {
+        throw 'user\'s email, phone. firstname, lastname, password must be string';
+    }
     
+    if (userId.trim().length === 0 || email.trim().length === 0 || phone.trim().length === 0 ||firstname.trim().length === 0 ||lastname.trim().length === 0 ||password.trim().length === 0) {
+        throw 'uesr\'s email, phone. firstname, lastname, password can\'t be empty or just spaces';
+    }
+    const phoneCheck = /^([0-9]{3})[-]([0-9]{3})[-]([0-9]{4})$/;
+    if (! phoneCheck.test(phone)) {
+        throw 'Wrong phoneNo formate xxx-xxx-xxxx';
+    }
+    if (!ObjectId.isValid(userId)) {
+        throw 'Invalid userID'
+    } else {
+        userId = ObjectId(userId); 
+    }
+    const usersCollection = await users();
+    let newUser = {
+        email,
+        phone,
+        firstname,
+        lastname,
+        password
+    }
+    const insertInfo = await usersCollection.updateOne(
+        { _id: userId},
+        {$set : newUser}
+    );
+    if (insertInfo.modifiedCount === 0) throw 'Could not update the user';
 }
-
-
-
-
