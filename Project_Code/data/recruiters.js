@@ -105,6 +105,8 @@ change the status this job under applicant's jobs to "rejected"
 const mongoCollections = require('../config/mongoCollections');
 const recruiters = mongoCollections.recruiters;
 const bcrypt = require('bcrypt');
+const usrs = mongoCollections.users;
+const jobs = mongoCollections.jobs;
 const saltRounds = 16;
 
 function CustomError (status, message) {
@@ -184,10 +186,11 @@ async function getRecruiter(email) {
       }
 }
 
-async function createProfile(email, gender, photo, city, state, company, about) {
+async function createProfile(profile) {
   const recruiterCol = await recruiters();
   let recruiter = await getRecruiter(email);
 
+  let {email, gender, photo, city, state, company, about} = profile
   //gender validation
   let re = /[A-Z]/i
   gender = gender.trim();
@@ -223,7 +226,85 @@ async function createProfile(email, gender, photo, city, state, company, about) 
       company: company,
       photo: photo
     }
-    const recruiterUpdate = await recruiterCol.updateOne({ _id: recruiter._id }, { $push: { profile: newProfile } });
+    const recruiterUpdate = await recruiterCol.updateOne({ _id: recruiter._id }, { $set: { profile: newProfile } });
+    if (recruiterUpdate.modifiedCount === 0) {
+      throw `The recruiter's profile could not be created.`;
+    } else {
+        return "Sucessfully created";
+    }
+  } else {
+    throw `Recruiter with the email ${email} does not exist in the database.`;
+  }
+}
+
+async function recruiterCheck(email, password) {
+
+  //Email validation
+  let re = /[A-Z0-9._-]+@[A-Z0-9.-]+\.[A-Z]{2,}/im
+  if(email == "" || email == undefined) throw new CustomError(400,"Please enter your email.");
+  if(email.length < 6) throw new CustomError(400,"The email is too short.");
+  if(!re.test(email)) throw new CustomError(400,`${email} is not a valid email.`);
+  email = email.toLowerCase();
+
+  //password validation
+  let re2 = /\s/i
+  if(!password) throw `Please enter your password`;
+  if(re2.test(password)) throw new CustomError(400,"Spaces are not allowed in passwords.");
+  if(password.length < 6) throw new CustomError(400,"Password is too short.");
+
+  const recruiterCol = await recruiters();
+  let validateRecruiter = await recruiterCol.findOne({"email": email})
+    if(validateRecruiter == null) throw new CustomError(400,"Either the username or password is invalid");
+    else {
+        if(await bcrypt.compare(password, validateRecruiter.password)){
+            let returnObj = {"authenticated": true};
+            return returnObj;
+        } else throw new CustomError(400,"Either the username or password is invalid");
+    }
+
+}
+
+async function updateProfile(email, profile) {
+  const recruiterCol = await recruiters();
+  let recruiter = await getRecruiter(email);
+
+  let {gender, photo, city, state, company, about} = profile;
+  //gender validation
+  let re = /[A-Z]/i
+  gender = gender.trim();
+  if(gender == "" || gender == undefined) throw new CustomError(400,"Please enter your gender.");
+  if(!re.test(gender)) throw new CustomError(400,"Your gender should not contain special characters.");
+  if(gender.length != 1) throw new CustomError(400,"Please enter a valid gender.");
+
+  //company validation
+  let {position, companyName} = company;
+  let re2 = /[A-Z0-9.-]/i
+  position = position.trim();
+  companyName = companyName.trim();
+  if(companyName == "" || companyName == undefined) throw new CustomError(400,"Please enter your place of work.")
+  if(re2.test(companyName)) throw `${companyName} is not a valid company.`;
+  if(position == "" || position == undefined) throw new CustomError(400,"Please enter your position.")
+  if(re2.test(position)) throw `${position} is not a valid position at ${companyName}.`;
+
+  //city validation
+  let re3 = /[A-Z-]/i
+  city = city.trim();
+  state = state.trim();
+  if(city == "" || city == undefined) throw new CustomError(400,"Please enter your location of work.")
+  if(re3.test(city)) throw `${city} is not a valid city.`;
+  if(state == "" || state == undefined) throw new CustomError(400,"Please enter your location of work.")
+  if(re3.test(state)) throw `${state} is not a valid state.`;
+
+  if(!recruiter.recFound) {
+    let updatedProfile = {
+      gender: gender,
+      city: city,
+      state: state,
+      about: about,
+      company: company,
+      photo: photo
+    }
+    const recruiterUpdate = await recruiterCol.updateOne({ _id: recruiter._id }, { $set: { profile: updatedProfile } });
     if (recruiterUpdate.modifiedCount === 0) {
       throw `The recruiter's profile could not be updated.`;
     } else {
@@ -234,9 +315,100 @@ async function createProfile(email, gender, photo, city, state, company, about) 
   }
 }
 
+async function removeRecruiter(email) {
+  const recruiterCol = await recruiters();
+  const userCol = await usrs();
+  //Email validation
+  let re = /[A-Z0-9._-]+@[A-Z0-9.-]+\.[A-Z]{2,}/im
+  if(email == "" || email == undefined) throw new CustomError(400,"Please enter your email.");
+  if(email.length < 6) throw new CustomError(400,"The email is too short.");
+  if(!re.test(email)) throw new CustomError(400,`${email} is not a valid email.`);
+  email = email.toLowerCase();
 
+  let recruiter = await getRecruiter(email);
+  if(recruiter){
+    let 
+    const recruiterDeletion = await recruiterCollection.deleteOne({ email: email });
+    if (recruiterDeletion.deletedCount === 0) {
+        throw `The recruiter with email ${email} could not be removed.`;
+    } else {
+        return "Successfully removed";
+    }
+  } else throw `Recruiter with the email ${email} does not exist in the database.`;
+}
+
+async function postJob(email, jobDetails) {
+  //Email validation
+  let re = /[A-Z0-9._-]+@[A-Z0-9.-]+\.[A-Z]{2,}/im
+  if(email == "" || email == undefined) throw new CustomError(400,"Please enter your email.");
+  if(email.length < 6) throw new CustomError(400,"The email is too short.");
+  if(!re.test(email)) throw new CustomError(400,`${email} is not a valid email.`);
+  email = email.toLowerCase();
+
+  const recruiterCol = await recruiters();
+  let recruiter = await getRecruiter(email);
+  if(recruiter) {
+    let resObj = await createJob(recruiter._id, email, jobDetails);
+    const jobPost = await recruiterCol.updateOne({ _id: recruiter._id }, { $push: { "jobs.job_id": resObj._id } });
+    if (recruiterUpdate.modifiedCount === 0) {
+      throw `The recruiter's profile could not be created.`;
+    } else {
+        return "Sucessfully created";
+    }
+    return resObj;
+  } else {
+    throw `Recruiter with the email ${email} does not exist in the database.`;
+  }
+}
+
+async function updateJob(email, jobDetails) {
+  let re = /[A-Z0-9._-]+@[A-Z0-9.-]+\.[A-Z]{2,}/im
+  if(email == "" || email == undefined) throw new CustomError(400,"Please enter your email.");
+  if(email.length < 6) throw new CustomError(400,"The email is too short.");
+  if(!re.test(email)) throw new CustomError(400,`${email} is not a valid email.`);
+  email = email.toLowerCase();
+
+  let recruiter = await getRecruiter(email);
+  if(recruiter) {
+    let resObj = await updateJob(recruiter._id, jobDetails);
+    return resObj;
+  } else {
+    throw `Recruiter with the email ${email} does not exist in the database.`;
+  }
+}
+
+async function removeJob(email, jobId) {
+  let re = /[A-Z0-9._-]+@[A-Z0-9.-]+\.[A-Z]{2,}/im
+  if(email == "" || email == undefined) throw new CustomError(400,"Please enter your email.");
+  if(email.length < 6) throw new CustomError(400,"The email is too short.");
+  if(!re.test(email)) throw new CustomError(400,`${email} is not a valid email.`);
+  email = email.toLowerCase();
+
+  const recruiterCol = await recruiters();
+  let recruiter = await getRecruiter(email);
+  if(recruiter) {
+    let resObj = await removeJob(recruiter._id, jobId);
+    if(resObj) {
+      let jobDeletion = await recruiter.find({ 'jobs.job_id' : { $eq:jobId } }).project().toArray();
+      const jobDel = await recruiterCol.updateMany({ }, {$pull: { jobs: {job_id: jobId } } } )
+      if(jobDel.modifiedCount === 0){
+        throw `The job with ID ${jobId} could not be removed.`;
+        return;
+      } else {
+        let jobD = {"jobId" : jobId.toString(), "deleted": true};
+        return jobD; 
+      }
+    } else throw "Job could not be removed.";
+  } else throw `Recruiter with the email ${email} does not exist in the database.`;
+}
 module.exports = {
   createRecruiter,
   getRecruiter,
-  createProfile
+  createProfile,
+  recruiterCheck,
+  updateProfile,
+  removeRecruiter,
+  postJob,
+  updateJob,
+  removeJob
 }
