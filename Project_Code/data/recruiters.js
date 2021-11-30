@@ -131,7 +131,6 @@ Methods:
 
 const mongoCollections = require('../config/mongoCollections');
 const jobMethods = require('./jobs');
-// const userMethods = require("./users");
 const recruiters = mongoCollections.recruiters;
 const bcrypt = require('bcrypt');
 const { ObjectId } = require('bson');
@@ -231,7 +230,7 @@ async function getJobsByRecruiter(id) {
 async function createProfile(recruiterId, profile) {
   const recruiterCol = await recruiters();
 
-  let {email, gender, photo, city, state, company, about} = profile
+  let {gender, photo, city, state, company, about} = profile
   let recruiter = await getRecruiter(recruiterId);
   //gender validation
   let re = /[A-Z]/i
@@ -246,20 +245,21 @@ async function createProfile(recruiterId, profile) {
   position = position.trim();
   companyName = companyName.trim();
   if(companyName == "" || companyName == undefined) throw new CustomError(400,"Please enter your place of work.")
-  if(re2.test(companyName)) throw `${companyName} is not a valid company.`;
+  if(re2.test(companyName)) throw new CustomError(400,`${companyName} is not a valid company.`);
   if(position == "" || position == undefined) throw new CustomError(400,"Please enter your position.")
-  if(re2.test(position)) throw `${position} is not a valid position at ${companyName}.`;
+  if(re2.test(position)) throw new CustomError(400,`${position} is not a valid position at ${companyName}.`);
 
   //city validation
   let re3 = /[A-Z-]/i
   city = city.trim();
   state = state.trim();
   if(city == "" || city == undefined) throw new CustomError(400,"Please enter your location of work.")
-  if(re3.test(city)) throw `${city} is not a valid city.`;
+  if(re3.test(city)) throw new CustomError(400,`${city} is not a valid city.`);
   if(state == "" || state == undefined) throw new CustomError(400,"Please enter your location of work.")
-  if(re3.test(state)) throw `${state} is not a valid state.`;
+  if(re3.test(state)) throw new CustomError(400,`${state} is not a valid state.`);
 
   if(!recruiter.recFound) {
+
     let newProfile = {
       gender: gender,
       city: city,
@@ -339,19 +339,23 @@ async function updateProfile(recruiterId, profile) {
     if(re3.test(state)) throw `${state} is not a valid state.`;
 
     if(!recruiter.recFound) {
-      let updatedProfile = {
-        gender: gender,
-        city: city,
-        state: state,
-        about: about,
-        company: company,
-        photo: photo
-      }
-      const recruiterUpdate = await recruiterCol.updateOne({ _id: recruiter._id }, { $set: { profile: updatedProfile } });
-      if (recruiterUpdate.modifiedCount === 0) {
-        throw `The recruiter's profile could not be updated.`;
-      } else {
-          return await getRecruiter(recruiterId);
+      if(recruiter.profile.gender == gender && recruiter.profile.city == city && recruiter.profile.state == state
+        && recruiter.profile.company == company) throw new CustomError(400,`No fields are being updated.`)
+      else {
+        let updatedProfile = {
+          gender: gender,
+          city: city,
+          state: state,
+          about: about,
+          company: company,
+          photo: photo
+        }
+        const recruiterUpdate = await recruiterCol.updateOne({ _id: recruiter._id }, { $set: { profile: updatedProfile } });
+        if (recruiterUpdate.modifiedCount === 0) {
+          throw `The recruiter's profile could not be updated.`;
+        } else {
+            return await getRecruiter(recruiterId);
+        }
       }
     } else {
       throw `Recruiter with the email ${email} does not exist in the database.`;
@@ -478,6 +482,7 @@ async function rejectDecision(id, applicantId, jobId) {
   } else throw new CustomError(400,"Recruiter is not present in the database");
 }
   //async function sendMail()
+  //async function resetPassword() 
 
 
 
