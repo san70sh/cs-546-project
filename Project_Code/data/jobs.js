@@ -121,6 +121,10 @@ async function createJob(recuriterId, recruiterEmail, jobDetails){
     if(!jobDetails.details || typeof jobDetails.details !== 'object') throw `Please provide a valid details`;
     
     // to write checfunction for postDate and expiry date.
+    if(!jobDetails.postDate|| typeof jobDetails.postDate !== 'object') throw `please provide a valid post date`;
+    let currentDay = new Date();
+    if(!jobDetails.expiryDate|| typeof jobDetails.expiryDate !== 'object'|| +jobDetails.expiryDate < +currentDay) throw `please provide a valid expiry date`;
+
     if(!jobDetails.details.summary || typeof jobDetails.details.summary !== 'string' || jobDetails.details.summary.trim().length < 1) throw `Please provide a valid summary in details`;
 
     
@@ -219,17 +223,22 @@ async function updateJob(jobId, updatedJob){
     }
 
     // to bediscussed how to store the dat in MM/DD/YYYY object or string
-    /*
+    
     if(updatedJob.postDate){
-        if(typeof updatedJob.type !== 'string' || updatedJob.type.trim().length < 1) throw `please provide a valid type`;
-        currentJob.type = updatedJob.type.trim().toLowerCase();
+        if(typeof updatedJob.postDate !== 'object') throw `please provide a valid type`;
+        currentJob.postDate = updatedJob.postDate;
     }
-    expiry date
+
+    if(updatedJob.expiryDate){
+        if(typeof updatedJob.expiryDate !== 'object') throw `please provide a valid type`;
+        currentJob.expiryDate = updatedJob.expiryDate;
+    }
+    
     if(updatedJob.type){
         if(typeof updatedJob.type !== 'string' || updatedJob.type.trim().length < 1) throw `please provide a valid type`;
         currentJob.type = updatedJob.type.trim().toLowerCase();
     }
-    */
+    
 
     if(updatedJob.details){
         if(updatedJob.details.summary){
@@ -364,7 +373,24 @@ async function getJobByCity(city){
 
 }
 
+
 // function for sorting the db data by date
+
+async function sortByDate(res){
+
+    // this will sort the jobs according to the date;
+    // need to check this function later again
+    //const res = await getAllJobs();
+
+    res.sort(function (a, b) {
+	
+        return a.postDate - b.postDate
+    });
+
+    return res;
+
+
+}
 
 
 module.exports = {
