@@ -102,19 +102,50 @@ change the status this job under applicant's jobs to "rejected"
 */
 
 
+/*
+Methods:
+  createRecruiter(email, password, firstname, lastName, phone)
+    Inserts recruiter object in database -> Returns Recruiter object after insertion
+  
+  getRecruiter(id)
+    Retrieves recruiter record based on ID passed -> Returns recruiter object
+  
+  createProfile(recruiterId, profile)
+    Creates profile subdocument of recruiter based on recruiterId and data in profile object passed ->  Returns recruiter record with inserted profile
+  
+  recruiterCheck(email, password)
+    Checks if passed email and password are a match in database -> Returns {"authenticated": true} if matched.
+
+  updateProfile(recruiterId, profile
+    Updates profile subdocument of recruiter based on recruiterId and data in profile object passed ->  Returns recruiter record with updated profile
+  
+  removeRecruiter(id)
+    Removes recruiter record from database along with associated data in jobs and users collection -> Returns "Successfully removed"
+  
+  postJob(id, jobDetails)
+    Creates a new job post by recruiter by passing recruiterId and job related details into createJob methods in jobs -> Returns "Sucessfully created" for now (Should return/redirect to jobs page)
+
+
+
+*/
+
 const mongoCollections = require('../config/mongoCollections');
+const jobMethods = require('./jobs');
+// const userMethods = require("./users");
 const recruiters = mongoCollections.recruiters;
 const bcrypt = require('bcrypt');
+const { ObjectId } = require('bson');
 const usrs = mongoCollections.users;
 const jobs = mongoCollections.jobs;
 const saltRounds = 16;
+
 
 function CustomError (status, message) {
   this.status = status;
   this.message = message;
 }
 
-async function createRecruiter(email, password, firstname, lastName, phone) {
+async function createRecruiter(email, password, firstName, lastName, phone) {
   //Email validation
   let re = /[A-Z0-9._-]+@[A-Z0-9.-]+\.[A-Z]{2,}/im
   if(email == "" || email == undefined) throw new CustomError(400,"Please enter your email.");
@@ -130,10 +161,10 @@ async function createRecruiter(email, password, firstname, lastName, phone) {
 
   //name validation
   let re3 = /[A-Z0-9]/i
-  firstname = firstname.trim();
+  firstName = firstName.trim();
   lastName = lastName.trim();
-  if(firstname == "" || firstname == undefined) throw new CustomError(400,"Please enter your first name.");
-  if(!re3.test(firstname)) throw new CustomError(400,"Your name should not contain special characters.");
+  if(firstName == "" || firstName == undefined) throw new CustomError(400,"Please enter your first name.");
+  if(!re3.test(firstName)) throw new CustomError(400,"Your name should not contain special characters.");
   if(lastName == "" || lastName == undefined) throw new CustomError(400,"Please enter your last name.");
   if(!re3.test(lastName)) throw new CustomError(400,"Your name should not contain special characters.");
 
@@ -150,7 +181,7 @@ async function createRecruiter(email, password, firstname, lastName, phone) {
       let newRec = {
           email: email,
           password: await bcrypt.hash(password, saltRounds),
-          firstName: firstname,
+          firstName: firstName,
           lastName: lastName,
           phone: phone 
       }
@@ -159,7 +190,8 @@ async function createRecruiter(email, password, firstname, lastName, phone) {
       if (insertInfo.insertedCount === 0) {
           throw new CustomError(500,'Internal Server Error');
       } else {
-          let returnObj = {"userInserted": true};
+          let insertedId = insertInfo.insertedId;
+          let returnObj = await this.get(insertedId.toString());
           return returnObj;
       }
   } else {
@@ -167,30 +199,40 @@ async function createRecruiter(email, password, firstname, lastName, phone) {
   }
 }
 
-async function getRecruiter(email) {
+async function getRecruiter(id) {
 
-  //Email validation
-  let re = /[A-Z0-9._-]+@[A-Z0-9.-]+\.[A-Z]{2,}/im
-  if(email == "" || email == undefined) throw new CustomError(400,"Please enter your email.");
-  if(email.length < 6) throw new CustomError(400,"The email is too short.");
-  if(!re.test(email)) throw new CustomError(400,`${email} is not a valid email.`);
-  email = email.toLowerCase();
-
-  const recruiterCol = await recruiters();
-  let recruiter = await recruiterCol.findOne({"email": email});
-      if (recruiter) {
-          return recruiter;
-      } else {
-        let returnObj = {"recFound": false}
-          return returnObj;
-      }
+  //ID validation
+  if(ObjectId.isValid(id)) {
+    const recruiterCol = await recruiters();
+    let recruiter = await recruiterCol.findOne({"_id": new ObjectId(id)});
+    if (recruiter) {
+        return recruiter;
+    } else {
+      let returnObj = {"recFound": false}
+        return returnObj;
+    }
+  } else throw new CustomError(400, `${id} is not a valid ID`)
+  
 }
 
-async function createProfile(profile) {
+async function getJobsByRecruiter(id) {
+  if(ObjectId.isValid(id)) {
+    const recruiterCol = await recruiters();
+    let recruiter = await recruiterCol.findOne({"_id": new ObjectId(id)});
+    if (recruiter) {
+        return recruiter.jobs;
+    } else {
+      let returnObj = {"unauthorised": true}
+        return returnObj;
+    }
+  } else throw new CustomError(400, `${id} is not a valid ID`)
+  
+}
+async function createProfile(recruiterId, profile) {
   const recruiterCol = await recruiters();
-  let recruiter = await getRecruiter(email);
 
   let {email, gender, photo, city, state, company, about} = profile
+  let recruiter = await getRecruiter(recruiterId);
   //gender validation
   let re = /[A-Z]/i
   gender = gender.trim();
@@ -230,10 +272,10 @@ async function createProfile(profile) {
     if (recruiterUpdate.modifiedCount === 0) {
       throw `The recruiter's profile could not be created.`;
     } else {
-        return "Sucessfully created";
+        return await getRecruiter(recruiterId);
     }
   } else {
-    throw `Recruiter with the email ${email} does not exist in the database.`;
+    throw `This recruiter does not exist in the database.`;
   }
 }
 
@@ -264,151 +306,192 @@ async function recruiterCheck(email, password) {
 
 }
 
-async function updateProfile(email, profile) {
+async function updateProfile(recruiterId, profile) {
   const recruiterCol = await recruiters();
-  let recruiter = await getRecruiter(email);
+  if(ObjectId.isValid(recruiterId)) {
+    let recruiter = await getRecruiter(recruiterId);
 
-  let {gender, photo, city, state, company, about} = profile;
-  //gender validation
-  let re = /[A-Z]/i
-  gender = gender.trim();
-  if(gender == "" || gender == undefined) throw new CustomError(400,"Please enter your gender.");
-  if(!re.test(gender)) throw new CustomError(400,"Your gender should not contain special characters.");
-  if(gender.length != 1) throw new CustomError(400,"Please enter a valid gender.");
+    let {gender, photo, city, state, company, about} = profile;
+    //gender validation
+    let re = /[A-Z]/i
+    gender = gender.trim();
+    if(gender == "" || gender == undefined) throw new CustomError(400,"Please enter your gender.");
+    if(!re.test(gender)) throw new CustomError(400,"Your gender should not contain special characters.");
+    if(gender.length != 1) throw new CustomError(400,"Please enter a valid gender.");
 
-  //company validation
-  let {position, companyName} = company;
-  let re2 = /[A-Z0-9.-]/i
-  position = position.trim();
-  companyName = companyName.trim();
-  if(companyName == "" || companyName == undefined) throw new CustomError(400,"Please enter your place of work.")
-  if(re2.test(companyName)) throw `${companyName} is not a valid company.`;
-  if(position == "" || position == undefined) throw new CustomError(400,"Please enter your position.")
-  if(re2.test(position)) throw `${position} is not a valid position at ${companyName}.`;
+    //company validation
+    let {position, companyName} = company;
+    let re2 = /[A-Z0-9.-]/i
+    position = position.trim();
+    companyName = companyName.trim();
+    if(companyName == "" || companyName == undefined) throw new CustomError(400,"Please enter your place of work.")
+    if(re2.test(companyName)) throw `${companyName} is not a valid company.`;
+    if(position == "" || position == undefined) throw new CustomError(400,"Please enter your position.")
+    if(re2.test(position)) throw `${position} is not a valid position at ${companyName}.`;
 
-  //city validation
-  let re3 = /[A-Z-]/i
-  city = city.trim();
-  state = state.trim();
-  if(city == "" || city == undefined) throw new CustomError(400,"Please enter your location of work.")
-  if(re3.test(city)) throw `${city} is not a valid city.`;
-  if(state == "" || state == undefined) throw new CustomError(400,"Please enter your location of work.")
-  if(re3.test(state)) throw `${state} is not a valid state.`;
+    //city validation
+    let re3 = /[A-Z-]/i
+    city = city.trim();
+    state = state.trim();
+    if(city == "" || city == undefined) throw new CustomError(400,"Please enter your location of work.")
+    if(re3.test(city)) throw `${city} is not a valid city.`;
+    if(state == "" || state == undefined) throw new CustomError(400,"Please enter your location of work.")
+    if(re3.test(state)) throw `${state} is not a valid state.`;
 
-  if(!recruiter.recFound) {
-    let updatedProfile = {
-      gender: gender,
-      city: city,
-      state: state,
-      about: about,
-      company: company,
-      photo: photo
-    }
-    const recruiterUpdate = await recruiterCol.updateOne({ _id: recruiter._id }, { $set: { profile: updatedProfile } });
-    if (recruiterUpdate.modifiedCount === 0) {
-      throw `The recruiter's profile could not be updated.`;
+    if(!recruiter.recFound) {
+      let updatedProfile = {
+        gender: gender,
+        city: city,
+        state: state,
+        about: about,
+        company: company,
+        photo: photo
+      }
+      const recruiterUpdate = await recruiterCol.updateOne({ _id: recruiter._id }, { $set: { profile: updatedProfile } });
+      if (recruiterUpdate.modifiedCount === 0) {
+        throw `The recruiter's profile could not be updated.`;
+      } else {
+          return await getRecruiter(recruiterId);
+      }
     } else {
-        return "Sucessfully updated";
+      throw `Recruiter with the email ${email} does not exist in the database.`;
     }
   } else {
-    throw `Recruiter with the email ${email} does not exist in the database.`;
+    throw `This recruiter does not exist in the database.`;
   }
+  
 }
 
-async function removeRecruiter(email) {
+async function removeRecruiter(id) {
   const recruiterCol = await recruiters();
   const userCol = await usrs();
-  //Email validation
-  let re = /[A-Z0-9._-]+@[A-Z0-9.-]+\.[A-Z]{2,}/im
-  if(email == "" || email == undefined) throw new CustomError(400,"Please enter your email.");
-  if(email.length < 6) throw new CustomError(400,"The email is too short.");
-  if(!re.test(email)) throw new CustomError(400,`${email} is not a valid email.`);
-  email = email.toLowerCase();
-
-  let recruiter = await getRecruiter(email);
-  if(recruiter){
-    let 
-    const recruiterDeletion = await recruiterCollection.deleteOne({ email: email });
-    if (recruiterDeletion.deletedCount === 0) {
-        throw `The recruiter with email ${email} could not be removed.`;
-    } else {
-        return "Successfully removed";
-    }
-  } else throw `Recruiter with the email ${email} does not exist in the database.`;
-}
-
-async function postJob(email, jobDetails) {
-  //Email validation
-  let re = /[A-Z0-9._-]+@[A-Z0-9.-]+\.[A-Z]{2,}/im
-  if(email == "" || email == undefined) throw new CustomError(400,"Please enter your email.");
-  if(email.length < 6) throw new CustomError(400,"The email is too short.");
-  if(!re.test(email)) throw new CustomError(400,`${email} is not a valid email.`);
-  email = email.toLowerCase();
-
-  const recruiterCol = await recruiters();
-  let recruiter = await getRecruiter(email);
-  if(recruiter) {
-    let resObj = await createJob(recruiter._id, email, jobDetails);
-    const jobPost = await recruiterCol.updateOne({ _id: recruiter._id }, { $push: { "jobs.job_id": resObj._id } });
-    if (recruiterUpdate.modifiedCount === 0) {
-      throw `The recruiter's profile could not be created.`;
-    } else {
-        return "Sucessfully created";
-    }
-    return resObj;
-  } else {
-    throw `Recruiter with the email ${email} does not exist in the database.`;
-  }
-}
-
-async function updateJob(email, jobDetails) {
-  let re = /[A-Z0-9._-]+@[A-Z0-9.-]+\.[A-Z]{2,}/im
-  if(email == "" || email == undefined) throw new CustomError(400,"Please enter your email.");
-  if(email.length < 6) throw new CustomError(400,"The email is too short.");
-  if(!re.test(email)) throw new CustomError(400,`${email} is not a valid email.`);
-  email = email.toLowerCase();
-
-  let recruiter = await getRecruiter(email);
-  if(recruiter) {
-    let resObj = await updateJob(recruiter._id, jobDetails);
-    return resObj;
-  } else {
-    throw `Recruiter with the email ${email} does not exist in the database.`;
-  }
-}
-
-async function removeJob(email, jobId) {
-  let re = /[A-Z0-9._-]+@[A-Z0-9.-]+\.[A-Z]{2,}/im
-  if(email == "" || email == undefined) throw new CustomError(400,"Please enter your email.");
-  if(email.length < 6) throw new CustomError(400,"The email is too short.");
-  if(!re.test(email)) throw new CustomError(400,`${email} is not a valid email.`);
-  email = email.toLowerCase();
-
-  const recruiterCol = await recruiters();
-  let recruiter = await getRecruiter(email);
-  if(recruiter) {
-    let resObj = await removeJob(recruiter._id, jobId);
-    if(resObj) {
-      let jobDeletion = await recruiter.find({ 'jobs.job_id' : { $eq:jobId } }).project().toArray();
-      const jobDel = await recruiterCol.updateMany({ }, {$pull: { jobs: {job_id: jobId } } } )
-      if(jobDel.modifiedCount === 0){
-        throw `The job with ID ${jobId} could not be removed.`;
-        return;
-      } else {
-        let jobD = {"jobId" : jobId.toString(), "deleted": true};
-        return jobD; 
+  const jobsCol = await jobs();
+  
+  if(ObjectId.isValid(id)) {
+    let recruiter = await getRecruiter(id);
+    if(recruiter){
+      let recruiterJobs = [], appliedUsers = [],usrUpdate;
+      recruiter.jobs.forEach(e => {
+        recruiterJobs.push(e.job_id);
+        appliedUsers.push(e.applicant_id);
+      });
+      let appliedUserSet = new Set(appliedUsers.flat());
+      let jobDel = await jobsCol.deleteMany({_id: {$in:recruiterJobs}});
+      if(jobDel.deletedCount === recruiterJobs.length) {
+          usrUpdate = await userCol.updateMany({_id: {$in: [...appliedUserSet]}}, {$pull: {jobs: {job: {$in: recruiterJobs}}, favor: {$in: recruiterJobs}}})
+        if(usrUpdate.modifiedCount === appliedUserSet.size) {
+          const recruiterDeletion = await recruiterCol.deleteOne({ _id: new ObjectId(id) });
+          if (recruiterDeletion.deletedCount === 0) {
+              throw `The recruiter could not be removed.`;
+          } else {
+              return "Successfully removed";
+          }
+        }
       }
-    } else throw "Job could not be removed.";
-  } else throw `Recruiter with the email ${email} does not exist in the database.`;
+    } else throw `This Recruiter does not exist in the database.`;  
+  }
 }
+
+async function postJob(id, jobDetails) {
+  
+  if(ObjectId.isValid(id)) {
+    const recruiterCol = await recruiters();
+    let recruiter = await getRecruiter(id);
+    if(recruiter) {
+      let resObj = await jobMethods.createJob(id, recruiter.email, jobDetails);
+      const jobPost = await recruiterCol.updateOne({ _id: id }, { $push: { "jobs.job_id": resObj._id } });
+      if (jobPost.modifiedCount === 0) {
+        throw `The job could not be created.`;
+      } else {
+          return "Sucessfully created";
+      }
+    } else {
+      throw `This Recruiter does not exist in the database.`;
+    }
+  }
+}
+
+async function updateJob(id, jobDetails) {
+  
+  if(ObjectId.isValid(id)) {
+    let recruiter = await getRecruiter(id);
+    if(recruiter) {
+      let resObj = await jobMethods.updateJob(id, jobDetails);
+      return resObj;
+    } else {
+      throw `Recruiter with the email ${email} does not exist in the database.`;
+    }
+  }
+}
+
+async function removeJob(id, jobId) {
+  
+  if(ObjectId.isValid(id)) {
+    const recruiterCol = await recruiters();
+    const userCol = await usrs();
+    let recruiter = await getRecruiter(id);
+    if(recruiter) {
+      let resObj = await jobMethods.deleteJob(jobId);
+      if(resObj) {
+        jobId = new ObjectId(jobId);
+        let applicants = await recruiterCol.find({"jobs.job_id": jobId}).project({_id: 0, jobs: {"applicant_id": 1}}).toArray();
+        let appliedUserSet = [];
+        if(applicants.length != 0) appliedUserSet = applicants[0].jobs[0].applicant_id;
+        let usrUpdate = await userCol.updateMany({_id: {$in: [...appliedUserSet]}}, {$pull: {jobs: {job: {$eq: jobId}}, favor: {$eq: jobId}}})
+        let jobDel = await recruiterCol.updateOne({ }, {$pull: { jobs: {job_id: jobId } } } )
+        if(jobDel.modifiedCount === 0){
+          throw `The job with ID ${jobId} could not be removed.`;
+        } else {
+          let jobD = {"jobId" : jobId.toString(), "deleted": true};
+          return jobD; 
+        }
+      } else throw "Job could not be removed.";
+    } else throw `This Recruiter does not exist in the database.`;
+  }
+}
+async function acceptDecision(id, applicantId, jobId) {
+  const userCol = await usrs();
+  let recruiter = await getRecruiter(id);
+  if(recruiter) {
+    let jobList = await getJobsByRecruiter(id);
+    if(jobList.some(e => e.job_id == new ObjectId(jobId))) {
+      let applicant = await userCol.updateOne({$and: [{"_id": new ObjectId(applicantId)}, {"jobs.job": new ObjectId(jobId)}]}, {$set: {"jobs.$.status": "Accepted"}})
+      if(applicant.modifiedCount === 1) {
+        return "Applicant accepted";
+      } else throw new CustomError(500,"Acceptance error");
+    } else throw new CustomError(403,"Recruiter does not have this job");
+  } else throw new CustomError(400,"Recruiter is not present in the database");
+}
+
+async function rejectDecision(id, applicantId, jobId) {
+  const recruiterCol = await recruiters();
+  const userCol = await usrs();
+  let recruiter = await getRecruiter(id);
+  if(recruiter) {
+    let jobList = await getJobsByRecruiter(id);
+    if(jobList.some(e => e.job_id == new ObjectId(jobId))) {
+      let applicant = await userCol.updateOne({$and: [{"_id": new ObjectId(applicantId)}, {"jobs.job": new ObjectId(jobId)}]}, {$set: {"jobs.$.status": "Rejected"}})
+      if(applicant.modifiedCount === 1) {
+        return "Applicant Rejected";
+      }else throw new CustomError(500,"Acceptance error");
+    } else throw new CustomError(403,"Recruiter does not have this job");
+  } else throw new CustomError(400,"Recruiter is not present in the database");
+}
+  //async function sendMail()
+
+
+
 module.exports = {
   createRecruiter,
   getRecruiter,
+  getJobsByRecruiter,
   createProfile,
   recruiterCheck,
   updateProfile,
   removeRecruiter,
   postJob,
   updateJob,
-  removeJob
+  removeJob,
+  acceptDecision,
+  rejectDecision
 }
