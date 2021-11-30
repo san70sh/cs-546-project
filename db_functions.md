@@ -67,31 +67,31 @@ Used to update the sub-document `profile` of users with `profileId`. The logic s
 - If the removal succeeds, return the name of the `user` and the text " has been successfully deleted!"
 - Also update the job under recruiter collection with this `jobId`: remove the `userId` from `applicantId`.
 
-## `apply(jobId)`
+## `apply(jobId, userId)`
 
 - Add this `jobId` to user's `jobs` field, and its `status` should be `pending`.
 - Cannot apply jobs that already be applied.
 - Also update the job under recruiter collection with this `jobId`: add the `userId` to `applicantId`.
 
-## `save`
+## `Favorites(jobId, userId)`
 
 - Add this `jobId` to user's `favour` field.
 - Cannot save jobs that already be saved.
 
-## `cancel(jobId)`(which used to cancel application for a job)
+## `cancel(jobId, userId)`(which used to cancel application for a job)
 
 - remove this `jobId` from user's `jobs` field
 - Also update the job under recruiter collection with this `jobId`: remove the `userId` from `applicantId`.
 
-## `track(jobId)`
+## `track(jobId, userId)`
 
 Return the `status` of this `jobId`.
 
-## `trackAll()`
+## `trackAll(userId)`
 
 Return all of jobs along with their `status`.
 
-## `get(id)`
+## `get(userId)`
 
 When given an id, this function will return a user from the database.
 
