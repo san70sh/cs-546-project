@@ -4,8 +4,8 @@ const router = express.Router();
 const recruiterDat = require("../data/recruiters");
 
 router.post('/login', async (req, res) => {
-    if (req.session.user) return res.redirect('/private')
-    else {
+    // if (req.session.user) return res.redirect('/private')
+    // else {
         let {email, password} = req.body;
         let re = /[A-Z0-9._-]+@[A-Z0-9.-]+\.[A-Z]{2,}/im
         if(email == "" || email == undefined) return res.status(400).render('partials/loginform', {title: "Login Page", message: "Please enter your email.", err: true});
@@ -22,25 +22,26 @@ router.post('/login', async (req, res) => {
             let output = await recruiterDat.recruiterCheck(email, password);
             if(output.authenticated) {
                 req.session.user = output.id;
-                return res.redirect('/private');
+                // return res.redirect('/private');
+                return res.json(output);
             }
         } catch (e) {
             return res.status(e.status).render('partials/loginform', {title: "Login Page", message: e.message, err: true});
         }
-    }
+    // }
 });
 
 router.post('/accept', async (req, res) => {
     try {
-        if(!req.session.user) {
-            return res.status(403).render('partials/loginform', {title: "Login Page", message: "Unauthorized Access", err: true})
-        } else {
+        // if(!req.session.user) {
+        //     return res.status(403).render('partials/loginform', {title: "Login Page", message: "Unauthorized Access", err: true})
+        // } else {
             let {recruiterId, applicantId, jobId} = req.body;
             if(ObjectId.isValid(recruiterId) && ObjectId.isValid(applicantId) && ObjectId.isValid(jobId)) {
                 let output = await recruiterDat.acceptDecision(recruiterId, applicantId, jobId);
                 res.json(output);
             }
-        }
+        // }
     } catch (e) {
         return res.status(e.status).render('partials/loginform', {title: "Login Page", message: e.message, err: true});
     }
@@ -48,23 +49,24 @@ router.post('/accept', async (req, res) => {
 
 router.post('/reject', async (req, res) => {
     try {
-        if(!req.session.user) {
-            return res.status(403).render('partials/loginform', {title: "Login Page", message: "Unauthorized Access", err: true})
-        } else {
+        // if(!req.session.user) {
+        //     return res.status(403).render('partials/loginform', {title: "Login Page", message: "Unauthorized Access", err: true})
+        // } else {
             let {recruiterId, applicantId, jobId} = req.body;
             if(ObjectId.isValid(recruiterId) && ObjectId.isValid(applicantId) && ObjectId.isValid(jobId)) {
                 let output = await recruiterDat.rejectDecision(recruiterId, applicantId, jobId);
                 res.json(output);
             }
-        }
+        // }
     } catch (e) {
         return res.status(e.status).render('partials/loginform', {title: "Login Page", message: e.message, err: true});
     }
 });
 
 router.post('/signup', async (req, res) => {
-    if (req.session.user) return res.redirect('/private')
-    else {
+    // if (req.session.user) return res.redirect('/private')
+    // else {
+        let {email, password, firstName, lastName, phone} = req.body;
         //Email validation
         let re = /[A-Z0-9._-]+@[A-Z0-9.-]+\.[A-Z]{2,}/im
         if(email == "" || email == undefined) return res.status(400).render('partials/signupform', {title: "Sign Up/Register", message: "Please enter your email.", err: true});
@@ -96,18 +98,27 @@ router.post('/signup', async (req, res) => {
 
         try {
             let output = await recruiterDat.createRecruiter(email, password, firstName, lastName, phone);
-            if(output.email) {
-                req.session.user = output._id;
-                return res.redirect('/private');
+            if(output.recFound) {
+                req.session.user = output.data._id;
+                return res.json(output);
+                // return res.redirect('/private');
             }
         } catch (e) {
             return res.status(e.status).render('partials/signupform', {title: "Sign Up/Register", message: e.message, err: true});
         }
+    // }
+});
+
+router.get('/:id', async (req, res) => {
+    let id = req.params.id;
+    if(ObjectId.isValid(id)) {
+        let output = await recruiterDat.getRecruiter(id);
+        return res.json(output);
     }
 });
 
-router.get('/profile', async (req, res) => {
-    let {id} = req.body;
+router.get('/profile/:id', async (req, res) => {
+    let id = req.params.id;
     try {
         if(ObjectId.isValid(id)) {
             let output = await recruiterDat.getRecruiter(id);
@@ -118,11 +129,11 @@ router.get('/profile', async (req, res) => {
     }
 });
 
-router.get('/jobs', async (req,res) => {
-    let {id} = req.body;
+router.get('/jobs/:id', async (req,res) => {
+    let id = req.params.id;
     try {
         if(ObjectId.isValid(id)) {
-            let output = await recruiterDat.getJobsByRecruiter(id);
+            let output = await recruiterDat.getJobsByRecruiterId(id);
             return res.json(output);
         } else {
             return res.status(400).render('partials/rec', {title: "Invalid User", message: "Invalid Recruiter ID", err: true});
@@ -132,11 +143,11 @@ router.get('/jobs', async (req,res) => {
     }
 });
 
-router.post('/profile/create', async (req, res) => {
-    if (req.session.user) return res.redirect('/private')
-    else {
-        let {id, profile} = req.body;
-        let {gender, photo, city, state, company, about} = profile;
+router.post('/profile/:id', async (req, res) => {
+    // if (req.session.user) return res.redirect('/private')
+    // else {
+        let id = req.params.id;
+        let {gender, photo, city, state, company, about} = req.body;
 
         //gender validation
         let re = /[A-Z]/i
@@ -151,18 +162,18 @@ router.post('/profile/create', async (req, res) => {
         position = position.trim();
         companyName = companyName.trim();
         if(companyName == "" || companyName == undefined) return res.status(400).render('partials/profilepage', {title: "Create Profile", message: "Please enter your place of work."})
-        if(re2.test(companyName)) return res.status(400).render('partials/profilepage', {title: "Create Profile", message: `${companyName} is not a valid company.`});
+        if(!re2.test(companyName)) return res.status(400).render('partials/profilepage', {title: "Create Profile", message: `${companyName} is not a valid company.`});
         if(position == "" || position == undefined) return res.status(400).render('partials/profilepage', {title: "Create Profile", message: "Please enter your position."})
-        if(re2.test(position)) return res.status(400).render('partials/profilepage', {title: "Create Profile", message: `${position} is not a valid position at ${companyName}.`});
+        if(!re2.test(position)) return res.status(400).render('partials/profilepage', {title: "Create Profile", message: `${position} is not a valid position at ${companyName}.`});
 
         //city validation
         let re3 = /[A-Z-]/i
         city = city.trim();
         state = state.trim();
         if(city == "" || city == undefined) return res.status(400).render('partials/profilepage', {title: "Create Profile", message: "Please enter your location of work."});
-        if(re3.test(city)) return res.status(400).render('partials/profilepage', {title: "Create Profile", message: `${city} is not a valid city.`});
+        if(!re3.test(city)) return res.status(400).render('partials/profilepage', {title: "Create Profile", message: `${city} is not a valid city.`});
         if(state == "" || state == undefined) return res.status(400).render('partials/profilepage', {title: "Create Profile", message: "Please enter your location of work."});
-        if(re3.test(state)) return res.status(400).render('partials/profilepage', {title: "Create Profile", message: `${state} is not a valid state.`});
+        if(!re3.test(state)) return res.status(400).render('partials/profilepage', {title: "Create Profile", message: `${state} is not a valid state.`});
 
         try {
             if(ObjectId.isValid(id)) {
@@ -175,14 +186,14 @@ router.post('/profile/create', async (req, res) => {
         } catch (e) {
             return res.status(e.status).render('partials/profilepage', {title: "Error", message: e.message, err: true});
         }
-    }
+    // }
 });
 
-router.patch('/profile/update', async (req, res) => {
-    if (req.session.user) return res.redirect('/private')
-    else {
-        let {id, profile} = req.body;
-        let {gender, photo, city, state, company, about} = profile;
+router.patch('/profile/:id', async (req, res) => {
+    // if (req.session.user) return res.redirect('/private')
+    // else {
+        let id = req.params.id;
+        let {gender, photo, city, state, company, about} = req.body;
 
         //gender validation
         let re = /[A-Z]/i
@@ -220,11 +231,11 @@ router.patch('/profile/update', async (req, res) => {
         } catch (e) {
             return res.status(e.status).render('partials/profilepage', {title: "Error", message: e.message, err: true});
         }
-    }
+    // }
 });
 
 router.delete('/:id', async (req, res) => {
-    let {id} = req.params.id;
+    let id = req.params.id;
     try {
         if(ObjectId.isValid(id)) {
             let output = await recruiterDat.removeRecruiter(id);
@@ -235,9 +246,9 @@ router.delete('/:id', async (req, res) => {
     }
 });
 
-router.post('/jobs', async (req, res) => {
-    let {id, jobDetails} = req.body;
-    let {title, type, company, city, state, postDate, expiryDate, details, payRange} = jobDetails;
+router.post('/jobs/:id', async (req, res) => {
+    let id = req.params.id;
+    let {title, type, company, city, state, postDate, expiryDate, details, payRange} = req.body;
 
     if(!title || typeof title !== 'string' || title.trim().length < 1) return res.status(400).render('partials/jobpost', {title: "Invalid Job", message: `Please provide a valid title`});
     if(!type || typeof type !== 'string' || type.trim().length < 1) return res.status(400).render('partials/jobpost', {title: "Invalid Job", message: `Please provide a valid JobType`});
