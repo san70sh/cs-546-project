@@ -154,7 +154,7 @@ async function createRecruiter(email, password, firstName, lastName, phone) {
 
   //password validation
   let re2 = /\s/i
-  if(!password) throw `Please enter your password`;
+  if(!password) throw new CustomError(400,"Please enter your password");
   if(re2.test(password)) throw new CustomError(400,"Spaces are not allowed in passwords.");
   if(password.length < 6) throw new CustomError(400,"Password is too short.");
 
@@ -190,7 +190,7 @@ async function createRecruiter(email, password, firstName, lastName, phone) {
           throw new CustomError(500,'Internal Server Error');
       } else {
           let insertedId = insertInfo.insertedId;
-          let returnObj = await this.get(insertedId.toString());
+          let returnObj = await this.getRecruiter(insertedId.toString());
           return returnObj;
       }
   } else {
@@ -205,7 +205,8 @@ async function getRecruiter(id) {
     const recruiterCol = await recruiters();
     let recruiter = await recruiterCol.findOne({"_id": new ObjectId(id)});
     if (recruiter) {
-        return recruiter;
+      recruiter._id = recruiter._id.toString();
+      return recruiter;
     } else {
       let returnObj = {"recFound": false}
         return returnObj;
@@ -270,12 +271,12 @@ async function createProfile(recruiterId, profile) {
     }
     const recruiterUpdate = await recruiterCol.updateOne({ _id: recruiter._id }, { $set: { profile: newProfile } });
     if (recruiterUpdate.modifiedCount === 0) {
-      throw `The recruiter's profile could not be created.`;
+      throw new CustomError(400,"The recruiter's profile could not be created.");
     } else {
         return await getRecruiter(recruiterId);
     }
   } else {
-    throw `This recruiter does not exist in the database.`;
+    throw new CustomError(400,"This recruiter does not exist in the database.");
   }
 }
 
@@ -290,7 +291,7 @@ async function recruiterCheck(email, password) {
 
   //password validation
   let re2 = /\s/i
-  if(!password) throw `Please enter your password`;
+  if(!password) throw new CustomError(400,"Please enter your password");
   if(re2.test(password)) throw new CustomError(400,"Spaces are not allowed in passwords.");
   if(password.length < 6) throw new CustomError(400,"Password is too short.");
 
@@ -299,7 +300,7 @@ async function recruiterCheck(email, password) {
     if(validateRecruiter == null) throw new CustomError(400,"Either the username or password is invalid");
     else {
         if(await bcrypt.compare(password, validateRecruiter.password)){
-            let returnObj = {"authenticated": true};
+            let returnObj = {"authenticated": true, "id": validateRecruiter._id.toString()};
             return returnObj;
         } else throw new CustomError(400,"Either the username or password is invalid");
     }
@@ -325,18 +326,18 @@ async function updateProfile(recruiterId, profile) {
     position = position.trim();
     companyName = companyName.trim();
     if(companyName == "" || companyName == undefined) throw new CustomError(400,"Please enter your place of work.")
-    if(re2.test(companyName)) throw `${companyName} is not a valid company.`;
+    if(re2.test(companyName)) throw new CustomError(400,`${companyName} is not a valid company.`);
     if(position == "" || position == undefined) throw new CustomError(400,"Please enter your position.")
-    if(re2.test(position)) throw `${position} is not a valid position at ${companyName}.`;
+    if(re2.test(position)) throw new CustomError(400,`${position} is not a valid position at ${companyName}.`);
 
     //city validation
     let re3 = /[A-Z-]/i
     city = city.trim();
     state = state.trim();
     if(city == "" || city == undefined) throw new CustomError(400,"Please enter your location of work.")
-    if(re3.test(city)) throw `${city} is not a valid city.`;
+    if(re3.test(city)) throw new CustomError(400,`${city} is not a valid city.`);
     if(state == "" || state == undefined) throw new CustomError(400,"Please enter your location of work.")
-    if(re3.test(state)) throw `${state} is not a valid state.`;
+    if(re3.test(state)) throw new CustomError(400,`${state} is not a valid state.`);
 
     if(!recruiter.recFound) {
       if(recruiter.profile.gender == gender && recruiter.profile.city == city && recruiter.profile.state == state
@@ -352,16 +353,16 @@ async function updateProfile(recruiterId, profile) {
         }
         const recruiterUpdate = await recruiterCol.updateOne({ _id: recruiter._id }, { $set: { profile: updatedProfile } });
         if (recruiterUpdate.modifiedCount === 0) {
-          throw `The recruiter's profile could not be updated.`;
+          throw new CustomError(400,"The recruiter's profile could not be updated.");
         } else {
             return await getRecruiter(recruiterId);
         }
       }
     } else {
-      throw `Recruiter with the email ${email} does not exist in the database.`;
+      throw new CustomError(400,`Recruiter with the email ${email} does not exist in the database.`);
     }
   } else {
-    throw `This recruiter does not exist in the database.`;
+    throw new CustomError(400,"This recruiter does not exist in the database.");
   }
   
 }
@@ -386,13 +387,13 @@ async function removeRecruiter(id) {
         if(usrUpdate.modifiedCount === appliedUserSet.size) {
           const recruiterDeletion = await recruiterCol.deleteOne({ _id: new ObjectId(id) });
           if (recruiterDeletion.deletedCount === 0) {
-              throw `The recruiter could not be removed.`;
+              throw new CustomError(400,"The recruiter could not be removed.");
           } else {
               return "Successfully removed";
           }
         }
       }
-    } else throw `This Recruiter does not exist in the database.`;  
+    } else throw new CustomError(400,"This Recruiter does not exist in the database.");
   }
 }
 
@@ -405,25 +406,28 @@ async function postJob(id, jobDetails) {
       let resObj = await jobMethods.createJob(id, recruiter.email, jobDetails);
       const jobPost = await recruiterCol.updateOne({ _id: id }, { $push: { "jobs.job_id": resObj._id } });
       if (jobPost.modifiedCount === 0) {
-        throw `The job could not be created.`;
+        throw new CustomError(400,"The job could not be created.");
       } else {
           return "Sucessfully created";
       }
     } else {
-      throw `This Recruiter does not exist in the database.`;
+      throw new CustomError(400,"This Recruiter does not exist in the database.");
     }
   }
 }
 
-async function updateJob(id, jobDetails) {
+async function updateJob(id, jobId, jobDetails) {
   
   if(ObjectId.isValid(id)) {
     let recruiter = await getRecruiter(id);
     if(recruiter) {
-      let resObj = await jobMethods.updateJob(id, jobDetails);
-      return resObj;
+      let jobList = await getJobsByRecruiter(id);
+      if(jobList.some(e => e.job_id == new ObjectId(jobId))) {
+        let resObj = await jobMethods.updateJob(jobId, jobDetails);
+        return resObj;
+      } else throw new CustomError(403,"Recruiter does not have this job");
     } else {
-      throw `Recruiter with the email ${email} does not exist in the database.`;
+      throw new CustomError(400,`Recruiter with the email ${email} does not exist in the database.`);
     }
   }
 }
@@ -435,22 +439,25 @@ async function removeJob(id, jobId) {
     const userCol = await usrs();
     let recruiter = await getRecruiter(id);
     if(recruiter) {
-      let resObj = await jobMethods.deleteJob(jobId);
-      if(resObj) {
-        jobId = new ObjectId(jobId);
-        let applicants = await recruiterCol.find({"jobs.job_id": jobId}).project({_id: 0, jobs: {"applicant_id": 1}}).toArray();
-        let appliedUserSet = [];
-        if(applicants.length != 0) appliedUserSet = applicants[0].jobs[0].applicant_id;
-        let usrUpdate = await userCol.updateMany({_id: {$in: [...appliedUserSet]}}, {$pull: {jobs: {job: {$eq: jobId}}, favor: {$eq: jobId}}})
-        let jobDel = await recruiterCol.updateOne({ }, {$pull: { jobs: {job_id: jobId } } } )
-        if(jobDel.modifiedCount === 0){
-          throw `The job with ID ${jobId} could not be removed.`;
-        } else {
-          let jobD = {"jobId" : jobId.toString(), "deleted": true};
-          return jobD; 
-        }
-      } else throw "Job could not be removed.";
-    } else throw `This Recruiter does not exist in the database.`;
+      let jobList = await getJobsByRecruiter(id);
+      if(jobList.some(e => e.job_id == new ObjectId(jobId))) {
+        let resObj = await jobMethods.deleteJob(jobId);
+        if(resObj) {
+          jobId = new ObjectId(jobId);
+          let applicants = await recruiterCol.find({"jobs.job_id": jobId}).project({_id: 0, jobs: {"applicant_id": 1}}).toArray();
+          let appliedUserSet = [];
+          if(applicants.length != 0) appliedUserSet = applicants[0].jobs[0].applicant_id;
+          let usrUpdate = await userCol.updateMany({_id: {$in: [...appliedUserSet]}}, {$pull: {jobs: {job: {$eq: jobId}}, favor: {$eq: jobId}}})
+          let jobDel = await recruiterCol.updateOne({ }, {$pull: { jobs: {job_id: jobId } } } )
+          if(jobDel.modifiedCount === 0){
+            throw new CustomError(400,`The job with ID ${jobId} could not be removed.`);
+          } else {
+            let jobD = {"jobId" : jobId.toString(), "deleted": true};
+            return jobD; 
+          }
+        } else throw new CustomError(400,"Job could not be removed.");
+      } else throw new CustomError(403,"Recruiter does not have this job");
+    } else throw new CustomError(400,"This Recruiter does not exist in the database.");
   }
 }
 async function acceptDecision(id, applicantId, jobId) {
@@ -477,7 +484,7 @@ async function rejectDecision(id, applicantId, jobId) {
       let applicant = await userCol.updateOne({$and: [{"_id": new ObjectId(applicantId)}, {"jobs.job": new ObjectId(jobId)}]}, {$set: {"jobs.$.status": "Rejected"}})
       if(applicant.modifiedCount === 1) {
         return "Applicant Rejected";
-      }else throw new CustomError(500,"Acceptance error");
+      }else throw new CustomError(500,"Rejection error");
     } else throw new CustomError(403,"Recruiter does not have this job");
   } else throw new CustomError(400,"Recruiter is not present in the database");
 }
