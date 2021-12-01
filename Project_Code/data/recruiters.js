@@ -1,123 +1,32 @@
-/* 
-dbname : 'JobHunt_db'
-
-Variables: recruiterId, 
-
-#################################################################################
-
-SPECS:
-
-Recruiters Functions
-
-
-createProfile(userId, photo, gender, city, state, company)
-This function is used to create sub-document profile for the recruiter with userId, All fields need to match the type specified in DB_proposal. It will return newly created profile.
-
-create(email, phone, firstname, lastname, password, profile)
-Used to create an account for user:
-please create unique username and password in the keystore as well.
-Please make sure you tag it with respect to recruiter and users
-
-
-loginCheck(username, password)
-
-all the fields must be valid except for profile.
-if profile is empty, set it with empty object.
-For profile, it should be an object(all fields must be valid) and we use createProfile to help us create the recruiter's profile.
-jobs will be initialized with empty arrays.
-password must be encoded and then be saved to database. (encode and decode function to be determined later)
-will return newly created recruiter info.
-update and updateProfile will have the same logic with previous functions
-
-
-update and updateProfile will have the same logic with previous functions
-post(title, type, company, contact, city, state, expiryDate, details, payRange, companyPic)
-All the fields must match fields in DB_proposal, except for payRange and companyPic, they are optional features.
-
-If payRange or companyPic are not given, set it with empty string.
-
-details should be an object, it's a sub-document of this job.
-
-"details": {
-"summary":"This is a abc company",
-"description":"This a devops role your responsibilities will be abc",
-"required":["Java","Mongodb"],
-"benefits":"you will get travelling allowance,insurance etc."
-},
-Automatically set postDate to today's date and poster to the recruiter.
-
-Return the newly added job.
-
-Example of a job:
-
-"_id": "7b7997a2-c0d2-4f8c-b27a-6a1d4b5b6310",
-"title":"Software development summer 2022 internship"
-"type": "internship",
-"company: "Stevens",
-"poster": "get it from recruiter id from recruiter collection",
-"contact": "stevens.edu",
-"city": "Hoboken",
-"state": "NJ",
-“postDate”: "today's date in MM/DD/YYYY,
-"expiryDate":"MM/DD/YYY"
-"details": {
-  "summary":"This is a abc company",
-  "description":"This a devops role your responsibilities will be abc",
-  "required":["Java","Mongodb"],
-  "benefits":"you will get travelling allowance,insurance etc."
-},
-  "pay range":" 50 - 100 $ PER HOUR"
-  "companyPic": "image/pdf url"
-
-
-updateJob(jobId, title, type, company, contact, city, state, expiryDate, details, payRange, companyPic)
-Similar with post.
-
-removeJob(jobId)
-Remove all the applicants applied with this job.
-Remove saved jobs with this id
-Remove this job.
-
-removeAllJob()
-Recursively use removeJob(jobId).
-
-remove(id)(which used to remove one recruiter)
-remove will take the following steps:
-
-With this id, first find the jobs field, then find the applicantId under jobs, remove these applicants applied jobs in user collection.
-Remove jobs posted by this recruiter from job collection. (Step 1 and step 2 can use removeAllJob)
-Remove recruiter with this idfine.
-If the removal succeeds, return the name of the user and the text " has been successfully deleted!".
-
-viewJob(jobId)
-
-accept(applicantId, jobId)(used to accept or reject applicants' applications)
-change the status this job under applicant's jobs to accepted
-
-reject(applicantId, jobId)
-change the status this job under applicant's jobs to "rejected"
-
-
-
-*/
-
-
 /*
+Variables: 
+
+  recFound - True/False based on recruiter present in database
+  data - Recruiter object data 
+  recruiterCol - Recruiter Collection
+  userCol - User Collection
+
+
+
 Methods:
+
   createRecruiter(email, password, firstname, lastName, phone)
-    Inserts recruiter object in database -> Returns Recruiter object after insertion
+    Inserts recruiter object in database -> Returns {recFound, data} after insertion
   
   getRecruiter(id)
-    Retrieves recruiter record based on ID passed -> Returns recruiter object
+    Retrieves recruiter record based on ID passed -> Returns {recFound, data}
+
+  getJobsByRecruiterId(id)
+    Returns array of jobs created by the recruiter whose id is passed -> Returns recruiter.data.jobs
   
   createProfile(recruiterId, profile)
-    Creates profile subdocument of recruiter based on recruiterId and data in profile object passed ->  Returns recruiter record with inserted profile
+    Creates profile subdocument of recruiter based on recruiterId and data in profile object passed ->  Returns {recFound, data} with inserted profile
   
   recruiterCheck(email, password)
-    Checks if passed email and password are a match in database -> Returns {"authenticated": true} if matched.
+    Checks if passed email and password are a match in database -> Returns {"authenticated": true, "id": ObjectId of recruiter} if matched.
 
   updateProfile(recruiterId, profile
-    Updates profile subdocument of recruiter based on recruiterId and data in profile object passed ->  Returns recruiter record with updated profile
+    Updates profile subdocument of recruiter based on recruiterId and data in profile object passed ->  Returns {recFound, data} with updated profile
   
   removeRecruiter(id)
     Removes recruiter record from database along with associated data in jobs and users collection -> Returns "Successfully removed"
@@ -125,7 +34,17 @@ Methods:
   postJob(id, jobDetails)
     Creates a new job post by recruiter by passing recruiterId and job related details into createJob methods in jobs -> Returns "Sucessfully created" for now (Should return/redirect to jobs page)
 
+  updateJob(recruiterId, jobId, jobDetails)
+    Updates existing job details of the job whose id is passed after checking access rights of the recruiter whose id is passed along with the updated job details -> Returns updated job details object
 
+  removeJob(recruiterId, jobId)
+    Removes job document after checking access rights of the recruiter -> Returns {"jobId" : jobId.toString(), "deleted": true} after deletion
+
+  acceptDecision(recruiterId, applicantId, jobId)
+    Changes status to Accepted after checking the access of the job to the recruiter -> "Applicant accepted"
+
+  rejectDecision(recruiterId, applicantId, jobId)
+    Changes status to Rejected after checking the access of the job to the recruiter -> "Applicant rejected"
 
 */
 
@@ -182,7 +101,9 @@ async function createRecruiter(email, password, firstName, lastName, phone) {
           password: await bcrypt.hash(password, saltRounds),
           firstName: firstName,
           lastName: lastName,
-          phone: phone 
+          phone: phone,
+          profile: {},
+          jobs: []
       }
 
       const insertInfo = await recruiterCol.insertOne(newRec);
@@ -198,36 +119,37 @@ async function createRecruiter(email, password, firstName, lastName, phone) {
   }
 }
 
-async function getRecruiter(id) {
+async function getRecruiter(recruiterId) {
 
   //ID validation
-  if(ObjectId.isValid(id)) {
+  if(ObjectId.isValid(recruiterId)) {
     const recruiterCol = await recruiters();
-    let recruiter = await recruiterCol.findOne({"_id": new ObjectId(id)});
+    let recruiter = await recruiterCol.findOne({"_id": new ObjectId(recruiterId)});
     if (recruiter) {
       recruiter._id = recruiter._id.toString();
-      return recruiter;
+      return {"recFound": true, "data": recruiter};
     } else {
       let returnObj = {"recFound": false}
         return returnObj;
     }
-  } else throw new CustomError(400, `${id} is not a valid ID`)
+  } else throw new CustomError(400, `${recruiterId} is not a valid ID`)
   
 }
 
-async function getJobsByRecruiter(id) {
-  if(ObjectId.isValid(id)) {
+async function getJobsByRecruiterId(recruiterId) {
+  if(ObjectId.isValid(recruiterId)) {
     const recruiterCol = await recruiters();
-    let recruiter = await recruiterCol.findOne({"_id": new ObjectId(id)});
-    if (recruiter) {
-        return recruiter.jobs;
+    let recruiter = await getRecruiter(recruiterId);
+    if (recruiter.recFound) {
+        return recruiter.data.jobs;
     } else {
-      let returnObj = {"unauthorised": true}
+      let returnObj = {"unauthorized": true}
         return returnObj;
     }
-  } else throw new CustomError(400, `${id} is not a valid ID`)
+  } else throw new CustomError(400, `${recruiterId} is not a valid ID`)
   
 }
+
 async function createProfile(recruiterId, profile) {
   const recruiterCol = await recruiters();
 
@@ -246,20 +168,20 @@ async function createProfile(recruiterId, profile) {
   position = position.trim();
   companyName = companyName.trim();
   if(companyName == "" || companyName == undefined) throw new CustomError(400,"Please enter your place of work.")
-  if(re2.test(companyName)) throw new CustomError(400,`${companyName} is not a valid company.`);
+  if(!re2.test(companyName)) throw new CustomError(400,`${companyName} is not a valid company.`);
   if(position == "" || position == undefined) throw new CustomError(400,"Please enter your position.")
-  if(re2.test(position)) throw new CustomError(400,`${position} is not a valid position at ${companyName}.`);
+  if(!re2.test(position)) throw new CustomError(400,`${position} is not a valid position at ${companyName}.`);
 
   //city validation
   let re3 = /[A-Z-]/i
   city = city.trim();
   state = state.trim();
   if(city == "" || city == undefined) throw new CustomError(400,"Please enter your location of work.")
-  if(re3.test(city)) throw new CustomError(400,`${city} is not a valid city.`);
+  if(!re3.test(city)) throw new CustomError(400,`${city} is not a valid city.`);
   if(state == "" || state == undefined) throw new CustomError(400,"Please enter your location of work.")
-  if(re3.test(state)) throw new CustomError(400,`${state} is not a valid state.`);
+  if(!re3.test(state)) throw new CustomError(400,`${state} is not a valid state.`);
 
-  if(!recruiter.recFound) {
+  if(recruiter.recFound) {
 
     let newProfile = {
       gender: gender,
@@ -269,7 +191,7 @@ async function createProfile(recruiterId, profile) {
       company: company,
       photo: photo
     }
-    const recruiterUpdate = await recruiterCol.updateOne({ _id: recruiter._id }, { $set: { profile: newProfile } });
+    const recruiterUpdate = await recruiterCol.updateOne({ _id: recruiter.data._id }, { $set: { profile: newProfile } });
     if (recruiterUpdate.modifiedCount === 0) {
       throw new CustomError(400,"The recruiter's profile could not be created.");
     } else {
@@ -339,9 +261,9 @@ async function updateProfile(recruiterId, profile) {
     if(state == "" || state == undefined) throw new CustomError(400,"Please enter your location of work.")
     if(re3.test(state)) throw new CustomError(400,`${state} is not a valid state.`);
 
-    if(!recruiter.recFound) {
-      if(recruiter.profile.gender == gender && recruiter.profile.city == city && recruiter.profile.state == state
-        && recruiter.profile.company == company) throw new CustomError(400,`No fields are being updated.`)
+    if(recruiter.recFound) {
+      if(recruiter.data.profile.gender == gender && recruiter.data.profile.city == city && recruiter.data.profile.state == state
+        && recruiter.data.profile.company == company) throw new CustomError(400,`No fields are being updated.`)
       else {
         let updatedProfile = {
           gender: gender,
@@ -351,7 +273,7 @@ async function updateProfile(recruiterId, profile) {
           company: company,
           photo: photo
         }
-        const recruiterUpdate = await recruiterCol.updateOne({ _id: recruiter._id }, { $set: { profile: updatedProfile } });
+        const recruiterUpdate = await recruiterCol.updateOne({ _id: recruiter.data._id }, { $set: { profile: updatedProfile } });
         if (recruiterUpdate.modifiedCount === 0) {
           throw new CustomError(400,"The recruiter's profile could not be updated.");
         } else {
@@ -359,7 +281,7 @@ async function updateProfile(recruiterId, profile) {
         }
       }
     } else {
-      throw new CustomError(400,`Recruiter with the email ${email} does not exist in the database.`);
+      throw new CustomError(400,`This Recruiter does not exist in the database.`);
     }
   } else {
     throw new CustomError(400,"This recruiter does not exist in the database.");
@@ -367,44 +289,50 @@ async function updateProfile(recruiterId, profile) {
   
 }
 
-async function removeRecruiter(id) {
+async function removeRecruiter(recruiterId) {
   const recruiterCol = await recruiters();
   const userCol = await usrs();
   const jobsCol = await jobs();
   
   if(ObjectId.isValid(id)) {
-    let recruiter = await getRecruiter(id);
-    if(recruiter){
-      let recruiterJobs = [], appliedUsers = [],usrUpdate;
-      recruiter.jobs.forEach(e => {
-        recruiterJobs.push(e.job_id);
-        appliedUsers.push(e.applicant_id);
-      });
-      let appliedUserSet = new Set(appliedUsers.flat());
-      let jobDel = await jobsCol.deleteMany({_id: {$in:recruiterJobs}});
-      if(jobDel.deletedCount === recruiterJobs.length) {
-          usrUpdate = await userCol.updateMany({_id: {$in: [...appliedUserSet]}}, {$pull: {jobs: {job: {$in: recruiterJobs}}, favor: {$in: recruiterJobs}}})
-        if(usrUpdate.modifiedCount === appliedUserSet.size) {
-          const recruiterDeletion = await recruiterCol.deleteOne({ _id: new ObjectId(id) });
-          if (recruiterDeletion.deletedCount === 0) {
-              throw new CustomError(400,"The recruiter could not be removed.");
-          } else {
-              return "Successfully removed";
+    let recruiter = await getRecruiter(recruiterId);
+    if(recruiter.recFound){
+      let recruiterJobs = [], appliedUsers = [], usrUpdate, jobDel, appliedUserSet;
+      if(recruiter.data.jobs) {
+        recruiter.data.jobs.forEach(e => {
+          recruiterJobs.push(e.job_id);
+          appliedUsers.push(e.applicant_id);
+        });
+
+        jobDel = await jobsCol.deleteMany({_id: {$in:recruiterJobs}});
+        if(jobDel.deletedCount === recruiterJobs.length) {
+          if(appliedUsers.length != 0) {
+            appliedUserSet = new Set(appliedUsers.flat());
+            usrUpdate = await userCol.updateMany({_id: {$in: [...appliedUserSet]}}, {$pull: {jobs: {job: {$in: recruiterJobs}}, favor: {$in: recruiterJobs}}})
           }
+        }
+      }
+
+      if(recruiterJobs.length == 0 || usrUpdate.modifiedCount === appliedUserSet.size) {
+        const recruiterDeletion = await recruiterCol.deleteOne({ _id: new ObjectId(recruiterId) });
+        if (recruiterDeletion.deletedCount === 0) {
+            throw new CustomError(400,"The recruiter could not be removed.");
+        } else {
+            return "Successfully removed";
         }
       }
     } else throw new CustomError(400,"This Recruiter does not exist in the database.");
   }
 }
 
-async function postJob(id, jobDetails) {
+async function postJob(recruiterId, jobDetails) {
   
-  if(ObjectId.isValid(id)) {
+  if(ObjectId.isValid(recruiterId)) {
     const recruiterCol = await recruiters();
-    let recruiter = await getRecruiter(id);
-    if(recruiter) {
-      let resObj = await jobMethods.createJob(id, recruiter.email, jobDetails);
-      const jobPost = await recruiterCol.updateOne({ _id: id }, { $push: { "jobs.job_id": resObj._id } });
+    let recruiter = await getRecruiter(recruiterId);
+    if(recruiter.recFound) {
+      let resObj = await jobMethods.createJob(id, recruiter.data.email, jobDetails);
+      const jobPost = await recruiterCol.updateOne({ _id: recruiterId }, { $push: { "jobs.job_id": resObj._id } });
       if (jobPost.modifiedCount === 0) {
         throw new CustomError(400,"The job could not be created.");
       } else {
@@ -421,7 +349,7 @@ async function updateJob(id, jobId, jobDetails) {
   if(ObjectId.isValid(id)) {
     let recruiter = await getRecruiter(id);
     if(recruiter) {
-      let jobList = await getJobsByRecruiter(id);
+      let jobList = await getJobsByRecruiterId(id);
       if(jobList.some(e => e.job_id == new ObjectId(jobId))) {
         let resObj = await jobMethods.updateJob(jobId, jobDetails);
         return resObj;
@@ -432,41 +360,46 @@ async function updateJob(id, jobId, jobDetails) {
   }
 }
 
-async function removeJob(id, jobId) {
+async function removeJob(recruiterId, jobId) {
   
-  if(ObjectId.isValid(id)) {
+  if(ObjectId.isValid(recruiterId || ObjectId.isValid(jobId))) {
     const recruiterCol = await recruiters();
     const userCol = await usrs();
-    let recruiter = await getRecruiter(id);
-    if(recruiter) {
-      let jobList = await getJobsByRecruiter(id);
-      if(jobList.some(e => e.job_id == new ObjectId(jobId))) {
-        let resObj = await jobMethods.deleteJob(jobId);
-        if(resObj) {
-          jobId = new ObjectId(jobId);
-          let applicants = await recruiterCol.find({"jobs.job_id": jobId}).project({_id: 0, jobs: {"applicant_id": 1}}).toArray();
-          let appliedUserSet = [];
-          if(applicants.length != 0) appliedUserSet = applicants[0].jobs[0].applicant_id;
-          let usrUpdate = await userCol.updateMany({_id: {$in: [...appliedUserSet]}}, {$pull: {jobs: {job: {$eq: jobId}}, favor: {$eq: jobId}}})
-          let jobDel = await recruiterCol.updateOne({ }, {$pull: { jobs: {job_id: jobId } } } )
+    let recruiter = await getRecruiter(recruiterId);
+    if(recruiter.recFound) {
+      let applicants = await recruiterCol.find({"jobs.job_id": jobId}).project({_id: 0, jobs: {"applicant_id": 1}}).toArray();
+      let appliedUserSet = [];
+      if(applicants.length != 0) appliedUserSet = applicants[0].jobs[0].applicant_id;
+      let usrUpdate = await userCol.updateMany({_id: {$in: [...appliedUserSet]}}, {$pull: {jobs: {job: {$eq: jobId}}, favor: {$eq: jobId}}});
+      if(usrUpdate.modifiedCount == appliedUserSet.size){
+        jobId = new ObjectId(jobId);
+        let jobList = await getJobsByRecruiterId(recruiterId);
+        if(jobList.some(e => e.job_id == jobId)) {
+          let jobDel = await recruiterCol.updateOne({ }, {$pull: { jobs: {job_id: jobId } } } );
           if(jobDel.modifiedCount === 0){
-            throw new CustomError(400,`The job with ID ${jobId} could not be removed.`);
-          } else {
-            let jobD = {"jobId" : jobId.toString(), "deleted": true};
-            return jobD; 
+            let resObj = await jobMethods.deleteJob(jobId);
+            if(resObj) {
+              jobId = new ObjectId(jobId);
+              throw new CustomError(400,`The job with ID ${jobId} could not be removed.`);
+            } else {
+              let jobD = {"jobId" : jobId.toString(), "deleted": true};
+              return jobD; 
+            }
           }
-        } else throw new CustomError(400,"Job could not be removed.");
-      } else throw new CustomError(403,"Recruiter does not have this job");
+        } else throw new CustomError(403,"Recruiter does not have this job");
+      } else throw new CustomError(400,"Job could not be removed.");
     } else throw new CustomError(400,"This Recruiter does not exist in the database.");
   }
 }
-async function acceptDecision(id, applicantId, jobId) {
+
+async function acceptDecision(recruiterId, applicantId, jobId) {
   const userCol = await usrs();
-  let recruiter = await getRecruiter(id);
+  let recruiter = await getRecruiter(recruiterId);
   if(recruiter) {
-    let jobList = await getJobsByRecruiter(id);
-    if(jobList.some(e => e.job_id == new ObjectId(jobId))) {
-      let applicant = await userCol.updateOne({$and: [{"_id": new ObjectId(applicantId)}, {"jobs.job": new ObjectId(jobId)}]}, {$set: {"jobs.$.status": "Accepted"}})
+    let jobList = await getJobsByRecruiterId(recruiterId);
+    jobId = new ObjectId(jobId);
+    if(jobList.some(e => e.job_id == jobId)) {
+      let applicant = await userCol.updateOne({$and: [{"_id": new ObjectId(applicantId)}, {"jobs.job": jobId}]}, {$set: {"jobs.$.status": "Accepted"}})
       if(applicant.modifiedCount === 1) {
         return "Applicant accepted";
       } else throw new CustomError(500,"Acceptance error");
@@ -474,14 +407,15 @@ async function acceptDecision(id, applicantId, jobId) {
   } else throw new CustomError(400,"Recruiter is not present in the database");
 }
 
-async function rejectDecision(id, applicantId, jobId) {
+async function rejectDecision(recruiterId, applicantId, jobId) {
   const recruiterCol = await recruiters();
   const userCol = await usrs();
-  let recruiter = await getRecruiter(id);
-  if(recruiter) {
-    let jobList = await getJobsByRecruiter(id);
-    if(jobList.some(e => e.job_id == new ObjectId(jobId))) {
-      let applicant = await userCol.updateOne({$and: [{"_id": new ObjectId(applicantId)}, {"jobs.job": new ObjectId(jobId)}]}, {$set: {"jobs.$.status": "Rejected"}})
+  let recruiter = await getRecruiter(recruiterId);
+  if(recruiter.recFound) {
+    let jobList = await getJobsByRecruiterId(recruiterId);
+    jobId = new ObjectId(jobId);
+    if(jobList.some(e => e.job_id == jobId)) {
+      let applicant = await userCol.updateOne({$and: [{"_id": new ObjectId(applicantId)}, {"jobs.job": jobId}]}, {$set: {"jobs.$.status": "Rejected"}})
       if(applicant.modifiedCount === 1) {
         return "Applicant Rejected";
       }else throw new CustomError(500,"Rejection error");
@@ -496,7 +430,7 @@ async function rejectDecision(id, applicantId, jobId) {
 module.exports = {
   createRecruiter,
   getRecruiter,
-  getJobsByRecruiter,
+  getJobsByRecruiterId,
   createProfile,
   recruiterCheck,
   updateProfile,
