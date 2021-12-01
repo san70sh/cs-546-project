@@ -21,7 +21,7 @@ router.post('/login', async (req, res) => {
         try {
             let output = await recruiterDat.recruiterCheck(email, password);
             if(output.authenticated) {
-                req.session.user = username;
+                req.session.user = output.id;
                 return res.redirect('/private');
             }
         } catch (e) {
@@ -67,36 +67,37 @@ router.post('/signup', async (req, res) => {
     else {
         //Email validation
         let re = /[A-Z0-9._-]+@[A-Z0-9.-]+\.[A-Z]{2,}/im
-        if(email == "" || email == undefined) res.status(400).render('partials/signupform', {title: "Sign Up/Register", message: "Please enter your email.", err: true});
-        if(email.length < 6) res.status(400).render('partials/signupform', {title: "Sign Up/Register", message: "The email is too short.", err: true});
-        if(!re.test(email)) res.status(400).render('partials/signupform', {title: "Sign Up/Register", message: `${email} is not a valid email.`, err: true});
+        if(email == "" || email == undefined) return res.status(400).render('partials/signupform', {title: "Sign Up/Register", message: "Please enter your email.", err: true});
+        if(email.length < 6) return res.status(400).render('partials/signupform', {title: "Sign Up/Register", message: "The email is too short.", err: true});
+        if(!re.test(email)) return res.status(400).render('partials/signupform', {title: "Sign Up/Register", message: `${email} is not a valid email.`, err: true});
         email = email.toLowerCase();
 
         //password validation
         let re2 = /\s/i
-        if(!password) throw `Please enter your password`;
-        if(re2.test(password)) res.status(400).render('partials/signupform', {title: "Sign Up/Register", message: "Spaces are not allowed in passwords.", err: true});
-        if(password.length < 6) res.status(400).render('partials/signupform', {title: "Sign Up/Register", message: "Password is too short.", err: true});
+        if(!password) return res.status(400).render('partials/signupform',{title: "Sign Up/Register", message: `Please enter your password`});
+        if(re2.test(password)) return res.status(400).render('partials/signupform', {title: "Sign Up/Register", message: "Spaces are not allowed in passwords.", err: true});
+        if(password.length < 6) return res.status(400).render('partials/signupform', {title: "Sign Up/Register", message: "Password is too short.", err: true});
 
         //name validation
         let re3 = /[A-Z0-9]/i
         firstName = firstName.trim();
         lastName = lastName.trim();
-        if(firstName == "" || firstName == undefined) res.status(400).render('partials/signupform', {title: "Sign Up/Register", message: "Please enter your first name.", err: true});
-        if(!re3.test(firstName)) res.status(400).render('partials/signupform', {title: "Sign Up/Register", message: "Your name should not contain special characters.", err: true});
-        if(lastName == "" || lastName == undefined) res.status(400).render('partials/signupform', {title: "Sign Up/Register", message: "Please enter your last name.", err: true});
-        if(!re3.test(lastName)) res.status(400).render('partials/signupform', {title: "Sign Up/Register", message: "Your name should not contain special characters.", err: true});
+        if(firstName == "" || firstName == undefined) return res.status(400).render('partials/signupform', {title: "Sign Up/Register", message: "Please enter your first name.", err: true});
+        if(!re3.test(firstName)) return res.status(400).render('partials/signupform', {title: "Sign Up/Register", message: "Your name should not contain special characters.", err: true});
+        if(lastName == "" || lastName == undefined) return res.status(400).render('partials/signupform', {title: "Sign Up/Register", message: "Please enter your last name.", err: true});
+        if(!re3.test(lastName)) return res.status(400).render('partials/signupform', {title: "Sign Up/Register", message: "Your name should not contain special characters.", err: true});
 
         //phone validation
-        let re4 = /^(\+\d{1,3}\s)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$/
+        let re4 = /^[0-9]+$/
         phone = phone.trim();
-        if(phone == "" || phone == undefined) res.status(400).render('partials/signupform', {title: "Sign Up/Register", message: "Please enter your first name.", err: true});
-        if(!re4.test(phone)) res.status(400).render('partials/signupform', {title: "Sign Up/Register", message: "Your name should not contain special characters.", err: true});
+        if(phone == "" || phone == undefined) return res.status(400).render('partials/signupform', {title: "Sign Up/Register", message: "Please enter your phone number.", err: true});
+        if(phone.length != 10) return res.status(400).render('partials/signupform', {title: "Sign Up/Register", message: "Invalid phone number.", err: true});
+        if(!re4.test(phone)) return res.status(400).render('partials/signupform', {title: "Sign Up/Register", message: "Invalid phone number.", err: true});
 
         try {
             let output = await recruiterDat.createRecruiter(email, password, firstName, lastName, phone);
             if(output.email) {
-                req.session.user = username;
+                req.session.user = output._id;
                 return res.redirect('/private');
             }
         } catch (e) {
@@ -222,11 +223,96 @@ router.patch('/profile/update', async (req, res) => {
     }
 });
 
-router.delete('/', async (req, res) => {
-    let {id} = req.body;
+router.delete('/:id', async (req, res) => {
+    let {id} = req.params.id;
     try {
         if(ObjectId.isValid(id)) {
             let output = await recruiterDat.removeRecruiter(id);
+            return res.json(output);
+        }
+    } catch (e) {
+        return res.status(e.status).render('partials/rec', {title: "Invalid User", message: e.message, err: true});
+    }
+});
+
+router.post('/jobs', async (req, res) => {
+    let {id, jobDetails} = req.body;
+    let {title, type, company, city, state, postDate, expiryDate, details, payRange} = jobDetails;
+
+    if(!title || typeof title !== 'string' || title.trim().length < 1) return res.status(400).render('partials/jobpost', {title: "Invalid Job", message: `Please provide a valid title`});
+    if(!type || typeof type !== 'string' || type.trim().length < 1) return res.status(400).render('partials/jobpost', {title: "Invalid Job", message: `Please provide a valid JobType`});
+    if(!company || typeof company !== 'string' || company.trim().length < 1) return res.status(400).render('partials/jobpost', {title: "Invalid Job", message: `Please provide a valid company`});
+    if(!city || typeof city !== 'string' || city.trim().length < 1) return res.status(400).render('partials/jobpost', {title: "Invalid Job", message: `Please provide a valid city`});
+    if(!state || typeof state !== 'string' || state.trim().length < 1) return res.status(400).render('partials/jobpost', {title: "Invalid Job", message: `Please provide a valid state`});
+
+    let {summary, description, required} = details;
+
+    if(!summary || typeof summary !== 'string' || summary.trim().length < 1) return res.status(400).render('partials/jobpost', {title: "Invalid Job", message: `Please provide a valid summary in details`});
+    if(!description || typeof description !== 'string' || description.trim().length < 1) return res.status(400).render('partials/jobpost', {title: "Invalid Job", message: `Please provide a valid summary in details`});
+    if(!required || required.length < 1 ) return res.status(400).render('partials/jobpost', {title: "Invalid Job", message: `Please provide a valid required skilset in details`});
+
+    let currentDay = new Date();
+    if(!postDate|| typeof postDate !== 'object') return res.status(400).render('partials/jobpost', {title: "Invalid Job", message: `please provide a valid post date`});
+    if(!expiryDate|| typeof expiryDate !== 'object'|| +expiryDate < +currentDay) return res.status(400).render('partials/jobpost', {title: "Invalid Job", message: `please provide a valid expiry date`});
+
+    let re = /^[0-9]+ - [0-9]+$/
+    if(!re.test(payRange)) return res.status(400).render('partials/jobpost', {title: "Invalid Job", message: "Invalid payrange"});
+    let payrangeArr = payRange.toArray();
+    if(parseInt(payrangeArr[0].trim()) > parseInt(payrangeArr[2].trim())) return res.status(400).render('partials/jobpost', {title: "Invalid Job", message: "Invalid payrange"});
+    
+    try {
+        if(ObjectId.isValid(id)) {
+            let output = await recruiterDat.postJob(id, jobDetails);
+            return res.json(output);
+        }
+    } catch(e) {
+        return res.status(e.status).render('partials/jobpost', {title: "Error", message: e.message, err: true});
+    }
+});
+
+router.patch('/jobs/:id', async (req, res) => {
+    let jobId = req.params.id;
+    let {userId, jobDetails} = req.body;
+
+    let {title, type, company, city, state, postDate, expiryDate, details, payRange} = jobDetails;
+
+    if(!title || typeof title !== 'string' || title.trim().length < 1) return res.status(400).render('partials/jobpost', {title: "Invalid Job", message: `Please provide a valid title`});
+    if(!type || typeof type !== 'string' || type.trim().length < 1) return res.status(400).render('partials/jobpost', {title: "Invalid Job", message: `Please provide a valid JobType`});
+    if(!company || typeof company !== 'string' || company.trim().length < 1) return res.status(400).render('partials/jobpost', {title: "Invalid Job", message: `Please provide a valid company`});
+    if(!city || typeof city !== 'string' || city.trim().length < 1) return res.status(400).render('partials/jobpost', {title: "Invalid Job", message: `Please provide a valid city`});
+    if(!state || typeof state !== 'string' || state.trim().length < 1) return res.status(400).render('partials/jobpost', {title: "Invalid Job", message: `Please provide a valid state`});
+
+    let {summary, description, required} = details;
+
+    if(!summary || typeof summary !== 'string' || summary.trim().length < 1) return res.status(400).render('partials/jobpost', {title: "Invalid Job", message: `Please provide a valid summary in details`});
+    if(!description || typeof description !== 'string' || description.trim().length < 1) return res.status(400).render('partials/jobpost', {title: "Invalid Job", message: `Please provide a valid summary in details`});
+    if(!required || required.length < 1 ) return res.status(400).render('partials/jobpost', {title: "Invalid Job", message: `Please provide a valid required skilset in details`});
+
+    let currentDay = new Date();
+    if(!postDate|| typeof postDate !== 'object') return res.status(400).render('partials/jobpost', {title: "Invalid Job", message: `please provide a valid post date`});
+    if(!expiryDate|| typeof expiryDate !== 'object'|| +expiryDate < +currentDay) return res.status(400).render('partials/jobpost', {title: "Invalid Job", message: `please provide a valid expiry date`});
+
+    let re = /^[0-9]+ - [0-9]+$/
+    if(!re.test(payRange)) return res.status(400).render('partials/jobpost', {title: "Invalid Job", message: "Invalid payrange"});
+    let payrangeArr = payRange.toArray();
+    if(parseInt(payrangeArr[0].trim()) > parseInt(payrangeArr[2].trim())) return res.status(400).render('partials/jobpost', {title: "Invalid Job", message: "Invalid payrange"});
+
+    try {
+        if(ObjectId.isValid(userId) || ObjectId.isValid(jobId)) {
+            let output = await recruiterDat.updateJob(userId, jobId, jobDetails);
+            return res.json(output);
+        }
+    } catch(e) {
+        return res.status(e.status).render('partials/jobpost', {title: "Error", message: e.message, err: true});
+    }
+});
+
+router.delete('/jobs/:id', async (req, res) => {
+    let jobId = req.params.id;
+    try {
+        if(ObjectId.isValid(jobId)) {
+            let userId = req.session.user;
+            let output = await recruiterDat.removeJob(userId, jobId);
             return res.json(output);
         }
     } catch (e) {
