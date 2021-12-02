@@ -8,31 +8,40 @@ router.get('/', async (req, res) => {
     try{
 
         const result = await jobData.getAllJobs();
-        return result;
+        for(let i = 0 ;i < result.length; i ++){
+            result[i].unique = String(result[i]._id);
+
+       }       
+       console.log(result);
+        res.render('pages/home',{jobs: result});
 
     }catch(e){
+
+        res.status(500).json({error : "Internal Server Error"});
 
     }
     
 });
 
-router.get('/:city', async (req, res) => {
+router.get('/jobs/city/:city', async (req, res) => {
     try{
 
         const result = await jobData.getJobByCity(req.params.city);
-        return result;
+        res.json(result);
 
     }catch(e){
+
+      console.log(e);
 
     }
     
 });
 
-router.get('/:id', async (req, res) => {
+router.get('/jobs/id/:id', async (req, res) => {
     try{
 
-        const result = await jobData.getJobByCity(req.params.id);
-        return result;
+        const result = await jobData.getJobsById(req.params.id);
+        res.render('pages/singleJob',{data : result});
 
     }catch(e){
 
@@ -40,11 +49,11 @@ router.get('/:id', async (req, res) => {
     
 });
 
-router.get('/:location', async (req, res) => {
+router.get('/jobs/state/:state', async (req, res) => {
     try{
 
-        const result = await jobData.getJobByCity(req.params.location);
-        return result;
+        const result = await jobData.getJobByState(req.params.state);
+        res.json(result);
 
     }catch(e){
 
@@ -52,43 +61,9 @@ router.get('/:location', async (req, res) => {
     
 });
 
-router.get('/:city', async (req, res) => {
-    try{
-
-        const result = await jobData.getJobByCity(req.params.city);
-        return result;
-
-    }catch(e){
-
-    }
+module.exports = router;
     
-});
 
-router.post('/jobs/:id', async (req, res) => {
-    try{
-
-        // to check if we are passing this in the req.body
-        const result = await jobData.createJob(req.params.city);
-        return result;
-
-    }catch(e){
-
-    }
-    
-});
-
-router.delete('/jobs/:id', async (req, res) => {
-    // this route is to delete the job by id and render something
-    try{
-         
-        const result = await jobData.deleteJob(req.params.id);
-        return result;
-
-    }catch(e){
-
-    }
-    
-});
 
 // to write a route for patching the database using the update function from the job data file ;
 
