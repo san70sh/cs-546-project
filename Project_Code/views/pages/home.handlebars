@@ -1,0 +1,25 @@
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src='/public/script/job_scripts.js'></script>
+{{#if errorclass }}
+  <p class="not-found">{{e}}</p>
+{{/if}}
+
+<input type="text" id="mySearchterm" onkeyup="filter(this);" placeholder="Search for Jobs.." title="Type in a term">
+<ul id = 'myJobList' class = 'jobList'>
+{{#each jobs}}
+    <li>
+        <a href="/jobs/id/{{unique}}"> Title : {{title}}</a>
+         <p> Type : {{type}}</p>
+        <p> Location : {{city}},{{state}}</p>
+        <p> Job Summary : {{details.summary}}</p>
+       
+
+    </li>
+{{/each}}
+</ul>
+
+
+
+
+

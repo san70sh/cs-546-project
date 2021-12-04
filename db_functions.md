@@ -36,7 +36,6 @@ Used to create an account for user:
 - For `profile`, if it's a pdf, we will use functions in package to parse it, and then use `createProfile` to create a profile. If `profile` is empty, set it with an empty object.
 - `jobs` and `favour` will be initialized with empty arrays.
 - password must be encoded and then be saved to database. (encode and decode function to be determined later)
-- will return newly created user info.
 
 One example:
 
@@ -60,7 +59,6 @@ Used to update the sub-document `profile` of users with `profileId`. The logic s
 
 - This function will update **all** the mandatory required data of this `user` currently in the database
 - All fields need to have valid values.
-- If the update succeeds, return the entire `user` object as it is after it is updated.
 
 ## `remove(id)`
 
