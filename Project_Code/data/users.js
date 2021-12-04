@@ -1,6 +1,7 @@
 const mongoCollections = require("../config/mongoCollections");
 const users = mongoCollections.users;
 let { ObjectId } = require("mongodb");
+const { compareSync } = require("bcrypt");
 
 // const checkWeb = (web) => {
 // //depends on the url link
@@ -350,9 +351,13 @@ const update = async (userId, email, phone, firstname, lastname, password) => {
   ) {
     throw new CustomError(400, "uesr's email, phone. firstname, lastname, password can't be empty or just spaces");
   }
+  const emailCheck = /[A-Z0-9._-]+@[A-Z0-9.-]+\.[A-Z]{2,}/im;
+  if (!emailCheck.test(email)) {
+    throw new CustomError(400, "Wrong email format");
+  }
   const phoneCheck = /^([0-9]{3})[-]([0-9]{3})[-]([0-9]{4})$/;
   if (!phoneCheck.test(phone)) {
-    throw new CustomError(400, "Wrong phoneNo formate xxx-xxx-xxxx");
+    throw new CustomError(400, "Wrong phoneNo format xxx-xxx-xxxx");
   }
   if (!ObjectId.isValid(userId)) {
     throw new CustomError(400, "Invalid userID");
@@ -458,6 +463,53 @@ const Favorites = async (jobId, userId) => {
   throw new CustomError(400, "Could not add the favor job,  the job is already exists or user doesn't exist");
 };
 
+const getFavourites = async(userId) => {
+  if (!userId) {
+    throw new CustomError(400, "id must be provided");
+  }
+  if (typeof userId !== "string") {
+    throw new CustomError(400, "the userId must be non-empty string and can't just be space");
+  }
+  if (!ObjectId.isValid(userId)) {
+    throw new CustomError(400, "Invalid userID");
+  } else {
+    userId = ObjectId(userId);
+  }
+  const usersCollection = await users();
+  const res = await usersCollection.findOne({ _id: userId });
+  if (res === null) throw new CustomError(400, "user did not exists");
+  return res.favor;
+}
+
+const delFavourites = async(jobId, userId) => {
+  if (!userId || !jobId) {
+    throw new CustomError(400, "id must be provided");
+  }
+  if (typeof userId !== "string" || userId.trim().length === 0) {
+    throw new CustomError(400, "the userId must be non-empty string and can't just be space");
+  }
+  if (typeof jobId !== "string" || jobId.trim().length === 0) {
+    throw new CustomError(400, "the jobId must be non-empty string and can't just be space");
+  }
+  if (!ObjectId.isValid(userId)) {
+    throw new CustomError(400, "Invalid userID");
+  } else {
+    userId = ObjectId(userId);
+  }
+  if (!ObjectId.isValid(jobId)) {
+    throw new CustomError(400, "Invalid jobId");
+  } else {
+    jobId = ObjectId(jobId);
+  }
+  const usersCollection = await users();
+  const deleteInfo = await usersCollection.updateOne(
+    {_id : userId},
+    {$pull: { favor: jobId } }
+  );
+  if (!deleteInfo.modifiedCount) {
+    throw new CustomError(400, "remove favor failed");
+  }
+}
 const cancel = async (jobId, userId) => {
   if (!userId || !jobId) {
     throw new CustomError(400, "id must be provided");
@@ -571,6 +623,8 @@ module.exports = {
   remove,
   apply,
   Favorites,
+  getFavourites,
+  delFavourites,
   cancel,
   track,
   trackAll,
@@ -620,3 +674,6 @@ module.exports = {
 //trackAll("61a4236167e3b3f821f5e374").then(ele => console.log(ele));
 // get("61a4236167e3b3f821f5e374???").then(ele => console.log(ele)).catch(ele => console.log(ele));
 //getAll().then(ele => console.log(ele));
+//Favorites("61a4236167e3b3f821f5ddde","61a33e13067da688cb1f8e39");
+//getFavourites("61a33e13067da688cb1f8e39").then(ele => console.log(ObjectId(ele[0])))
+delFavourites("61a4236167e3b3f821f5eeee","61a33e13067da688cb1f8e39");
