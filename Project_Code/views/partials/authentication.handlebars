@@ -11,18 +11,19 @@
 				<h4>Recruiter Login</h4>
 				</div>
 				<div class="d-flex flex-column text-center">
-					<form action="/recruiters/login" method="post">
+					<form action="/recruiters/login" method="post" id="recloginform">
 						<div class="form-group">
-							<input type="email" name="recAuthemail" id="recAuthEmail" class="form-control" placeholder="Your email address" aria-placeholder="Your email address">
+							<div id="emailerr" class="error"></div>
+							<input type="email" name="email" id="recAuthEmail" class="form-control" placeholder="Your email address" aria-placeholder="Your email address" required>
 						</div>
 						<div class="form-group">
-							<input type="password" name="recAuthpwd" id="recAuthPwd" class="form-control" placeholder="Password" aria-placeholder="Password">
+							<input type="password" name="password" id="recAuthPwd" class="form-control" placeholder="Password" aria-placeholder="Password" required>
 						</div>
 						<div class="form-group">
 							<input type="checkbox" id="recRememberSession"></input>
 							<label for="rememberSession">Remember Me</label>
 						</div>
-						<button type="submit" class="col-12 btn btn-dark btn-round">Login</button>
+						<button type="submit" id="recloginsubmit" class="col-12 btn btn-dark btn-round">Login</button>
 					</form>
 				</div>
 			</div>
