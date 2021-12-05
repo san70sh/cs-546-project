@@ -54,6 +54,8 @@ router.get('/favor/:id', async (req, res) => {//get all favor
             return res.json(output);
         }
     } catch (e) {
-        return res.status(e.status).render('partials/rec', {title: "Invalid User", message: e.message, err: true});
+        return res.status(e.status).render('pages/rec', {title: "Invalid User", message: e.message, err: true});
     }
 });
+
+module.exports = router;
