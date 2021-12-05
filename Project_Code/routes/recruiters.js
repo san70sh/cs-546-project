@@ -4,6 +4,7 @@ const router = express.Router();
 const recruiterDat = require("../data/recruiters");
 
 router.post('/login', async (req, res) => {
+    console.log(req.body);
     // if (req.session.user) return res.redirect('/private')
     // else {
         let {email, password} = req.body;
@@ -21,21 +22,18 @@ router.post('/login', async (req, res) => {
         try {
             let output = await recruiterDat.recruiterCheck(email, password);
             if(output.authenticated) {
-                req.session.user = output.id;
+                let recruiter = await recruiterDat.getRecruiter(output.id);
+                // req.session.user = output.id;
                 // return res.redirect('/private');
-                return res.json(output);
+                console.log(recruiter.data);
+                return res.render('pages/recruiterProfile', {recruiter: recruiter.data});
             }
         } catch (e) {
+            console.log(e);
             return res.status(e.status).render('partials/loginform', {message: e.message, err: true});
         }
     // }
 });
-
-router.get('/check', async (req, res) => {
-    let recruiter = {"firstName": "Ron", "lastName": "Weasley", "company": "ABC Inc.", "position": "Senior Recruiter"};
-
-    return res.render('pages/recruiterProfile',{recruiter});
-})
 
 router.post('/accept', async (req, res) => {
     try {
