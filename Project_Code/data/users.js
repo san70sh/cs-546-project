@@ -1,7 +1,8 @@
 const mongoCollections = require("../config/mongoCollections");
 const users = mongoCollections.users;
 let { ObjectId } = require("mongodb");
-const { compareSync } = require("bcrypt");
+bcrypt = require("bcrypt");
+const saltRounds = 8;
 
 // const checkWeb = (web) => {
 // //depends on the url link
@@ -126,6 +127,19 @@ const checkLa = (languages) => {
   });
 };
 
+const checkExist = async(email) => {
+  const emailCheck = /[A-Z0-9._-]+@[A-Z0-9.-]+\.[A-Z]{2,}/im;
+  if (!emailCheck.test(email)) {
+    throw new CustomError(400, "Wrong email format");
+  }
+  const resCollection = await users();
+  const res = await resCollection.findOne({ email: email });
+  if (res === null) {
+      return false;
+  }
+  return res.password;
+};
+
 const createProfile = async (
   userId,
   photo,
@@ -217,6 +231,10 @@ const create = async (
   ) {
     throw new CustomError(400, "uesr's email, phone. firstname, lastname, password can't be empty or just spaces");
   }
+  const emailCheck = /[A-Z0-9._-]+@[A-Z0-9.-]+\.[A-Z]{2,}/im;
+  if (!emailCheck.test(email)) {
+    throw new CustomError(400, "Wrong email format");
+  }
   const phoneCheck = /^([0-9]{3})[-]([0-9]{3})[-]([0-9]{4})$/;
   if (!phoneCheck.test(phone)) {
     throw new CustomError(400, "Wrong phoneNo formate xxx-xxx-xxxx");
@@ -227,13 +245,14 @@ const create = async (
   const jobs = [];
   const profile = [];
   const favor = [];
+  const hash = await bcrypt.hash(password, saltRounds);
   const usersCollection = await users();
   let newUser = {
     email,
     phone,
     firstname,
     lastname,
-    password,
+    password: hash,
     jobs,
     profile,
     favor,
@@ -364,13 +383,14 @@ const update = async (userId, email, phone, firstname, lastname, password) => {
   } else {
     userId = ObjectId(userId);
   }
+  const hash = await bcrypt.hash(password, saltRounds);
   const usersCollection = await users();
   let newUser = {
     email,
     phone,
     firstname,
     lastname,
-    password,
+    password:hash,
   };
   const insertInfo = await usersCollection.updateOne(
     { _id: userId },
@@ -615,6 +635,43 @@ const getAll = async () => {
   return res;
 };
 
+const checkUser = async(email, password) => {
+  if (typeof email !== 'string' || typeof password !== 'string') {
+      throw 'email and passwork must be string';
+  }
+  email = email.trim().toLowerCase();
+  password = password.trim();
+  if (email.length === 0 || password.length === 0) {
+      throw 'email and passwork must be non empty string and can\'t just be space';
+  }
+
+  if (password.length < 6) {
+      throw 'password must be longer than 6'
+  }
+  if(password.indexOf(" ") >= 0) {
+      throw 'password can\'t contain space'
+  }
+  const emailCheck = /[A-Z0-9._-]+@[A-Z0-9.-]+\.[A-Z]{2,}/im;
+  if (!emailCheck.test(email)) {
+    throw new CustomError(400, "Wrong email format");
+  }
+  let tmp = await checkExist(email);
+  if(!tmp) {
+      throw 'Either the email or password is invalid';
+  }
+  let compareToMerlin = false;
+  try {
+      compareToMerlin = await bcrypt.compare(password, tmp);
+    } catch (e) {
+      throw 'inner error';
+    }
+  if (compareToMerlin) {
+      return {authenticated: true}
+  } else {
+      throw 'Either the email or password is invalid';
+  }
+}
+
 module.exports = {
   createProfile,
   create,
@@ -629,7 +686,8 @@ module.exports = {
   track,
   trackAll,
   get,
-  getAll
+  getAll,
+  checkUser
 }
 // test functions **IMPORTANT**
 //checkEx([{title:"Maintenance Engineer", employmentType: "full time", companyName:"Apple",startDate: "08/05/2017", endDate: "08/05/2018"}])
@@ -676,4 +734,4 @@ module.exports = {
 //getAll().then(ele => console.log(ele));
 //Favorites("61a4236167e3b3f821f5ddde","61a33e13067da688cb1f8e39");
 //getFavourites("61a33e13067da688cb1f8e39").then(ele => console.log(ObjectId(ele[0])))
-delFavourites("61a4236167e3b3f821f5eeee","61a33e13067da688cb1f8e39");
+//delFavourites("61a4236167e3b3f821f5eeee","61a33e13067da688cb1f8e39");
