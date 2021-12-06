@@ -5,13 +5,10 @@ const dbConfig = require("../config/mongoConnection").dbConfig;
 
 var storage = new GridFsStorage({
   url: dbConfig.serverUrl + dbConfig.database,
-  options: { useNewUrlParser: true, useUnifiedTopology: true },
   file: (req, file) => {
-    const match = ["application/pdf"];
-
-    if (match.indexOf(file.mimetype) === -1) {
-      const filename = `${Date.now()}-user-${file.originalname}`;
-      return filename;
+    if (file.mimetype !== "application/pdf") {
+      // const filename = `${Date.now()}-user-${file.originalname}`;
+      return null;
     }
 
     return {
@@ -21,7 +18,7 @@ var storage = new GridFsStorage({
   },
 });
 
-var uploadFiles = multer({ storage: storage }).single("file");
+var uploadFiles = multer({ storage: storage });
 // var uploadFiles = multer({ storage: storage }).single("file");
-var uploadFilesMiddleware = util.promisify(uploadFiles);
-module.exports = uploadFilesMiddleware;
+// var uploadFilesMiddleware = util.promisify(uploadFiles);
+module.exports = uploadFiles;
