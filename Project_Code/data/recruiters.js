@@ -63,6 +63,8 @@ function CustomError (status, message) {
   this.message = message;
 }
 
+//Convert format for phone in backend
+
 async function createRecruiter(email, password, firstName, lastName, phone) {
   //Email validation
   let re = /[A-Z0-9._-]+@[A-Z0-9.-]+\.[A-Z]{2,}/im
@@ -87,11 +89,13 @@ async function createRecruiter(email, password, firstName, lastName, phone) {
   if(!re3.test(lastName)) throw new CustomError(400,"Your name should not contain special characters.");
 
   //phone validation
-  let re4 = /^(\+\d{1,3}\s)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$/
   phone = phone.trim();
-  if(phone == "" || phone == undefined) throw new CustomError(400,"Please enter your first name.");
-  if(!re4.test(phone)) throw new CustomError(400,"Your name should not contain special characters.");
+  let re4 = /[^0-9+$]/
+  if(phone == "" || phone == undefined) throw new CustomError(400,"Please enter your phone number.");
+  if(phone.length != 10) throw new CustomError(400,"Your phone number is of 10 digits.");
+  if(!re.test(phone)) throw new CustomError(400,"Invalid phone number");
 
+  phone = phone.replace(/(\d{3})(\d{3})(\d{4})/, "$1-$2-$3");
 
   const recruiterCol = await recruiters();
   let dupUser = await recruiterCol.findOne({"email": email})
@@ -153,7 +157,7 @@ async function getJobsByRecruiterId(recruiterId) {
 async function createProfile(recruiterId, profile) {
   const recruiterCol = await recruiters();
 
-  let {gender, photo, city, state, company, about} = profile
+  let {gender, photo, city, state, company} = profile
   let recruiter = await getRecruiter(recruiterId);
   //gender validation
   let re = /[A-Z]/i
@@ -163,14 +167,14 @@ async function createProfile(recruiterId, profile) {
   if(gender.length != 1) throw new CustomError(400,"Please enter a valid gender.");
 
   //company validation
-  let {position, companyName} = company;
+  let {position, name, description} = company;
   let re2 = /[A-Z0-9.-]/i
   position = position.trim();
-  companyName = companyName.trim();
-  if(companyName == "" || companyName == undefined) throw new CustomError(400,"Please enter your place of work.")
-  if(!re2.test(companyName)) throw new CustomError(400,`${companyName} is not a valid company.`);
+  name = name.trim();
+  if(name == "" || name == undefined) throw new CustomError(400,"Please enter your place of work.")
+  if(!re2.test(name)) throw new CustomError(400,`${name} is not a valid company.`);
   if(position == "" || position == undefined) throw new CustomError(400,"Please enter your position.")
-  if(!re2.test(position)) throw new CustomError(400,`${position} is not a valid position at ${companyName}.`);
+  if(!re2.test(position)) throw new CustomError(400,`${position} is not a valid position at ${name}.`);
 
   //city validation
   let re3 = /[A-Z-]/i
@@ -182,16 +186,15 @@ async function createProfile(recruiterId, profile) {
   if(!re3.test(state)) throw new CustomError(400,`${state} is not a valid state.`);
 
   if(recruiter.recFound) {
-
+    let recId = new ObjectId(recruiter.data._id);
     let newProfile = {
       gender: gender,
       city: city,
       state: state,
-      about: about,
       company: company,
       photo: photo
     }
-    const recruiterUpdate = await recruiterCol.updateOne({ _id: recruiter.data._id }, { $set: { profile: newProfile } });
+    const recruiterUpdate = await recruiterCol.updateOne({ _id: recId }, { $set: { profile: newProfile } });
     if (recruiterUpdate.modifiedCount === 0) {
       throw new CustomError(400,"The recruiter's profile could not be created.");
     } else {
@@ -234,7 +237,7 @@ async function updateProfile(recruiterId, profile) {
   if(ObjectId.isValid(recruiterId)) {
     let recruiter = await getRecruiter(recruiterId);
 
-    let {gender, photo, city, state, company, about} = profile;
+    let {gender, photo, city, state, company} = profile;
     //gender validation
     let re = /[A-Z]/i
     gender = gender.trim();
@@ -243,14 +246,14 @@ async function updateProfile(recruiterId, profile) {
     if(gender.length != 1) throw new CustomError(400,"Please enter a valid gender.");
 
     //company validation
-    let {position, companyName} = company;
+    let {position, name, description} = company;
     let re2 = /[A-Z0-9.-]/i
     position = position.trim();
-    companyName = companyName.trim();
-    if(companyName == "" || companyName == undefined) throw new CustomError(400,"Please enter your place of work.")
-    if(re2.test(companyName)) throw new CustomError(400,`${companyName} is not a valid company.`);
+    name = name.trim();
+    if(name == "" || name == undefined) throw new CustomError(400,"Please enter your place of work.")
+    if(re2.test(name)) throw new CustomError(400,`${name} is not a valid company.`);
     if(position == "" || position == undefined) throw new CustomError(400,"Please enter your position.")
-    if(re2.test(position)) throw new CustomError(400,`${position} is not a valid position at ${companyName}.`);
+    if(re2.test(position)) throw new CustomError(400,`${position} is not a valid position at ${name}.`);
 
     //city validation
     let re3 = /[A-Z-]/i
@@ -265,15 +268,15 @@ async function updateProfile(recruiterId, profile) {
       if(recruiter.data.profile.gender == gender && recruiter.data.profile.city == city && recruiter.data.profile.state == state
         && recruiter.data.profile.company == company) throw new CustomError(400,`No fields are being updated.`)
       else {
+        let recId = new ObjectId(recruiter.data._id);
         let updatedProfile = {
           gender: gender,
           city: city,
           state: state,
-          about: about,
           company: company,
           photo: photo
         }
-        const recruiterUpdate = await recruiterCol.updateOne({ _id: recruiter.data._id }, { $set: { profile: updatedProfile } });
+        const recruiterUpdate = await recruiterCol.updateOne({ _id: recId }, { $set: { profile: updatedProfile } });
         if (recruiterUpdate.modifiedCount === 0) {
           throw new CustomError(400,"The recruiter's profile could not be updated.");
         } else {
@@ -392,13 +395,14 @@ async function removeJob(recruiterId, jobId) {
   }
 }
 
+
 async function acceptDecision(recruiterId, applicantId, jobId) {
   const userCol = await usrs();
   let recruiter = await getRecruiter(recruiterId);
-  if(recruiter) {
+  if(recruiter.recFound) {
     let jobList = await getJobsByRecruiterId(recruiterId);
-    jobId = new ObjectId(jobId);
-    if(jobList.some(e => e.job_id == jobId)) {
+    if(jobList.some(e => jobId === e.job_id.toString())) {
+      jobId = new ObjectId(jobId);
       let applicant = await userCol.updateOne({$and: [{"_id": new ObjectId(applicantId)}, {"jobs.job": jobId}]}, {$set: {"jobs.$.status": "Accepted"}})
       if(applicant.modifiedCount === 1) {
         return "Applicant accepted";
@@ -413,8 +417,8 @@ async function rejectDecision(recruiterId, applicantId, jobId) {
   let recruiter = await getRecruiter(recruiterId);
   if(recruiter.recFound) {
     let jobList = await getJobsByRecruiterId(recruiterId);
-    jobId = new ObjectId(jobId);
-    if(jobList.some(e => e.job_id == jobId)) {
+    if(jobList.some(e => jobId === e.job_id.toString())) {
+      jobId = new ObjectId(jobId);
       let applicant = await userCol.updateOne({$and: [{"_id": new ObjectId(applicantId)}, {"jobs.job": jobId}]}, {$set: {"jobs.$.status": "Rejected"}})
       if(applicant.modifiedCount === 1) {
         return "Applicant Rejected";
