@@ -17,6 +17,7 @@ const settings = {
   mongoConfig: {
     serverUrl: "mongodb://localhost:27017/",
     database: "JobHunt_db",
+    userBucket: "userProfiles",
   },
 };
 const mongoConfig = settings.mongoConfig;
@@ -36,4 +37,5 @@ module.exports = {
   closeConnection: () => {
     _connection.close();
   },
+  dbConfig: settings.mongoConfig,
 };
