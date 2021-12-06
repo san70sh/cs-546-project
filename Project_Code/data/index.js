@@ -54,17 +54,17 @@ SCHEMA FOR
 
 */
 
+const users = require("./users");
 
+const recruiters = require("./recruiters");
 
-const users = require('./users');
+const jobs = require("./jobs");
 
-const recruiters = require('./recruiters');
-
-const jobs = require('./jobs');
-
+const upload = require("./upload");
 
 module.exports = {
   users: users,
-  recruiters:recruiters,
-  jobs : jobs
+  recruiters: recruiters,
+  jobs: jobs,
+  upload: upload,
 };

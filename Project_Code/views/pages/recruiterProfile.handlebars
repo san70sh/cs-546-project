@@ -1,0 +1,28 @@
+<section class="section profile-section" id="recProfile">
+    <div class="container">
+        <div class="row">
+            {{!-- <div class="col-6">
+                <img src="{{recruiter.profile}}"</img>
+            </div> --}}
+            <div class="col-6">
+                <h2>{{recruiter.firstName}} {{recruiter.lastName}}</h2>
+                <h6>{{recruiter.profile.company.position}}, {{recruiter.profile.company.name}}</h6>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <h4>Experience</h4>
+                    <p>{{recruiter.profile.company.description}}</p>
+            </div>
+        </div>
+        <div class="row">
+            <ul>
+                {{#each recruiter.jobs}}
+                <li>
+                    <a href="/jobs/id/{{job_id}}">{{job_id}}</a>
+                </li>
+                {{/each}}
+            </ul>
+        </div>
+    </div>
+</section>
