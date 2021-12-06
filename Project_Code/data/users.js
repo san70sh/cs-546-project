@@ -637,19 +637,19 @@ const getAll = async () => {
 
 const checkUser = async(email, password) => {
   if (typeof email !== 'string' || typeof password !== 'string') {
-      throw 'email and passwork must be string';
+    throw new CustomError(400, 'email and passwork must be string');
   }
   email = email.trim().toLowerCase();
   password = password.trim();
   if (email.length === 0 || password.length === 0) {
-      throw 'email and passwork must be non empty string and can\'t just be space';
+    throw new CustomError(400, 'email and passwork must be non empty string and can\'t just be space');
   }
 
   if (password.length < 6) {
-      throw 'password must be longer than 6'
+    throw new CustomError(400, 'password must be longer than 6');
   }
   if(password.indexOf(" ") >= 0) {
-      throw 'password can\'t contain space'
+    throw new CustomError(400, 'password can\'t contain space');
   }
   const emailCheck = /[A-Z0-9._-]+@[A-Z0-9.-]+\.[A-Z]{2,}/im;
   if (!emailCheck.test(email)) {
@@ -657,18 +657,18 @@ const checkUser = async(email, password) => {
   }
   let tmp = await checkExist(email);
   if(!tmp) {
-      throw 'Either the email or password is invalid';
+    throw new CustomError(400, 'Either the email or password is invalid');
   }
   let compareToMerlin = false;
   try {
       compareToMerlin = await bcrypt.compare(password, tmp);
     } catch (e) {
-      throw 'inner error';
+      throw new CustomError(400, 'inner error');
     }
   if (compareToMerlin) {
       return {authenticated: true}
   } else {
-      throw 'Either the email or password is invalid';
+    throw new CustomError(400,  'Either the email or password is invalid');
   }
 }
 
@@ -708,7 +708,7 @@ module.exports = {
 // ).catch(e => log(e));
 //tmp =
 
-// create("James@gmail.com", "848-242-6666", "Liam", "James", "$2a$08$XdvNkfdNIL8F8xsuIUeSbNOFgK0M0iV5HOskfVn7.PWncShU.O", undefined)
+//create("sega@gmail.com", "848-242-6666", "demo", "sega", "ccc11111111", undefined)
 
 // updateProfile(
 //     '61a34056fbd0613af9d399fc',
@@ -735,3 +735,4 @@ module.exports = {
 //Favorites("61a4236167e3b3f821f5ddde","61a33e13067da688cb1f8e39");
 //getFavourites("61a33e13067da688cb1f8e39").then(ele => console.log(ObjectId(ele[0])))
 //delFavourites("61a4236167e3b3f821f5eeee","61a33e13067da688cb1f8e39");
+//checkUser("sega@gmail.com", "ccc1111111").then(ele => console.log(ele));

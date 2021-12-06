@@ -120,22 +120,58 @@ router.post("/login", async (req, res) => {
   }
 });
 
-router.get("/favor/:id", async (req, res) => {
-  //get all favor
-  let id = req.params.id;
-  try {
-    if (ObjectId.isValid(id)) {
-      let output = await recruiterDat.getRecruiter(id);
-      return res.json(output);
+// if ...  should have else throw otherwise it would have no respondes
+router.get('/favor', async (req, res) => {//get all favor 
+    let userId = req.body.userId;
+    try {
+        if(ObjectId.isValid(userId)) {
+            let output = await users.getFavourites(userId);
+            return res.json(output);
+        }
+    } catch (e) {
+        return res.status(e.status).render('pages/error', {title: "Favor", message: e.message, error: true});
     }
-  } catch (e) {
-    return res.status(e.status).render("pages/rec", {
-      title: "Invalid User",
-      message: e.message,
-      err: true,
-    });
-  }
 });
+
+router.post('/favor', async (req, res) => {
+    let jobId = req.body.jobId;
+    let userId = req.body.userId;
+    try {
+        if(ObjectId.isValid(jobId) && ObjectId.isValid(userId)) {
+            let output = await users.Favorites(jobId, userId);
+            return res.json(output);
+        }
+    } catch (e) {
+        return res.status(e.status).render('pages/error', {title: "Apply", message: e.message, err: true});
+    }
+});
+
+router.delete('/favor', async (req, res) => {
+    let jobId = req.body.jobId;
+    let userId = req.body.userId;
+    try {
+        if(ObjectId.isValid(jobId) && ObjectId.isValid(userId)) {
+            let output = await users.delFavourites(jobId, userId);
+            return res.json(output);
+        }
+    } catch (e) {
+        return res.status(e.status).render('pages/error', {title: "Favor", message: e.message, err: true});
+    }
+});
+
+router.post('/apply', async (req, res) => {
+    let jobId = req.body.jobId;
+    let userId = req.body.userId;
+    try {
+        if(ObjectId.isValid(jobId) && ObjectId.isValid(userId)) {
+            let output = await users.apply(jobId, userId);
+            return res.json(output);
+        }
+    } catch (e) {
+        return res.status(e.status).render('pages/error', {title: "Apply", message: e.message, err: true});
+    }
+});
+
 
 router.delete("/apply", async (req, res) => {
   let jobId = req.body.jobId;
