@@ -11,6 +11,11 @@
         </form>
     </div>
 
+    {{#each resumes}}
+    <ul>
+        <a href="./profile/resume/{{this}}">resume{{math @index "+" 1}}.pdf</a>
+    </ul>
+    {{/each}}
     {{#if error}}
     <p class='error'>{{error}}</p>
     {{/if}}

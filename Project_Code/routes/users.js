@@ -5,7 +5,13 @@ const users = require("../data/users");
 const upload = require("../data/upload");
 
 router.get("/profile", async (req, res) => {
-  res.render("pages/userProfile");
+  try {
+    // const resumes = await users.getAllResume(req.body.userId);
+    const resumes = await users.getAllResume("61aee25ee978e8a5d47c5ffc");
+    res.render("pages/userProfile", { resumes });
+  } catch (e) {
+    return res.render("pages/userProfile", { error: e });
+  }
 });
 
 router.post("/profile/upload", upload.single("file"), async (req, res) => {
@@ -22,6 +28,19 @@ router.post("/profile/upload", upload.single("file"), async (req, res) => {
   res.redirect("/users/profile");
 });
 
+router.get("/profile/resume/:id", async (req, res) => {
+  // check file existence
+  if (req.file === undefined) {
+    return res.render("pages/userProfile", { error: "you must select a file" });
+  }
+  // check file type
+  if (req.file.mimetype !== "application/pdf") {
+    return res.render("pages/userProfile", { error: "file type error" });
+  }
+
+  // console.log(res.req.file);
+  res.redirect("/users/profile");
+});
 // router.post("/login", async (req, res) => {
 //   let email = req.body.email;
 //   let password = req.body.password;
@@ -96,8 +115,8 @@ router.get("/favor", async (req, res) => {
     });
   }
   try {
-      let output = await users.getFavourites(userId);
-      return res.json(output);
+    let output = await users.getFavourites(userId);
+    return res.json(output);
   } catch (e) {
     return res.status(e.status).render("pages/error", {
       title: "Favor",
@@ -111,14 +130,15 @@ router.post("/favor", async (req, res) => {
   let jobId = req.body.jobId;
   let userId = req.body.userId;
   if (!ObjectId.isValid(jobId) || !ObjectId.isValid(userId)) {
-    return res
-    .status(400)
-    .render("pages/error", { title: "favor", message: "invalid id", err: true });
+    return res.status(400).render("pages/error", {
+      title: "favor",
+      message: "invalid id",
+      err: true,
+    });
   }
   try {
-    
-      let output = await users.Favorites(jobId, userId);
-      return res.json(output);
+    let output = await users.Favorites(jobId, userId);
+    return res.json(output);
   } catch (e) {
     return res
       .status(e.status)
@@ -130,13 +150,15 @@ router.delete("/favor", async (req, res) => {
   let jobId = req.body.jobId;
   let userId = req.body.userId;
   if (!ObjectId.isValid(jobId) || !ObjectId.isValid(userId)) {
-    return res
-    .status(400)
-    .render("pages/error", { title: "favor", message: "invalid id", err: true });
+    return res.status(400).render("pages/error", {
+      title: "favor",
+      message: "invalid id",
+      err: true,
+    });
   }
   try {
-      let output = await users.delFavourites(jobId, userId);
-      return res.json(output);
+    let output = await users.delFavourites(jobId, userId);
+    return res.json(output);
   } catch (e) {
     return res
       .status(e.status)
@@ -148,13 +170,15 @@ router.post("/apply", async (req, res) => {
   let jobId = req.body.jobId;
   let userId = req.body.userId;
   if (!ObjectId.isValid(jobId) || !ObjectId.isValid(userId)) {
-    return res
-    .status(400)
-    .render("pages/error", { title: "apply", message: "invalid id", err: true });
+    return res.status(400).render("pages/error", {
+      title: "apply",
+      message: "invalid id",
+      err: true,
+    });
   }
   try {
-      let output = await users.apply(jobId, userId);
-      return res.json(output);
+    let output = await users.apply(jobId, userId);
+    return res.json(output);
   } catch (e) {
     return res
       .status(e.status)
@@ -165,14 +189,16 @@ router.post("/apply", async (req, res) => {
 router.delete("/apply", async (req, res) => {
   let jobId = req.body.jobId;
   let userId = req.body.userId;
-  if (! ObjectId.isValid(jobId) || !ObjectId.isValid(userId)) {
-    return res
-    .status(400)
-    .render("pages/error", { title: "apply", message: "invalid id", err: true });
+  if (!ObjectId.isValid(jobId) || !ObjectId.isValid(userId)) {
+    return res.status(400).render("pages/error", {
+      title: "apply",
+      message: "invalid id",
+      err: true,
+    });
   }
   try {
-      let output = await users.cancel(jobId, userId);
-      return res.json(output);
+    let output = await users.cancel(jobId, userId);
+    return res.json(output);
   } catch (e) {
     return res
       .status(e.status)
@@ -183,14 +209,16 @@ router.delete("/apply", async (req, res) => {
 router.get("/apply/:id", async (req, res) => {
   let userId = req.body.userId;
   let jobId = req.params.jobId;
-  if (! ObjectId.isValid(jobId) || !ObjectId.isValid(userId)) {
-    return res
-    .status(400)
-    .render("pages/error", { title: "apply", message: "invalid id", err: true });
+  if (!ObjectId.isValid(jobId) || !ObjectId.isValid(userId)) {
+    return res.status(400).render("pages/error", {
+      title: "apply",
+      message: "invalid id",
+      err: true,
+    });
   }
   try {
-      let output = await users.track(jobId, userId);
-      return res.json(output);
+    let output = await users.track(jobId, userId);
+    return res.json(output);
   } catch (e) {
     return res.status(e.status).render("pages/error", {
       title: "Favor",
@@ -203,13 +231,15 @@ router.get("/apply/:id", async (req, res) => {
 router.get("/apply", async (req, res) => {
   let userId = req.body.userId;
   if (!ObjectId.isValid(userId)) {
-    return res
-    .status(400)
-    .render("pages/error", { title: "apply", message: "invalid id", err: true });
+    return res.status(400).render("pages/error", {
+      title: "apply",
+      message: "invalid id",
+      err: true,
+    });
   }
   try {
-      let output = await users.trackAll(userId);
-      return res.json(output);
+    let output = await users.trackAll(userId);
+    return res.json(output);
   } catch (e) {
     return res.status(e.status).render("pages/error", {
       title: "Favor",
