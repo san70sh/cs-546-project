@@ -19,11 +19,12 @@ app.use(
   })
 );
 
-app.use('/private', (req, res, next) => {// *****************setting private page here may only be apply I think
-  if (!req.session.user) {
-    res.status(403).render("pages/error", {error: "you are not logged in"});
+app.use('/users', (req, res, next) => {//*****************setting private pages
+  if (!req.session.userId) {
+    res.status(200).render("pages/error", {error: "you are not logged in"});
     return;
   } else {
+    req.body.userId = req.session.userId; // give userId to next routes
     next();
   }
 });
