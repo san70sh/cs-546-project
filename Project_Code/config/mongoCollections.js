@@ -57,7 +57,7 @@ SCHEMA FOR
 //CODE STARTS HERE:
 
 const dbConnection = require("./mongoConnection");
-
+const userBucket = dbConnection.dbConfig.userBucket;
 /* This will allow you to have one reference to each collection per app */
 /* Feel free to copy and paste this this */
 const getCollectionFn = (collection) => {
@@ -79,4 +79,5 @@ module.exports = {
   recruiters: getCollectionFn("recruiters"),
   jobs: getCollectionFn("jobs"),
   keyStore: getCollectionFn("keyStore"),
+  userProfiles: getCollectionFn(userBucket + ".files"),
 };
