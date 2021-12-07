@@ -2,6 +2,17 @@ const { ObjectId } = require('bson');
 const express = require('express');
 const router = express.Router();
 const recruiterDat = require("../data/recruiters");
+const jobDat = require("../data/jobs");
+const usrDat = require("../data/users");
+router.get('/login', async (req, res) => {
+    // $("#reclogin").show("modal");
+    return res.render('pages/recruiterlogin', {title:"Recruiter Login"});
+});
+
+router.get('/signup', async (req, res) => {
+    // $("#reclogin").show("modal");
+    return res.render('pages/recruiterSignup', {title:"Recruiter Sign-up"});
+})
 
 router.post('/login', async (req, res) => {
     console.log(req.body);
@@ -9,15 +20,15 @@ router.post('/login', async (req, res) => {
     // else {
         let {email, password} = req.body;
         let re = /[A-Z0-9._-]+@[A-Z0-9.-]+\.[A-Z]{2,}/im
-        if(email == "" || email == undefined) return res.status(400).render('partials/loginform', {message: "Please enter your email.", err: true});
-        if(email.length < 6) return res.status(400).render('partials/loginform', {message: "The email is too short.", err: true});
-        if(!re.test(email)) return res.status(400).render('partials/loginform', {message: `${email} is not a valid email.`, err: true});
+        if(email == "" || email == undefined) return res.status(400).render('pages/recruiterlogin', {message: "Please enter your email.", emailerr: true});
+        if(email.length < 6) return res.status(400).render('pages/recruiterlogin', {message: "The email is too short.", emailerr: true});
+        if(!re.test(email)) return res.status(400).render('pages/recruiterlogin', {message: `${email} is not a valid email.`, emailerr: true});
 
         //password validation
         let re2 = /\s/i
         if(!password) throw `Please enter your password`;
-        if(re2.test(password)) return res.status(400).render('partials/loginform', {message: "Spaces are not allowed in passwords.", err: true});
-        if(password.length < 6) return res.status(400).render('partials/loginform', {message: "Password is too short.", err: true});
+        if(re2.test(password)) return res.status(400).render('pages/recruiterlogin', {message: "Spaces are not allowed in passwords.", pwderr: true});
+        if(password.length < 6) return res.status(400).render('pages/recruiterlogin', {message: "Password is too short.", pwderr: true});
 
         try {
             let output = await recruiterDat.recruiterCheck(email, password);
@@ -25,12 +36,10 @@ router.post('/login', async (req, res) => {
                 let recruiter = await recruiterDat.getRecruiter(output.id);
                 // req.session.user = output.id;
                 // return res.redirect('/private');
-                console.log(recruiter.data);
-                return res.render('pages/recruiterProfile', {recruiter: recruiter.data});
+                return res.redirect(`/recruiters/${output.id}`);
             }
         } catch (e) {
-            console.log(e);
-            return res.status(e.status).render('partials/loginform', {message: e.message, err: true});
+            return res.render('pages/recruiterlogin', {message: e.message, mainerr: true});
         }
     // }
 });
@@ -74,42 +83,45 @@ router.post('/signup', async (req, res) => {
         let {email, password, firstName, lastName, phone} = req.body;
         //Email validation
         let re = /[A-Z0-9._-]+@[A-Z0-9.-]+\.[A-Z]{2,}/im
-        if(email == "" || email == undefined) return res.status(400).render('partials/signupform', {title: "Sign Up/Register", message: "Please enter your email.", err: true});
-        if(email.length < 6) return res.status(400).render('partials/signupform', {title: "Sign Up/Register", message: "The email is too short.", err: true});
-        if(!re.test(email)) return res.status(400).render('partials/signupform', {title: "Sign Up/Register", message: `${email} is not a valid email.`, err: true});
+        if(email == "" || email == undefined) return res.status(400).render('pages/recruiterSignup', {title: "Sign Up/Register", message: "Please enter your email.", emailerr: true});
+        if(email.length < 6) return res.status(400).render('pages/recruiterSignup', {title: "Sign Up/Register", message: "The email is too short.", emailerr: true});
+        if(!re.test(email)) return res.status(400).render('pages/recruiterSignup', {title: "Sign Up/Register", message: `${email} is not a valid email.`, emailerr: true});
         email = email.toLowerCase();
 
         //password validation
         let re2 = /\s/i
-        if(!password) return res.status(400).render('partials/signupform',{title: "Sign Up/Register", message: `Please enter your password`});
-        if(re2.test(password)) return res.status(400).render('partials/signupform', {title: "Sign Up/Register", message: "Spaces are not allowed in passwords.", err: true});
-        if(password.length < 6) return res.status(400).render('partials/signupform', {title: "Sign Up/Register", message: "Password is too short.", err: true});
+        if(!password) return res.status(400).render('pages/recruiterSignup',{title: "Sign Up/Register", message: `Please enter your password`, pwderr: true});
+        if(re2.test(password)) return res.status(400).render('pages/recruiterSignup', {title: "Sign Up/Register", message: "Spaces are not allowed in passwords.", pwderr: true});
+        if(password.length < 6) return res.status(400).render('pages/recruiterSignup', {title: "Sign Up/Register", message: "Password is too short.", pwderr: true});
 
         //name validation
-        let re3 = /[A-Z0-9]/i
+        let re3 = /[A-Z]/i
         firstName = firstName.trim();
         lastName = lastName.trim();
-        if(firstName == "" || firstName == undefined) return res.status(400).render('partials/signupform', {title: "Sign Up/Register", message: "Please enter your first name.", err: true});
-        if(!re3.test(firstName)) return res.status(400).render('partials/signupform', {title: "Sign Up/Register", message: "Your name should not contain special characters.", err: true});
-        if(lastName == "" || lastName == undefined) return res.status(400).render('partials/signupform', {title: "Sign Up/Register", message: "Please enter your last name.", err: true});
-        if(!re3.test(lastName)) return res.status(400).render('partials/signupform', {title: "Sign Up/Register", message: "Your name should not contain special characters.", err: true});
+        if(firstName == "" || firstName == undefined) return res.status(400).render('pages/recruiterSignup', {title: "Sign Up/Register", message: "Please enter your first name.", fnerr: true});
+        if(!re3.test(firstName)) return res.status(400).render('pages/recruiterSignup', {title: "Sign Up/Register", message: "Your name should not contain special characters.", fnerr: true});
+        if(lastName == "" || lastName == undefined) return res.status(400).render('pages/recruiterSignup', {title: "Sign Up/Register", message: "Please enter your last name.", lnerr: true});
+        if(!re3.test(lastName)) return res.status(400).render('pages/recruiterSignup', {title: "Sign Up/Register", message: "Your name should not contain special characters.", lnerr: true});
 
         //phone validation
-        let re4 = /^[0-9]+$/
+        let re4 = /[0-9]{10}/
         phone = phone.trim();
-        if(phone == "" || phone == undefined) return res.status(400).render('partials/signupform', {title: "Sign Up/Register", message: "Please enter your phone number.", err: true});
-        if(phone.length != 10) return res.status(400).render('partials/signupform', {title: "Sign Up/Register", message: "Invalid phone number.", err: true});
-        if(!re4.test(phone)) return res.status(400).render('partials/signupform', {title: "Sign Up/Register", message: "Invalid phone number.", err: true});
+        if(phone == "" || phone == undefined) return res.status(400).render('pages/recruiterSignup', {title: "Sign Up/Register", message: "Please enter your phone number.", pherr: true});
+        if(phone.length != 10) return res.status(400).render('pages/recruiterSignup', {title: "Sign Up/Register", message: "Invalid phone number.", pherr: true});
+        if(!re4.test(phone)) return res.status(400).render('pages/recruiterSignup', {title: "Sign Up/Register", message: "Invalid phone number.", pherr: true});
 
         try {
-            let output = await recruiterDat.createRecruiter(email, password, firstName, lastName, phone);
-            if(output.recFound) {
-                req.session.user = output.data._id;
-                return res.json(output);
-                // return res.redirect('/private');
+            let recruiter = await recruiterDat.createRecruiter(email, password, firstName, lastName, phone);
+            if(recruiter.recFound) {
+                req.session.user = recruiter.data._id;
+                let profileCreated = true;
+                if(!recruiter.data.profile){
+                    profileCreated = false;
+                }
+                return res.redirect('/', {recruiter: recruiter.data, profileCreated: profileCreated});
             }
         } catch (e) {
-            return res.status(e.status).render('partials/signupform', {title: "Sign Up/Register", message: e.message, err: true});
+            return res.status(e.status).render('pages/recruiterSignup', {title: "Sign Up/Register", message: e.message, mainerr: true});
         }
     // }
 });
@@ -117,8 +129,20 @@ router.post('/signup', async (req, res) => {
 router.get('/:id', async (req, res) => {
     let id = req.params.id;
     if(ObjectId.isValid(id)) {
-        let output = await recruiterDat.getRecruiter(id);
-        return res.json(output);
+        let recruiter = await recruiterDat.getRecruiter(id);
+        let applicantList = [];
+        await Promise.all(recruiter.data.jobs.map(async (e) => {
+            e.applicant_id.map(async (e) => {
+                e = e.toString();
+                let appDetails = await usrDat.get(e);
+                applicantList.push(appDetails);
+            })
+            let job = await jobDat.getJobsById(e.job_id.toString());
+            e["jobDetails"] = job;
+            e["applicants"] = applicantList;
+            e.job_id = e.job_id.toString();
+        }));
+        return res.render('pages/recruiterProfile',{recruiter: recruiter.data, jobs: recruiter.data.jobs});
     }
 });
 
