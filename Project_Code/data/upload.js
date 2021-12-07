@@ -1,17 +1,13 @@
-const util = require("util");
 const multer = require("multer");
 const { GridFsStorage } = require("multer-gridfs-storage");
 const dbConfig = require("../config/mongoConnection").dbConfig;
 
 var storage = new GridFsStorage({
   url: dbConfig.serverUrl + dbConfig.database,
-  options: { useNewUrlParser: true, useUnifiedTopology: true },
   file: (req, file) => {
-    const match = ["application/pdf"];
-
-    if (match.indexOf(file.mimetype) === -1) {
+    if (file.mimetype !== "application/pdf") {
       const filename = `${Date.now()}-user-${file.originalname}`;
-      return filename;
+      return null;
     }
 
     return {
@@ -21,7 +17,5 @@ var storage = new GridFsStorage({
   },
 });
 
-var uploadFiles = multer({ storage: storage }).single("file");
-// var uploadFiles = multer({ storage: storage }).single("file");
-var uploadFilesMiddleware = util.promisify(uploadFiles);
-module.exports = uploadFilesMiddleware;
+var uploadFiles = multer({ storage: storage });
+module.exports = uploadFiles;
