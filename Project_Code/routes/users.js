@@ -2,7 +2,8 @@ const { ObjectId } = require("mongodb");
 const express = require("express");
 const router = express.Router();
 const users = require("../data/users");
-const upload = require("../data/upload");
+const upload = require("../data/upload").upload;
+const download = require("../data/upload").download;
 
 router.get("/profile", async (req, res) => {
   try {
@@ -38,9 +39,28 @@ router.post("/profile/upload", upload.single("file"), async (req, res) => {
 });
 
 router.get("/profile/resume/:id", async (req, res) => {
-  res.send(`not implemented yet, file id is ${req.params.id}`);
+  try {
+    const downloadStream = await download(req.params.id);
+    downloadStream.on("data", function (data) {
+      return res.status(200).write(data);
+    });
+
+    downloadStream.on("error", function (err) {
+      return res
+        .status(404)
+        .render("/users/profile", { error: "Cannot download the resume!" });
+    });
+
+    downloadStream.on("end", () => {
+      return res.end();
+    });
+  } catch (e) {
+    res.send({ error: e });
+  }
   // res.redirect("/users/profile");
 });
+
+router.delete("/profile/resume/:id", async (req, res) => {});
 // router.post("/login", async (req, res) => {
 //   let email = req.body.email;
 //   let password = req.body.password;

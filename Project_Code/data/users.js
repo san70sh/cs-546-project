@@ -1,5 +1,4 @@
 const mongoCollections = require("../config/mongoCollections");
-const baseUrl = require("../config/mongoConnection").dbConfig.serverUrl;
 const users = mongoCollections.users;
 const userProfiles = mongoCollections.userProfiles;
 let { ObjectId } = require("mongodb");
@@ -155,7 +154,7 @@ const checkExist = async (email) => {
 };
 
 const getFile = async (fileId) => {
-  if (!ObjectId.isValid(fileId)) {
+  if (!ObjectId.isValid(fileId) && typeof fileId !== "string") {
     throw new CustomError(400, "Invalid fileId");
   } else {
     fileId = ObjectId(fileId);
@@ -167,13 +166,13 @@ const getFile = async (fileId) => {
 };
 
 const addResume = async (userId, fileId) => {
-  if (!ObjectId.isValid(fileId)) {
+  if (!ObjectId.isValid(fileId) && typeof fileId !== "string") {
     throw new CustomError(400, "Invalid fileId");
   } else {
     fileId = ObjectId(fileId);
   }
 
-  if (!ObjectId.isValid(userId)) {
+  if (!ObjectId.isValid(userId) && typeof userId !== "string") {
     throw new CustomError(400, "Invalid fileId");
   } else {
     userId = ObjectId(userId);
@@ -205,7 +204,7 @@ const addResume = async (userId, fileId) => {
 };
 
 const getAllResume = async (userId) => {
-  if (!ObjectId.isValid(userId)) {
+  if (!ObjectId.isValid(userId) && typeof userId !== "string") {
     throw new CustomError(400, "Invalid fileId");
   } else {
     userId = ObjectId(userId);
@@ -213,7 +212,6 @@ const getAllResume = async (userId) => {
 
   // open two collection
   const usersCollection = await users();
-  const userProfileCol = await userProfiles();
 
   // find user if not throw
   const thisUser = await usersCollection.findOne({ _id: userId });
@@ -226,25 +224,28 @@ const getAllResume = async (userId) => {
   return resumes;
 };
 
-// const test = async () => {
-//   try {
-//     // const a = await addResume(
-//     //   "61aee25ee978e8a5d47c5ffc",
-//     //   "61ae51c711da680d18f74240"
-//     // );
-//     const a = await getAllResume("61aee25ee978e8a5d47c5ffc");
-//     console.log(a);
-//   } catch (e) {
-//     console.log(e);
-//   }
-//   // try {
-//   //   const a = await getFile("61ae4e111168d15491514883");
-//   //   console.log(a);
-//   // } catch (e) {
-//   //   console.log(e);
-//   // }
-// };
-// test();
+const test = async () => {
+  try {
+    // const a = await addResume(
+    //   "61aee25ee978e8a5d47c5ffc",
+    //   "61ae51c711da680d18f74240"
+    // );
+    const a = await removeResume(
+      "61aee25ee978e8a5d47c5ffc",
+      "61aefe42b0b871b69e98a5b5"
+    );
+    console.log(a);
+  } catch (e) {
+    console.log(e);
+  }
+  // try {
+  //   const a = await getFile("61ae4e111168d15491514883");
+  //   console.log(a);
+  // } catch (e) {
+  //   console.log(e);
+  // }
+};
+test();
 
 // const createProfile = async (
 //   userId,

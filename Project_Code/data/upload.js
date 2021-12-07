@@ -1,6 +1,9 @@
 const multer = require("multer");
 const { GridFsStorage } = require("multer-gridfs-storage");
 const dbConfig = require("../config/mongoConnection").dbConfig;
+const dbConnection = require("../config/mongoConnection");
+let { ObjectId } = require("mongodb");
+const GridFSBucket = require("mongodb").GridFSBucket;
 
 var storage = new GridFsStorage({
   url: dbConfig.serverUrl + dbConfig.database,
@@ -18,4 +21,20 @@ var storage = new GridFsStorage({
 });
 
 var uploadFiles = multer({ storage: storage });
-module.exports = uploadFiles;
+
+const download = async (fileId) => {
+  if (!ObjectId.isValid(fileId)) {
+    throw new CustomError(400, "Invalid fileId");
+  } else {
+    fileId = ObjectId(fileId);
+  }
+
+  const db = await dbConnection.connectToDb();
+  const bucket = new GridFSBucket(db, {
+    bucketName: dbConfig.userBucket,
+  });
+  let downloadStream = bucket.openDownloadStream(fileId);
+  return downloadStream;
+};
+
+module.exports = { upload: uploadFiles, download: download };
