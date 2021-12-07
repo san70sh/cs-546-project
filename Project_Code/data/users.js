@@ -1,4 +1,5 @@
 const mongoCollections = require("../config/mongoCollections");
+const baseUrl = require("../config/mongoConnection").dbConfig.serverUrl;
 const users = mongoCollections.users;
 const userProfiles = mongoCollections.userProfiles;
 let { ObjectId } = require("mongodb");
@@ -203,22 +204,45 @@ const addResume = async (userId, fileId) => {
   return await get(userId.toString());
 };
 
+const getAllResume = async (userId) => {
+  if (!ObjectId.isValid(userId)) {
+    throw new CustomError(400, "Invalid fileId");
+  } else {
+    userId = ObjectId(userId);
+  }
+
+  // open two collection
+  const usersCollection = await users();
+  const userProfileCol = await userProfiles();
+
+  // find user if not throw
+  const thisUser = await usersCollection.findOne({ _id: userId });
+  if (thisUser === null) throw new CustomError(400, "user did not exist");
+  const resumes = thisUser.profile.resume;
+
+  // check if have resume
+  if (resumes.length === 0) throw new CustomError(400, "no resume found");
+
+  return resumes;
+};
+
 // const test = async () => {
 //   try {
-//     const a = await addResume(
-//       "61aee25ee978e8a5d47c5ffc",
-//       "61ae4e111168d15491514883"
-//     );
+//     // const a = await addResume(
+//     //   "61aee25ee978e8a5d47c5ffc",
+//     //   "61ae51c711da680d18f74240"
+//     // );
+//     const a = await getAllResume("61aee25ee978e8a5d47c5ffc");
 //     console.log(a);
 //   } catch (e) {
 //     console.log(e);
 //   }
-//   try {
-//     const a = await getFile("61ae4e111168d15491514883");
-//     console.log(a);
-//   } catch (e) {
-//     console.log(e);
-//   }
+//   // try {
+//   //   const a = await getFile("61ae4e111168d15491514883");
+//   //   console.log(a);
+//   // } catch (e) {
+//   //   console.log(e);
+//   // }
 // };
 // test();
 
@@ -832,7 +856,8 @@ const checkUser = async (email, password) => {
 
 module.exports = {
   create,
-
+  getFile,
+  addResume,
   update,
   remove,
   apply,
@@ -845,6 +870,7 @@ module.exports = {
   get,
   getAll,
   checkUser,
+  getAllResume,
 };
 // test functions **IMPORTANT**
 //checkEx([{title:"Maintenance Engineer", employmentType: "full time", companyName:"Apple",startDate: "08/05/2017", endDate: "08/05/2018"}])
