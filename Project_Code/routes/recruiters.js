@@ -118,7 +118,7 @@ router.post('/signup', async (req, res) => {
                 if(!recruiter.data.profile){
                     profileCreated = false;
                 }
-                return res.redirect('/', {recruiter: recruiter.data, profileCreated: profileCreated});
+                return res.redirect(`/recruiters/${recruiter.data._id}`);
             }
         } catch (e) {
             return res.status(e.status).render('pages/recruiterSignup', {title: "Sign Up/Register", message: e.message, mainerr: true});
