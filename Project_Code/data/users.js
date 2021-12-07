@@ -1,5 +1,6 @@
 const mongoCollections = require("../config/mongoCollections");
 const users = mongoCollections.users;
+const userProfiles = mongoCollections.userProfiles;
 let { ObjectId } = require("mongodb");
 bcrypt = require("bcrypt");
 const saltRounds = 8;
@@ -7,7 +8,7 @@ const saltRounds = 8;
 // const checkWeb = (web) => {
 // //depends on the url link
 // }
-function CustomError (status, message) {
+function CustomError(status, message) {
   this.status = status;
   this.message = message;
 }
@@ -18,7 +19,7 @@ const checkEx = (experience) => {
     return;
   }
   if (!Array.isArray(experience)) {
-    throw new CustomError(400,"experience must be an array");
+    throw new CustomError(400, "experience must be an array");
   }
   experience.forEach((ele) => {
     if (
@@ -28,7 +29,10 @@ const checkEx = (experience) => {
       typeof ele.startDate != "string" ||
       typeof ele.endDate != "string"
     ) {
-      throw new CustomError(400,"Value of experience in each elements must be string");
+      throw new CustomError(
+        400,
+        "Value of experience in each elements must be string"
+      );
     }
     if (
       ele.title.trim().length === 0 ||
@@ -38,7 +42,10 @@ const checkEx = (experience) => {
       ele.endDate.trim().length === 0
     ) {
       // not optional, the user must fill in this data when regiester
-      throw new CustomError(400,"Value of experience in each elements can't be empty or just spaces");
+      throw new CustomError(
+        400,
+        "Value of experience in each elements can't be empty or just spaces"
+      );
     }
     date_regex = /^\d{2}\/\d{2}\/\d{4}$/;
     if (!date_regex.test(ele.startDate) && date_regex.test(ele.endDate)) {
@@ -53,7 +60,7 @@ const checkEd = (education) => {
     return;
   }
   if (!Array.isArray(education)) {
-    throw new CustomError(400,"education must be an array");
+    throw new CustomError(400, "education must be an array");
   }
   education.forEach((ele) => {
     if (
@@ -63,7 +70,10 @@ const checkEd = (education) => {
       typeof ele.startDate != "string" ||
       typeof ele.endDate != "string"
     ) {
-      throw new CustomError(400,"Value of education in each elements must be string");
+      throw new CustomError(
+        400,
+        "Value of education in each elements must be string"
+      );
     }
     if (
       ele.school.trim().length === 0 ||
@@ -73,11 +83,14 @@ const checkEd = (education) => {
       ele.endDate.trim().length === 0
     ) {
       // not optional, the user must fill in this data when regiester
-      throw new CustomError(400,"Value of education in each elements can't be empty or just spaces");
+      throw new CustomError(
+        400,
+        "Value of education in each elements can't be empty or just spaces"
+      );
     }
     date_regex = /^\d{2}\/\d{2}\/\d{4}$/;
     if (!date_regex.test(ele.startDate) && date_regex.test(ele.endDate)) {
-      throw new CustomError(400,"Wrong date formate MM/DD/YYYY");
+      throw new CustomError(400, "Wrong date formate MM/DD/YYYY");
     }
   });
 };
@@ -88,7 +101,7 @@ const checkSk = (skills) => {
     return;
   }
   if (!Array.isArray(skills)) {
-    throw new CustomError(400,"skills must be an array");
+    throw new CustomError(400, "skills must be an array");
   }
   skills.forEach((ele) => {
     if (typeof ele !== "string") {
@@ -127,7 +140,7 @@ const checkLa = (languages) => {
   });
 };
 
-const checkExist = async(email) => {
+const checkExist = async (email) => {
   const emailCheck = /[A-Z0-9._-]+@[A-Z0-9.-]+\.[A-Z]{2,}/im;
   if (!emailCheck.test(email)) {
     throw new CustomError(400, "Wrong email format");
@@ -135,75 +148,144 @@ const checkExist = async(email) => {
   const resCollection = await users();
   const res = await resCollection.findOne({ email: email });
   if (res === null) {
-      return false;
+    return false;
   }
   return res.password;
 };
 
-const createProfile = async (
-  userId,
-  photo,
-  gender,
-  city,
-  state,
-  experience,
-  education,
-  skills,
-  languages,
-  tags
-) => {
-  if (
-    typeof userId !== "string" ||
-    typeof photo !== "string" ||
-    typeof gender !== "string" ||
-    typeof city !== "string" ||
-    typeof state !== "string"
-  ) {
-    throw new CustomError(400, "photo, gender, city must be stirng type and can't be null");
+const getFile = async (fileId) => {
+  if (!ObjectId.isValid(fileId)) {
+    throw new CustomError(400, "Invalid fileId");
+  } else {
+    fileId = ObjectId(fileId);
   }
+  const userProfileCol = await userProfiles();
+  const res = await userProfileCol.findOne({ _id: fileId });
+  if (res === null) throw new CustomError(400, "file did not exist");
+  return res;
+};
+
+const addResume = async (userId, fileId) => {
+  if (!ObjectId.isValid(fileId)) {
+    throw new CustomError(400, "Invalid fileId");
+  } else {
+    fileId = ObjectId(fileId);
+  }
+
   if (!ObjectId.isValid(userId)) {
-    throw new CustomError(400, "Invalid userID");
+    throw new CustomError(400, "Invalid fileId");
   } else {
     userId = ObjectId(userId);
   }
-  if (
-    photo.trim().length === 0 ||
-    gender.trim().length === 0 ||
-    city.trim().length === 0 ||
-    state.trim().length === 0
-  ) {
-    // not optional, the user must fill in this data when regiester
-    throw new CustomError(400, "name, location, phoneNumber, website, priceRange can't be empty or just spaces");
-  }
-  if (gender !== "M" && gender !== "F") {
-    throw new CustomError(400, "gender must be M(male) or F(female)");
-  }
-  //checkWeb(photo);
-  checkEx(experience);
-  checkEd(education);
-  checkSk(skills);
-  checkTa(tags);
-  checkLa(languages);
+
+  await getFile(fileId);
+
   const usersCollection = await users();
-  let _id = ObjectId();
-  let newProfiles = {
-    _id,
-    photo,
-    gender,
-    city,
-    state,
-    experience,
-    education,
-    skills,
-    languages,
-    tags,
-  };
+  const thisUser = await usersCollection.findOne({ _id: userId });
+  if (thisUser === null) throw new CustomError(400, "user did not exist");
+
+  let newProfile = thisUser.profile;
+
+  if (newProfile.resume.includes(fileId.toString())) {
+    throw new CustomError(400, "resume already added");
+  }
+
+  newProfile.resume.push(fileId.toString());
+
   const insertInfo = await usersCollection.updateOne(
     { _id: userId },
-    { $addToSet: { profile: newProfiles } }
+    { $set: { profile: newProfile } }
   );
-  if (insertInfo.modifiedCount === 0) throw new CustomError(400, "Could not add the profile");
+
+  if (insertInfo.modifiedCount === 0)
+    throw new CustomError(400, "Could not update the user");
+
+  return await get(userId.toString());
 };
+
+// const test = async () => {
+//   try {
+//     const a = await addResume(
+//       "61aee25ee978e8a5d47c5ffc",
+//       "61ae4e111168d15491514883"
+//     );
+//     console.log(a);
+//   } catch (e) {
+//     console.log(e);
+//   }
+//   try {
+//     const a = await getFile("61ae4e111168d15491514883");
+//     console.log(a);
+//   } catch (e) {
+//     console.log(e);
+//   }
+// };
+// test();
+
+// const createProfile = async (
+//   userId,
+//   photo,
+//   gender,
+//   city,
+//   state,
+//   experience,
+//   education,
+//   skills,
+//   languages,
+//   tags
+// ) => {
+//   if (
+//     typeof userId !== "string" ||
+//     typeof photo !== "string" ||
+//     typeof gender !== "string" ||
+//     typeof city !== "string" ||
+//     typeof state !== "string"
+//   ) {
+//     throw new CustomError(400, "photo, gender, city must be stirng type and can't be null");
+//   }
+//   if (!ObjectId.isValid(userId)) {
+//     throw new CustomError(400, "Invalid userID");
+//   } else {
+//     userId = ObjectId(userId);
+//   }
+//   if (
+//     photo.trim().length === 0 ||
+//     gender.trim().length === 0 ||
+//     city.trim().length === 0 ||
+//     state.trim().length === 0
+//   ) {
+//     // not optional, the user must fill in this data when regiester
+//     throw new CustomError(400, "name, location, phoneNumber, website, priceRange can't be empty or just spaces");
+//   }
+//   if (gender !== "M" && gender !== "F") {
+//     throw new CustomError(400, "gender must be M(male) or F(female)");
+//   }
+//   //checkWeb(photo);
+//   checkEx(experience);
+//   checkEd(education);
+//   checkSk(skills);
+//   checkTa(tags);
+//   checkLa(languages);
+//   const usersCollection = await users();
+//   let _id = ObjectId();
+//   let newProfiles = {
+//     _id,
+//     photo,
+//     gender,
+//     city,
+//     state,
+//     experience,
+//     education,
+//     skills,
+//     languages,
+//     tags,
+//   };
+//   const insertInfo = await usersCollection.updateOne(
+//     { _id: userId },
+//     { $addToSet: { profile: newProfiles } }
+//   );
+//   if (insertInfo.modifiedCount === 0) throw new CustomError(400, "Could not add the profile");
+// };
 
 const create = async (
   email,
@@ -220,7 +302,10 @@ const create = async (
     typeof lastname !== "string" ||
     typeof password !== "string"
   ) {
-    throw new CustomError(400, "user's email, phone. firstname, lastname, password must be string");
+    throw new CustomError(
+      400,
+      "user's email, phone. firstname, lastname, password must be string"
+    );
   }
   if (
     email.trim().length === 0 ||
@@ -229,7 +314,10 @@ const create = async (
     lastname.trim().length === 0 ||
     password.trim().length === 0
   ) {
-    throw new CustomError(400, "uesr's email, phone. firstname, lastname, password can't be empty or just spaces");
+    throw new CustomError(
+      400,
+      "uesr's email, phone. firstname, lastname, password can't be empty or just spaces"
+    );
   }
   const emailCheck = /[A-Z0-9._-]+@[A-Z0-9.-]+\.[A-Z]{2,}/im;
   if (!emailCheck.test(email)) {
@@ -278,75 +366,81 @@ const create = async (
   }
 };
 
-const updateProfile = async (
-  profileId,
-  userId,
-  photo,
-  gender,
-  city,
-  state,
-  experience,
-  education,
-  skills,
-  languages,
-  tags
-) => {
-  if (
-    typeof userId !== "string" ||
-    typeof photo !== "string" ||
-    typeof gender !== "string" ||
-    typeof city !== "string" ||
-    typeof state !== "string"
-  ) {
-    throw new CustomError(400, "photo, gender, city must be stirng type and can't be null");
-  }
-  if (!ObjectId.isValid(userId)) {
-    throw new CustomError(400, "Invalid userID");
-  } else {
-    userId = ObjectId(userId);
-  }
-  if (!ObjectId.isValid(profileId)) {
-    throw new CustomError(400, "Invalid profileId");
-  } else {
-    profileId = ObjectId(profileId);
-  }
-  if (
-    photo.trim().length === 0 ||
-    gender.trim().length === 0 ||
-    city.trim().length === 0 ||
-    state.trim().length === 0
-  ) {
-    // not optional, the user must fill in this data when regiester
-    throw new CustomError(400, "name, location, phoneNumber, website, priceRange can't be empty or just spaces");
-  }
-  if (gender !== "M" && gender !== "F") {
-    throw new CustomError(400, "gender must be M(male) or F(female)");
-  }
-  //checkWeb(photo);
-  checkEx(experience);
-  checkEd(education);
-  checkSk(skills);
-  checkTa(tags);
-  checkLa(languages);
-  const usersCollection = await users();
-  let newProfiles = {
-    _id: profileId,
-    photo,
-    gender,
-    city,
-    state,
-    experience,
-    education,
-    skills,
-    languages,
-    tags,
-  };
-  const insertInfo = await usersCollection.updateOne(
-    { _id: userId, "profile._id": profileId },
-    { $set: { "profile.$": newProfiles } }
-  );
-  if (insertInfo.modifiedCount === 0) throw "Could not update the profile";
-};
+// const updateProfile = async (
+//   profileId,
+//   userId,
+//   photo,
+//   gender,
+//   city,
+//   state,
+//   experience,
+//   education,
+//   skills,
+//   languages,
+//   tags
+// ) => {
+//   if (
+//     typeof userId !== "string" ||
+//     typeof photo !== "string" ||
+//     typeof gender !== "string" ||
+//     typeof city !== "string" ||
+//     typeof state !== "string"
+//   ) {
+//     throw new CustomError(
+//       400,
+//       "photo, gender, city must be stirng type and can't be null"
+//     );
+//   }
+//   if (!ObjectId.isValid(userId)) {
+//     throw new CustomError(400, "Invalid userID");
+//   } else {
+//     userId = ObjectId(userId);
+//   }
+//   if (!ObjectId.isValid(profileId)) {
+//     throw new CustomError(400, "Invalid profileId");
+//   } else {
+//     profileId = ObjectId(profileId);
+//   }
+//   if (
+//     photo.trim().length === 0 ||
+//     gender.trim().length === 0 ||
+//     city.trim().length === 0 ||
+//     state.trim().length === 0
+//   ) {
+//     // not optional, the user must fill in this data when regiester
+//     throw new CustomError(
+//       400,
+//       "name, location, phoneNumber, website, priceRange can't be empty or just spaces"
+//     );
+//   }
+//   if (gender !== "M" && gender !== "F") {
+//     throw new CustomError(400, "gender must be M(male) or F(female)");
+//   }
+//   //checkWeb(photo);
+//   checkEx(experience);
+//   checkEd(education);
+//   checkSk(skills);
+//   checkTa(tags);
+//   checkLa(languages);
+//   const usersCollection = await users();
+//   let newProfiles = {
+//     _id: profileId,
+//     photo,
+//     gender,
+//     city,
+//     state,
+//     experience,
+//     education,
+//     skills,
+//     languages,
+//     tags,
+//   };
+//   const insertInfo = await usersCollection.updateOne(
+//     { _id: userId, "profile._id": profileId },
+//     { $set: { "profile.$": newProfiles } }
+//   );
+//   if (insertInfo.modifiedCount === 0) throw "Could not update the profile";
+// };
 
 const update = async (userId, email, phone, firstname, lastname, password) => {
   if (
@@ -357,7 +451,10 @@ const update = async (userId, email, phone, firstname, lastname, password) => {
     typeof lastname !== "string" ||
     typeof password !== "string"
   ) {
-    throw new CustomError(400, "user's email, phone. firstname, lastname, password must be string");
+    throw new CustomError(
+      400,
+      "user's email, phone. firstname, lastname, password must be string"
+    );
   }
 
   if (
@@ -368,7 +465,10 @@ const update = async (userId, email, phone, firstname, lastname, password) => {
     lastname.trim().length === 0 ||
     password.trim().length === 0
   ) {
-    throw new CustomError(400, "uesr's email, phone. firstname, lastname, password can't be empty or just spaces");
+    throw new CustomError(
+      400,
+      "uesr's email, phone. firstname, lastname, password can't be empty or just spaces"
+    );
   }
   const emailCheck = /[A-Z0-9._-]+@[A-Z0-9.-]+\.[A-Z]{2,}/im;
   if (!emailCheck.test(email)) {
@@ -390,13 +490,14 @@ const update = async (userId, email, phone, firstname, lastname, password) => {
     phone,
     firstname,
     lastname,
-    password:hash,
+    password: hash,
   };
   const insertInfo = await usersCollection.updateOne(
     { _id: userId },
     { $set: newUser }
   );
-  if (insertInfo.modifiedCount === 0) throw new CustomError(400, "Could not update the user");
+  if (insertInfo.modifiedCount === 0)
+    throw new CustomError(400, "Could not update the user");
 };
 
 const remove = async (userId) => {
@@ -404,7 +505,10 @@ const remove = async (userId) => {
     throw new CustomError(400, "id must be provided");
   }
   if (typeof userId !== "string" || userId.trim().length === 0) {
-    throw new CustomError(400, "the userId must be non-empty string and can't just be space");
+    throw new CustomError(
+      400,
+      "the userId must be non-empty string and can't just be space"
+    );
   }
   if (!ObjectId.isValid(userId)) {
     throw new CustomError(400, "Invalid userID");
@@ -424,10 +528,16 @@ const apply = async (jobId, userId) => {
     throw new CustomError(400, "id must be provided");
   }
   if (typeof userId !== "string" || userId.trim().length === 0) {
-    throw new CustomError(400, "the userId must be non-empty string and can't just be space");
+    throw new CustomError(
+      400,
+      "the userId must be non-empty string and can't just be space"
+    );
   }
   if (typeof jobId !== "string" || jobId.trim().length === 0) {
-    throw new CustomError(400, "the jobId must be non-empty string and can't just be space");
+    throw new CustomError(
+      400,
+      "the jobId must be non-empty string and can't just be space"
+    );
   }
   if (!ObjectId.isValid(userId)) {
     throw new CustomError(400, "Invalid userID");
@@ -450,7 +560,10 @@ const apply = async (jobId, userId) => {
     { $addToSet: { jobs: newjob } }
   );
   if (insertInfo.modifiedCount === 0)
-  throw new CustomError(400, "Could not add the profile, the job is already exists or user doesn't exist");
+    throw new CustomError(
+      400,
+      "Could not add the profile, the job is already exists or user doesn't exist"
+    );
   //*****************recruiter collection update userId to applicantId.
 };
 
@@ -459,10 +572,16 @@ const Favorites = async (jobId, userId) => {
     throw new CustomError(400, "id must be provided");
   }
   if (typeof userId !== "string" || userId.trim().length === 0) {
-    throw new CustomError(400, "the userId must be non-empty string and can't just be space");
+    throw new CustomError(
+      400,
+      "the userId must be non-empty string and can't just be space"
+    );
   }
   if (typeof jobId !== "string" || jobId.trim().length === 0) {
-    throw new CustomError(400, "the jobId must be non-empty string and can't just be space");
+    throw new CustomError(
+      400,
+      "the jobId must be non-empty string and can't just be space"
+    );
   }
   if (!ObjectId.isValid(userId)) {
     throw new CustomError(400, "Invalid userID");
@@ -480,15 +599,21 @@ const Favorites = async (jobId, userId) => {
     { $addToSet: { favor: jobId } }
   );
   if (insertInfo.modifiedCount === 0)
-  throw new CustomError(400, "Could not add the favor job,  the job is already exists or user doesn't exist");
+    throw new CustomError(
+      400,
+      "Could not add the favor job,  the job is already exists or user doesn't exist"
+    );
 };
 
-const getFavourites = async(userId) => {
+const getFavourites = async (userId) => {
   if (!userId) {
     throw new CustomError(400, "id must be provided");
   }
   if (typeof userId !== "string") {
-    throw new CustomError(400, "the userId must be non-empty string and can't just be space");
+    throw new CustomError(
+      400,
+      "the userId must be non-empty string and can't just be space"
+    );
   }
   if (!ObjectId.isValid(userId)) {
     throw new CustomError(400, "Invalid userID");
@@ -499,17 +624,23 @@ const getFavourites = async(userId) => {
   const res = await usersCollection.findOne({ _id: userId });
   if (res === null) throw new CustomError(400, "user did not exists");
   return res.favor;
-}
+};
 
-const delFavourites = async(jobId, userId) => {
+const delFavourites = async (jobId, userId) => {
   if (!userId || !jobId) {
     throw new CustomError(400, "id must be provided");
   }
   if (typeof userId !== "string" || userId.trim().length === 0) {
-    throw new CustomError(400, "the userId must be non-empty string and can't just be space");
+    throw new CustomError(
+      400,
+      "the userId must be non-empty string and can't just be space"
+    );
   }
   if (typeof jobId !== "string" || jobId.trim().length === 0) {
-    throw new CustomError(400, "the jobId must be non-empty string and can't just be space");
+    throw new CustomError(
+      400,
+      "the jobId must be non-empty string and can't just be space"
+    );
   }
   if (!ObjectId.isValid(userId)) {
     throw new CustomError(400, "Invalid userID");
@@ -523,22 +654,28 @@ const delFavourites = async(jobId, userId) => {
   }
   const usersCollection = await users();
   const deleteInfo = await usersCollection.updateOne(
-    {_id : userId},
-    {$pull: { favor: jobId } }
+    { _id: userId },
+    { $pull: { favor: jobId } }
   );
   if (!deleteInfo.modifiedCount) {
     throw new CustomError(400, "remove favor failed");
   }
-}
+};
 const cancel = async (jobId, userId) => {
   if (!userId || !jobId) {
     throw new CustomError(400, "id must be provided");
   }
   if (typeof userId !== "string" || userId.trim().length === 0) {
-    throw new CustomError(400, "the userId must be non-empty string and can't just be space");
+    throw new CustomError(
+      400,
+      "the userId must be non-empty string and can't just be space"
+    );
   }
   if (typeof jobId !== "string" || jobId.trim().length === 0) {
-    throw new CustomError(400, "the jobId must be non-empty string and can't just be space");
+    throw new CustomError(
+      400,
+      "the jobId must be non-empty string and can't just be space"
+    );
   }
   if (!ObjectId.isValid(userId)) {
     throw new CustomError(400, "Invalid userID");
@@ -556,7 +693,10 @@ const cancel = async (jobId, userId) => {
     { $pull: { jobs: { _id: jobId } } }
   );
   if (insertInfo.modifiedCount === 0)
-  throw new CustomError(400, "Could not add the profile, the job is already exists or user doesn't exist");
+    throw new CustomError(
+      400,
+      "Could not add the profile, the job is already exists or user doesn't exist"
+    );
 };
 
 const track = async (jobId, userId) => {
@@ -564,10 +704,16 @@ const track = async (jobId, userId) => {
     throw new CustomError(400, "id must be provided");
   }
   if (typeof userId !== "string" || userId.trim().length === 0) {
-    throw new CustomError(400, "the userId must be non-empty string and can't just be space");
+    throw new CustomError(
+      400,
+      "the userId must be non-empty string and can't just be space"
+    );
   }
   if (typeof jobId !== "string" || jobId.trim().length === 0) {
-    throw new CustomError(400, "the jobId must be non-empty string and can't just be space");
+    throw new CustomError(
+      400,
+      "the jobId must be non-empty string and can't just be space"
+    );
   }
   if (!ObjectId.isValid(userId)) {
     throw new CustomError(400, "Invalid userID");
@@ -599,7 +745,10 @@ const trackAll = async (userId) => {
     throw new CustomError(400, "id must be provided");
   }
   if (typeof userId !== "string") {
-    throw new CustomError(400, "the userId must be non-empty string and can't just be space");
+    throw new CustomError(
+      400,
+      "the userId must be non-empty string and can't just be space"
+    );
   }
   if (!ObjectId.isValid(userId)) {
     throw new CustomError(400, "Invalid userID");
@@ -616,9 +765,14 @@ const get = async (userId) => {
   if (!userId) {
     throw new CustomError(400, "id must be provided");
   }
+
   if (typeof userId !== "string") {
-    throw new CustomError(400, "the userId must be non-empty string and can't just be space");
+    throw new CustomError(
+      400,
+      "the userId must be non-empty string and can't just be space"
+    );
   }
+
   if (!ObjectId.isValid(userId)) {
     throw new CustomError(400, "Invalid userID");
   } else {
@@ -629,53 +783,56 @@ const get = async (userId) => {
   if (res === null) throw new CustomError(400, "user did not exists");
   return res;
 };
+
 const getAll = async () => {
   const usersCollection = await users();
   const res = await usersCollection.find({}).toArray();
   return res;
 };
 
-const checkUser = async(email, password) => {
-  if (typeof email !== 'string' || typeof password !== 'string') {
-    throw new CustomError(400, 'email and passwork must be string');
+const checkUser = async (email, password) => {
+  if (typeof email !== "string" || typeof password !== "string") {
+    throw new CustomError(400, "email and passwork must be string");
   }
   email = email.trim().toLowerCase();
   password = password.trim();
   if (email.length === 0 || password.length === 0) {
-    throw new CustomError(400, 'email and passwork must be non empty string and can\'t just be space');
+    throw new CustomError(
+      400,
+      "email and passwork must be non empty string and can't just be space"
+    );
   }
 
   if (password.length < 6) {
-    throw new CustomError(400, 'password must be longer than 6');
+    throw new CustomError(400, "password must be longer than 6");
   }
-  if(password.indexOf(" ") >= 0) {
-    throw new CustomError(400, 'password can\'t contain space');
+  if (password.indexOf(" ") >= 0) {
+    throw new CustomError(400, "password can't contain space");
   }
   const emailCheck = /[A-Z0-9._-]+@[A-Z0-9.-]+\.[A-Z]{2,}/im;
   if (!emailCheck.test(email)) {
     throw new CustomError(400, "Wrong email format");
   }
   let tmp = await checkExist(email);
-  if(!tmp) {
-    throw new CustomError(400, 'Either the email or password is invalid');
+  if (!tmp) {
+    throw new CustomError(400, "Either the email or password is invalid");
   }
   let compareToMerlin = false;
   try {
-      compareToMerlin = await bcrypt.compare(password, tmp);
-    } catch (e) {
-      throw new CustomError(400, 'inner error');
-    }
-  if (compareToMerlin) {
-      return {authenticated: true}
-  } else {
-    throw new CustomError(400,  'Either the email or password is invalid');
+    compareToMerlin = await bcrypt.compare(password, tmp);
+  } catch (e) {
+    throw new CustomError(400, "inner error");
   }
-}
+  if (compareToMerlin) {
+    return { authenticated: true };
+  } else {
+    throw new CustomError(400, "Either the email or password is invalid");
+  }
+};
 
 module.exports = {
-  createProfile,
   create,
-  updateProfile,
+
   update,
   remove,
   apply,
@@ -687,8 +844,8 @@ module.exports = {
   trackAll,
   get,
   getAll,
-  checkUser
-}
+  checkUser,
+};
 // test functions **IMPORTANT**
 //checkEx([{title:"Maintenance Engineer", employmentType: "full time", companyName:"Apple",startDate: "08/05/2017", endDate: "08/05/2018"}])
 //checkEd([{school:"SIT", major: "CE", degree:"master of science",startDate: "08/05/2017", endDate: "08/05/2018"}])

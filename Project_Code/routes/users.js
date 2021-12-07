@@ -3,8 +3,7 @@ const express = require("express");
 const router = express.Router();
 const users = require("../data/users");
 const upload = require("../data/upload");
-const dbConfig = require("../config/mongoConnection").dbConfig;
-const { check, validationResult } = require("express-validator");
+
 router.get("/profile", async (req, res) => {
   res.render("pages/userProfile");
 });
@@ -19,7 +18,7 @@ router.post("/profile/upload", upload.single("file"), async (req, res) => {
     return res.render("pages/userProfile", { error: "file type error" });
   }
 
-  console.log(res.req.file);
+  // console.log(res.req.file);
   res.redirect("/users/profile");
 });
 
