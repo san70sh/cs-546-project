@@ -4,14 +4,22 @@ const router = express.Router();
 const users = require("../data/users");
 const upload = require("../data/upload");
 const dbConfig = require("../config/mongoConnection").dbConfig;
-
+const { check, validationResult } = require("express-validator");
 router.get("/profile", async (req, res) => {
-  console.log(dbConfig.serverUrl + dbConfig.database);
   res.render("pages/userProfile");
 });
 
 router.post("/profile/upload", upload.single("file"), async (req, res) => {
-  console.log(req.file);
+  // check file existence
+  if (req.file === undefined) {
+    return res.render("pages/userProfile", { error: "you must select a file" });
+  }
+  // check file type
+  if (req.file.mimetype !== "application/pdf") {
+    return res.render("pages/userProfile", { error: "file type error" });
+  }
+
+  console.log(res.req.file);
   res.redirect("/users/profile");
 });
 
