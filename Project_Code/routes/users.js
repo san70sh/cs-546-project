@@ -2,61 +2,25 @@ const { ObjectId } = require("mongodb");
 const express = require("express");
 const router = express.Router();
 const users = require("../data/users");
-const util = require("util");
-const multer = require("multer");
-const { GridFsStorage } = require("multer-gridfs-storage");
+const upload = require("../data/upload");
 const dbConfig = require("../config/mongoConnection").dbConfig;
+const { check, validationResult } = require("express-validator");
+router.get("/profile", async (req, res) => {
+  res.render("pages/userProfile");
+});
 
-router.post("/upload", async (req, res) => {
-  var storage = new GridFsStorage({
-    url: dbConfig.serverUrl + dbConfig.database,
-    options: { useNewUrlParser: true, useUnifiedTopology: true },
-    file: (req, file) => {
-      const match = ["application/pdf"];
-
-      if (match.indexOf(file.mimetype) === -1) {
-        const filename = `${Date.now()}-user-${file.originalname}`;
-        return filename;
-      }
-
-      return {
-        bucketName: dbConfig.userBucket,
-        filename: `${Date.now()}-user-${file.originalname}`,
-      };
-    },
-  });
-  var uploadFiles = multer({ storage: storage }).single("file");
-  var upload = util.promisify(uploadFiles);
-  try {
-    await upload(req, res);
-    console.log(req.body);
-
-    if (req.file == undefined) {
-      return res.send({
-        message: "You must select a file.",
-      });
-    }
-
-    return res.status(200).send({
-      message: "Files have been uploaded.",
-    });
-
-    // console.log(req.file);
-
-    // return res.send({
-    //   message: "File has been uploaded.",
-    // });
-  } catch (error) {
-    console.log(error);
-
-    return res.status(500).send({
-      message: `Error when trying upload many files: ${error}`,
-    });
-
-    // return res.send({
-    //   message: "Error when trying upload image: ${error}",
-    // });
+router.post("/profile/upload", upload.single("file"), async (req, res) => {
+  // check file existence
+  if (req.file === undefined) {
+    return res.render("pages/userProfile", { error: "you must select a file" });
   }
+  // check file type
+  if (req.file.mimetype !== "application/pdf") {
+    return res.render("pages/userProfile", { error: "file type error" });
+  }
+
+  console.log(res.req.file);
+  res.redirect("/users/profile");
 });
 
 router.post("/login", async (req, res) => {
@@ -121,57 +85,67 @@ router.post("/login", async (req, res) => {
 });
 
 // if ...  should have else throw otherwise it would have no respondes
-router.get('/favor', async (req, res) => {//get all favor 
-    let userId = req.body.userId;
-    try {
-        if(ObjectId.isValid(userId)) {
-            let output = await users.getFavourites(userId);
-            return res.json(output);
-        }
-    } catch (e) {
-        return res.status(e.status).render('pages/error', {title: "Favor", message: e.message, error: true});
+router.get("/favor", async (req, res) => {
+  //get all favor
+  let userId = req.body.userId;
+  try {
+    if (ObjectId.isValid(userId)) {
+      let output = await users.getFavourites(userId);
+      return res.json(output);
     }
+  } catch (e) {
+    return res.status(e.status).render("pages/error", {
+      title: "Favor",
+      message: e.message,
+      error: true,
+    });
+  }
 });
 
-router.post('/favor', async (req, res) => {
-    let jobId = req.body.jobId;
-    let userId = req.body.userId;
-    try {
-        if(ObjectId.isValid(jobId) && ObjectId.isValid(userId)) {
-            let output = await users.Favorites(jobId, userId);
-            return res.json(output);
-        }
-    } catch (e) {
-        return res.status(e.status).render('pages/error', {title: "Apply", message: e.message, err: true});
+router.post("/favor", async (req, res) => {
+  let jobId = req.body.jobId;
+  let userId = req.body.userId;
+  try {
+    if (ObjectId.isValid(jobId) && ObjectId.isValid(userId)) {
+      let output = await users.Favorites(jobId, userId);
+      return res.json(output);
     }
+  } catch (e) {
+    return res
+      .status(e.status)
+      .render("pages/error", { title: "Apply", message: e.message, err: true });
+  }
 });
 
-router.delete('/favor', async (req, res) => {
-    let jobId = req.body.jobId;
-    let userId = req.body.userId;
-    try {
-        if(ObjectId.isValid(jobId) && ObjectId.isValid(userId)) {
-            let output = await users.delFavourites(jobId, userId);
-            return res.json(output);
-        }
-    } catch (e) {
-        return res.status(e.status).render('pages/error', {title: "Favor", message: e.message, err: true});
+router.delete("/favor", async (req, res) => {
+  let jobId = req.body.jobId;
+  let userId = req.body.userId;
+  try {
+    if (ObjectId.isValid(jobId) && ObjectId.isValid(userId)) {
+      let output = await users.delFavourites(jobId, userId);
+      return res.json(output);
     }
+  } catch (e) {
+    return res
+      .status(e.status)
+      .render("pages/error", { title: "Favor", message: e.message, err: true });
+  }
 });
 
-router.post('/apply', async (req, res) => {
-    let jobId = req.body.jobId;
-    let userId = req.body.userId;
-    try {
-        if(ObjectId.isValid(jobId) && ObjectId.isValid(userId)) {
-            let output = await users.apply(jobId, userId);
-            return res.json(output);
-        }
-    } catch (e) {
-        return res.status(e.status).render('pages/error', {title: "Apply", message: e.message, err: true});
+router.post("/apply", async (req, res) => {
+  let jobId = req.body.jobId;
+  let userId = req.body.userId;
+  try {
+    if (ObjectId.isValid(jobId) && ObjectId.isValid(userId)) {
+      let output = await users.apply(jobId, userId);
+      return res.json(output);
     }
+  } catch (e) {
+    return res
+      .status(e.status)
+      .render("pages/error", { title: "Apply", message: e.message, err: true });
+  }
 });
-
 
 router.delete("/apply", async (req, res) => {
   let jobId = req.body.jobId;
