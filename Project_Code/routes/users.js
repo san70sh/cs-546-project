@@ -23,23 +23,23 @@ router.post("/profile/upload", upload.single("file"), async (req, res) => {
   if (req.file.mimetype !== "application/pdf") {
     return res.render("pages/userProfile", { error: "file type error" });
   }
-
-  // console.log(res.req.file);
+  console.log(res.req.file);
+  try {
+    const addRes = await users.addResume(
+      "61aee25ee978e8a5d47c5ffc",
+      res.req.file.id
+    );
+    console.log(addRes);
+  } catch (e) {
+    res.send({ error: e });
+    console.log(e);
+  }
   res.redirect("/users/profile");
 });
 
 router.get("/profile/resume/:id", async (req, res) => {
-  // check file existence
-  if (req.file === undefined) {
-    return res.render("pages/userProfile", { error: "you must select a file" });
-  }
-  // check file type
-  if (req.file.mimetype !== "application/pdf") {
-    return res.render("pages/userProfile", { error: "file type error" });
-  }
-
-  // console.log(res.req.file);
-  res.redirect("/users/profile");
+  res.send(`not implemented yet, file id is ${req.params.id}`);
+  // res.redirect("/users/profile");
 });
 // router.post("/login", async (req, res) => {
 //   let email = req.body.email;
