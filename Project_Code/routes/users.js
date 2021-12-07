@@ -89,11 +89,16 @@ router.post("/profile/upload", upload.single("file"), async (req, res) => {
 router.get("/favor", async (req, res) => {
   //get all favor
   let userId = req.body.userId;
+  if (!ObjectId.isValid(userId)) {
+    res.status(e.status).render("pages/error", {
+      title: "Favor",
+      message: "inValid userId",
+      error: true,
+    });
+  }
   try {
-    if (ObjectId.isValid(userId)) {
       let output = await users.getFavourites(userId);
       return res.json(output);
-    }
   } catch (e) {
     return res.status(e.status).render("pages/error", {
       title: "Favor",
@@ -106,26 +111,33 @@ router.get("/favor", async (req, res) => {
 router.post("/favor", async (req, res) => {
   let jobId = req.body.jobId;
   let userId = req.body.userId;
+  if (!ObjectId.isValid(jobId) || !ObjectId.isValid(userId)) {
+    return res
+    .status(400)
+    .render("pages/error", { title: "favor", message: "invalid id", err: true });
+  }
   try {
-    if (ObjectId.isValid(jobId) && ObjectId.isValid(userId)) {
+    
       let output = await users.Favorites(jobId, userId);
       return res.json(output);
-    }
   } catch (e) {
     return res
       .status(e.status)
-      .render("pages/error", { title: "Apply", message: e.message, err: true });
+      .render("pages/error", { title: "favor", message: e.message, err: true });
   }
 });
 
 router.delete("/favor", async (req, res) => {
   let jobId = req.body.jobId;
   let userId = req.body.userId;
+  if (!ObjectId.isValid(jobId) || !ObjectId.isValid(userId)) {
+    return res
+    .status(400)
+    .render("pages/error", { title: "favor", message: "invalid id", err: true });
+  }
   try {
-    if (ObjectId.isValid(jobId) && ObjectId.isValid(userId)) {
       let output = await users.delFavourites(jobId, userId);
       return res.json(output);
-    }
   } catch (e) {
     return res
       .status(e.status)
@@ -136,11 +148,14 @@ router.delete("/favor", async (req, res) => {
 router.post("/apply", async (req, res) => {
   let jobId = req.body.jobId;
   let userId = req.body.userId;
+  if (!ObjectId.isValid(jobId) || !ObjectId.isValid(userId)) {
+    return res
+    .status(400)
+    .render("pages/error", { title: "apply", message: "invalid id", err: true });
+  }
   try {
-    if (ObjectId.isValid(jobId) && ObjectId.isValid(userId)) {
       let output = await users.apply(jobId, userId);
       return res.json(output);
-    }
   } catch (e) {
     return res
       .status(e.status)
@@ -151,11 +166,14 @@ router.post("/apply", async (req, res) => {
 router.delete("/apply", async (req, res) => {
   let jobId = req.body.jobId;
   let userId = req.body.userId;
+  if (! ObjectId.isValid(jobId) || !ObjectId.isValid(userId)) {
+    return res
+    .status(400)
+    .render("pages/error", { title: "apply", message: "invalid id", err: true });
+  }
   try {
-    if (ObjectId.isValid(jobId) && ObjectId.isValid(userId)) {
       let output = await users.cancel(jobId, userId);
       return res.json(output);
-    }
   } catch (e) {
     return res
       .status(e.status)
@@ -166,11 +184,14 @@ router.delete("/apply", async (req, res) => {
 router.get("/apply/:id", async (req, res) => {
   let userId = req.body.userId;
   let jobId = req.params.jobId;
+  if (! ObjectId.isValid(jobId) || !ObjectId.isValid(userId)) {
+    return res
+    .status(400)
+    .render("pages/error", { title: "apply", message: "invalid id", err: true });
+  }
   try {
-    if (ObjectId.isValid(userId) && ObjectId.isValid(jobId)) {
       let output = await users.track(jobId, userId);
       return res.json(output);
-    }
   } catch (e) {
     return res.status(e.status).render("pages/error", {
       title: "Favor",
@@ -182,11 +203,14 @@ router.get("/apply/:id", async (req, res) => {
 
 router.get("/apply", async (req, res) => {
   let userId = req.body.userId;
+  if (!ObjectId.isValid(userId)) {
+    return res
+    .status(400)
+    .render("pages/error", { title: "apply", message: "invalid id", err: true });
+  }
   try {
-    if (ObjectId.isValid(userId)) {
       let output = await users.trackAll(userId);
       return res.json(output);
-    }
   } catch (e) {
     return res.status(e.status).render("pages/error", {
       title: "Favor",
