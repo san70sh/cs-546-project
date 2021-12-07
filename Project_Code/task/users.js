@@ -7,7 +7,7 @@ const password2 = "87654321";
 const password3 = "135792468";
 
 const profile1 = {
-  resume: "url",
+  resume: [],
   photo: "url",
   gender: "m",
   city: "Hoboken",
@@ -36,7 +36,7 @@ const profile1 = {
 };
 
 const profile2 = {
-  resume: "url",
+  resume: [],
   photo: "url",
   gender: "f",
   city: "NYC",
@@ -65,7 +65,7 @@ const profile2 = {
 };
 
 const profile3 = {
-  resume: "url",
+  resume: [],
   photo: "url",
   gender: "m",
   city: "Los Angeles",
