@@ -150,7 +150,7 @@ const checkExist = async (email) => {
   if (res === null) {
     return false;
   }
-  return res.password;
+  return { password: res.password, userId: res._id };
 };
 
 const getFile = async (fileId) => {
@@ -819,12 +819,12 @@ const checkUser = async (email, password) => {
   }
   let compareToMerlin = false;
   try {
-    compareToMerlin = await bcrypt.compare(password, tmp);
+    compareToMerlin = await bcrypt.compare(password, tmp.password);
   } catch (e) {
     throw new CustomError(400, "inner error");
   }
   if (compareToMerlin) {
-    return { authenticated: true };
+    return { authenticated: true, id: tmp.userId };
   } else {
     throw new CustomError(400, "Either the email or password is invalid");
   }
@@ -892,4 +892,4 @@ module.exports = {
 //Favorites("61a4236167e3b3f821f5ddde","61a33e13067da688cb1f8e39");
 //getFavourites("61a33e13067da688cb1f8e39").then(ele => console.log(ObjectId(ele[0])))
 //delFavourites("61a4236167e3b3f821f5eeee","61a33e13067da688cb1f8e39");
-//checkUser("sega@gmail.com", "ccc1111111").then(ele => console.log(ele));
+//checkUser("sega@gmail.com", "ccc11111111").then(ele => console.log(ele)).catch(e => console.log(e));
