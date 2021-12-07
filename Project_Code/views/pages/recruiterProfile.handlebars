@@ -1,28 +1,62 @@
 <section class="section profile-section" id="recProfile">
     <div class="container">
         <div class="row">
-            {{!-- <div class="col-6">
+            <div class="col-6">
                 <img src="{{recruiter.profile}}"</img>
-            </div> --}}
+            </div>
             <div class="col-6">
                 <h2>{{recruiter.firstName}} {{recruiter.lastName}}</h2>
                 <h6>{{recruiter.profile.company.position}}, {{recruiter.profile.company.name}}</h6>
             </div>
         </div>
-        <div class="row">
+        <div class="row profile-section">
             <div class="col">
-                <h4>Experience</h4>
-                    <p>{{recruiter.profile.company.description}}</p>
+                <p>City: {{recruiter.profile.city}}</p>
+                <p>State: {{recruiter.profile.state}}</p>
             </div>
         </div>
-        <div class="row">
-            <ul>
-                {{#each recruiter.jobs}}
-                <li>
-                    <a href="/jobs/id/{{job_id}}">{{job_id}}</a>
-                </li>
+        <div class="row experience-section">
+            <div class="col">
+                <p>Position: {{recruiter.profile.company.position}}</p>
+                <p>Company: {{recruiter.profile.company.name}}</p>
+            </div>
+        </div>
+        <div class="row about-section">
+            <div class="col">
+                <h5>About Me:</h5>
+                <br/>
+                <p>{{recruiter.profile.company.description}}</p>
+            </div>
+        </div>
+        <div class="row job-section">
+            <div class="accordion" id="job-accordion">
+                {{#each jobs}}
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="jobheading{{@index}}">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseJob{{@index}}" aria-expanded="true" aria-controls="collapseJob{{@index}}">
+                            {{jobDetails.title}}
+                        </button>
+                    </h2>
+                    <div id="collapseJob{{@index}}" class="accordion-collapse collapse show" aria-labelledby="jobheading{{@index}}" data-bs-parent="job-accordion">
+                        <div class="accordion-body">
+                            <ul id="applicantList">
+                                {{#each applicants}}
+                                <li>
+                                    <div class="container" id="appContainer">
+                                        <div class="row" id="appDetails">
+                                            <div class="col-3">{{firstName}} {{lastName}}</div>
+                                            <div class="col-2"><button type="button" class="btn btn-success">Accept</button></div>
+                                            <div class="col-2"><button type="button" class="btn btn-danger">Reject</button></div>
+                                        </div>
+                                    </div>
+                                </li>
+                                {{/each}}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
                 {{/each}}
-            </ul>
+            </div>
         </div>
     </div>
 </section>
