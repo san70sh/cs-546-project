@@ -29,6 +29,10 @@ router.get("/jobs/city/:city", async (req, res) => {
 
 router.get("/jobs/id/:id", async (req, res) => {
   try {
+    if(!req.session.user || req.session.user.type != 'user'){
+      //alert("PLEASE LOGIN FIRST");
+      return res.render('pages/home',{errorclass: true});
+    }
     const result = await jobData.getJobsById(req.params.id);
     const jobId = req.params.id;
     console.log(jobId);
