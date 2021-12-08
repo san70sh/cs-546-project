@@ -418,8 +418,7 @@ const create = async (
   // if (newProfile !== undefined && !Array.isArray(newProfile)) {
   //   throw new CustomError(400, "Profile must be array");
   // }
-
-  if (checkDuplicateP(phone) || checkDuplicateE(email)) {
+  if (await checkDuplicateP(phone) || await checkDuplicateE(email)) {
     throw new CustomError(400, "user already exists");
   }
   const jobs = [];
