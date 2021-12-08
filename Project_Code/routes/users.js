@@ -17,7 +17,7 @@ router.get("/profile", async (req, res) => {
                               }
                           }
   try {
-    // const resumes = await users.getAllResume(req.body.userId);
+    // const resumes = await users.getAllResume(req.session.user.id);
     const resumes = await users.getAllResume("61b01cfc70d31d9c65cad488");
     res.render("pages/userProfile", { resumes });
   } catch (e) {
@@ -98,12 +98,14 @@ router.get("/profile/resume/:id", async (req, res) => {
 router.delete("/profile/resume/:id", async (req, res) => {});
 
 router.get("/login", async(req, res) => {
-  // if (req.session.user.type == 'recruiter'){
-  //   res.redirect("/user/login");
-  // }else if(req.session.user.type == 'user'){
-  //   console.log('user : already logged in');
-  //   return res.redirect('/');     
-  // }
+  if(req.session.user){
+  if (req.session.user.type == 'recruiter'){
+    res.redirect("/recruiter/login");
+  }else if(req.session.user.type == 'user'){
+    console.log('user : already logged in');
+    return res.redirect('/');     
+  }
+}
 return res.render('pages/applicantlogin', {title:"Applicant Login"});
 });
 
@@ -190,6 +192,44 @@ router.post("/login", async (req, res) => {
     }
   });
 
+router.post('/signup', async (req, res) => {
+      let {email, password, firstName, lastName, phone} = req.body;
+      let re = /[A-Z0-9._-]+@[A-Z0-9.-]+\.[A-Z]{2,}/im
+      if(email == "" || email == undefined) return res.status(400).render('pages/applicantSignup', {title: "Sign Up/Register", message: "Please enter your email.", emailerr: true});
+      if(email.length < 6) return res.status(400).render('pages/applicantSignup', {title: "Sign Up/Register", message: "The email is too short.", emailerr: true});
+      if(!re.test(email)) return res.status(400).render('pages/applicantSignup', {title: "Sign Up/Register", message: `${email} is not a valid email.`, emailerr: true});
+      email = email.toLowerCase();
+
+      //password validation
+      let re2 = /\s/i
+      if(!password) return res.status(400).render('pages/applicantSignup',{title: "Sign Up/Register", message: `Please enter your password`, pwderr: true});
+      if(re2.test(password)) return res.status(400).render('pages/applicantSignup', {title: "Sign Up/Register", message: "Spaces are not allowed in passwords.", pwderr: true});
+      if(password.length < 6) return res.status(400).render('pages/applicantSignup', {title: "Sign Up/Register", message: "Password is too short.", pwderr: true});
+
+      //name validation
+      let re3 = /[A-Z]/i
+      firstName = firstName.trim();
+      lastName = lastName.trim();
+      if(firstName == "" || firstName == undefined) return res.status(400).render('pages/applicantSignup', {title: "Sign Up/Register", message: "Please enter your first name.", fnerr: true});
+      if(!re3.test(firstName)) return res.status(400).render('pages/applicantSignup', {title: "Sign Up/Register", message: "Your name should not contain special characters.", fnerr: true});
+      if(lastName == "" || lastName == undefined) return res.status(400).render('pages/applicantSignup', {title: "Sign Up/Register", message: "Please enter your last name.", lnerr: true});
+      if(!re3.test(lastName)) return res.status(400).render('pages/applicantSignup', {title: "Sign Up/Register", message: "Your name should not contain special characters.", lnerr: true});
+
+      //phone validation
+      let re4 = /[0-9]{10}/
+      phone = phone.trim();
+      if(phone == "" || phone == undefined) return res.status(400).render('pages/applicantSignup', {title: "Sign Up/Register", message: "Please enter your phone number.", pherr: true});
+      if(phone.length != 10) return res.status(400).render('pages/applicantSignup', {title: "Sign Up/Register", message: "Invalid phone number.", pherr: true});
+      if(!re4.test(phone)) return res.status(400).render('pages/applicantSignup', {title: "Sign Up/Register", message: "Invalid phone number.", pherr: true});
+      try {
+          let userId = await users.create(email, phone, firstName, lastName, password);
+              req.session.user = {email: email,type:"user",id: userId};
+              console.log(req.session.user)
+              return res.redirect(`/`);
+      } catch (e) {
+          return res.status(e.status).render('pages/applicantSignup', {title: "Sign Up/Register", message: e.message, mainerr: true});
+      }
+});
 router.get("/favor", async (req, res) => {
   
                             // common session code all of your private routes
@@ -204,7 +244,7 @@ router.get("/favor", async (req, res) => {
                           }
   
   //get all favor
-  let userId = req.body.userId;
+  let userId = req.session.user.id;
   if (!ObjectId.isValid(userId)) {
     res.status(e.status).render("pages/error", {
       title: "Favor",
@@ -237,7 +277,7 @@ router.post("/favor", async (req, res) => {
                               }
                           }
   let jobId = req.body.jobId;
-  let userId = req.body.userId;
+  let userId = req.session.user.id;
   if (!ObjectId.isValid(jobId) || !ObjectId.isValid(userId)) {
     return res.status(400).render("pages/error", {
       title: "favor",
@@ -268,7 +308,7 @@ router.delete("/favor", async (req, res) => {
                           }
 
   let jobId = req.body.jobId;
-  let userId = req.body.userId;
+  let userId = req.session.user.id;
   if (!ObjectId.isValid(jobId) || !ObjectId.isValid(userId)) {
     return res.status(400).render("pages/error", {
       title: "favor",
@@ -300,7 +340,7 @@ router.post("/apply", async (req, res) => {
                           }
 
   let jobId = req.body.jobId;
-  let userId = req.body.userId;
+  let userId = req.session.user.id;
   if (!ObjectId.isValid(jobId) || !ObjectId.isValid(userId)) {
     return res.status(400).render("pages/error", {
       title: "apply",
@@ -331,7 +371,7 @@ router.delete("/apply", async (req, res) => {
                           }
 
   let jobId = req.body.jobId;
-  let userId = req.body.userId;
+  let userId = req.session.user.id;
   if (!ObjectId.isValid(jobId) || !ObjectId.isValid(userId)) {
     return res.status(400).render("pages/error", {
       title: "apply",
@@ -362,7 +402,7 @@ router.get("/apply/:id", async (req, res) => {
                               }
                           }
 
-  let userId = req.body.userId;
+  let userId = req.session.user.id;
   let jobId = req.params.jobId;
   if (!ObjectId.isValid(jobId) || !ObjectId.isValid(userId)) {
     return res.status(400).render("pages/error", {
@@ -395,7 +435,7 @@ router.get("/apply", async (req, res) => {
                                   return res.redirect('/users/login');
                               }
                           }
-  let userId = req.body.userId;
+  let userId = req.session.user.id;
   if (!ObjectId.isValid(userId)) {
     return res.status(400).render("pages/error", {
       title: "apply",

@@ -152,7 +152,30 @@ const checkExist = async (email) => {
   }
   return { password: res.password, userId: res._id };
 };
-
+const checkDuplicateE = async (email) => {
+  const emailCheck = /[A-Z0-9._-]+@[A-Z0-9.-]+\.[A-Z]{2,}/im;
+  if (!emailCheck.test(email)) {
+    throw new CustomError(400, "Wrong email format");
+  }
+  const resCollection = await users();
+  const res = await resCollection.findOne({ email: email });
+  if (res === null) {
+    return false;
+  }
+  return true;
+}
+const checkDuplicateP = async(phone) => {
+  const phoneCheck = /[0-9]{10}/;
+  if (!phoneCheck.test(phone)) {
+    throw new CustomError(400, "Phone number should be 10 digits");
+  }
+  const resCollection = await users();
+  const res = await resCollection.findOne({ phone: phone });
+  if (res === null) {
+    return false;
+  }
+  return true;
+}
 const getFile = async (fileId) => {
   if (!ObjectId.isValid(fileId) && typeof fileId !== "string") {
     throw new CustomError(400, "Invalid fileId");
@@ -388,12 +411,16 @@ const create = async (
   if (!emailCheck.test(email)) {
     throw new CustomError(400, "Wrong email format");
   }
-  const phoneCheck = /^([0-9]{3})[-]([0-9]{3})[-]([0-9]{4})$/;
+  const phoneCheck = /[0-9]{10}/;
   if (!phoneCheck.test(phone)) {
-    throw new CustomError(400, "Wrong phoneNo formate xxx-xxx-xxxx");
+    throw new CustomError(400, "Phone number should be 10 digits");
   }
-  if (newProfile !== undefined && !Array.isArray(newProfile)) {
-    throw new CustomError(400, "Profile must be array");
+  // if (newProfile !== undefined && !Array.isArray(newProfile)) {
+  //   throw new CustomError(400, "Profile must be array");
+  // }
+
+  if (checkDuplicateP(phone) || checkDuplicateE(email)) {
+    throw new CustomError(400, "user already exists");
   }
   const jobs = [];
   const profile = [];
@@ -412,23 +439,24 @@ const create = async (
   };
   const insertInfo = await usersCollection.insertOne(newUser);
   if (!insertInfo.acknowledged) throw "Could not add the User";
-  if (newProfile !== undefined) {
-    newProfile.forEach((ele) => {
-      createProfile(
-        insertInfo.insertedId,
-        ele.userId,
-        ele.photo,
-        ele.gender,
-        ele.city,
-        ele.state,
-        ele.experience,
-        ele.education,
-        ele.skills,
-        ele.languages,
-        ele.tags
-      );
-    });
-  }
+  // if (newProfile !== undefined) {
+  //   newProfile.forEach((ele) => {
+  //     createProfile(
+  //       insertInfo.insertedId,
+  //       ele.userId,
+  //       ele.photo,
+  //       ele.gender,
+  //       ele.city,
+  //       ele.state,
+  //       ele.experience,
+  //       ele.education,
+  //       ele.skills,
+  //       ele.languages,
+  //       ele.tags
+  //     );
+  //   });
+  // }
+  return insertInfo.insertedId;
 };
 
 // const updateProfile = async (
