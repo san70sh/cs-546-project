@@ -6,19 +6,20 @@ const upload = require("../data/upload").upload;
 const download = require("../data/upload").download;
 
 router.get("/profile", async (req, res) => {
-                            // common session code all of your private routes
-                            if(!req.session.user){
-                              return res.redirect('/users/login');
-                          }
-                  
-                          if(req.session.user){
-                              if(req.session.user.type !=='user'){
-                                  return res.redirect('/users/login');
-                              }
-                          }
+  // common session code all of your private routes
+  if (!req.session.user) {
+    return res.redirect("/users/login");
+  }
+
+  if (req.session.user) {
+    if (req.session.user.type !== "user") {
+      return res.redirect("/users/login");
+    }
+  }
+
   try {
     // const resumes = await users.getAllResume(req.body.userId);
-    const resumes = await users.getAllResume("61b01cfc70d31d9c65cad488");
+    const resumes = await users.getAllResume(req.session.user.id);
     res.render("pages/userProfile", { resumes });
   } catch (e) {
     return res.render("pages/userProfile", { error: e.message });
@@ -26,18 +27,17 @@ router.get("/profile", async (req, res) => {
 });
 
 router.post("/profile/upload", upload.single("file"), async (req, res) => {
-  
-                            // common session code all of your private routes
-                            if(!req.session.user){
-                              return res.redirect('/users/login');
-                          }
-                  
-                          if(req.session.user){
-                              if(req.session.user.type !=='user'){
-                                  return res.redirect('/users/login');
-                              }
-                          }
-  
+  // common session code all of your private routes
+  if (!req.session.user) {
+    return res.redirect("/users/login");
+  }
+
+  if (req.session.user) {
+    if (req.session.user.type !== "user") {
+      return res.redirect("/users/login");
+    }
+  }
+
   // check file existence
   if (req.file === undefined) {
     return res.render("pages/userProfile", { error: "you must select a file" });
@@ -48,10 +48,7 @@ router.post("/profile/upload", upload.single("file"), async (req, res) => {
   }
   console.log(res.req.file);
   try {
-    const addRes = await users.addResume(
-      "61b01cfc70d31d9c65cad488",
-      res.req.file.id
-    );
+    const addRes = await users.addResume(req.session.user.id, res.req.file.id);
     console.log(addRes);
   } catch (e) {
     res.render("pages/userProfile", { error: e.message });
@@ -61,18 +58,16 @@ router.post("/profile/upload", upload.single("file"), async (req, res) => {
 });
 
 router.get("/profile/resume/:id", async (req, res) => {
-                          // common session code all of your private routes
-                          if(!req.session.user){
-                            return res.redirect('/users/login');
-                        }
-                
-                        if(req.session.user){
-                            if(req.session.user.type !=='user'){
-                                return res.redirect('/users/login');
-                            }
-                        }
+  // common session code all of your private routes
+  if (!req.session.user) {
+    return res.redirect("/users/login");
+  }
 
-
+  if (req.session.user) {
+    if (req.session.user.type !== "user") {
+      return res.redirect("/users/login");
+    }
+  }
 
   try {
     const downloadStream = await download(req.params.id);
@@ -97,99 +92,99 @@ router.get("/profile/resume/:id", async (req, res) => {
 
 router.delete("/profile/resume/:id", async (req, res) => {});
 
-router.get("/login", async(req, res) => {
+router.get("/login", async (req, res) => {
   // if (req.session.user.type == 'recruiter'){
   //   res.redirect("/user/login");
   // }else if(req.session.user.type == 'user'){
   //   console.log('user : already logged in');
-  //   return res.redirect('/');     
+  //   return res.redirect('/');
   // }
-return res.render('pages/applicantlogin', {title:"Applicant Login"});
+  return res.render("pages/applicantlogin", { title: "Applicant Login" });
 });
 
 router.post("/login", async (req, res) => {
-    let email = req.body.email;
-    let password = req.body.password;
-    //let status = req.body.status; //**************use status to store a form data that shows the user is applicant or recruiter */
-    if (typeof email !== "string" ) {
-      res.status(400).render("pages/applicantlogin", {
-        message: "email and passwork must be string",
-        emailerr: true,
-      });
-      return;
-    }
-    if (typeof password !== "string") {
-      res.status(400).render("pages/applicantlogin", {
-        message: "email and passwork must be string",
-        pwderr: true,
-      });
-      return;
-    }
-    email = email.trim().toLowerCase();
-    password = password.trim();
-    if (email.length === 0 || password.length === 0) {
-      res.status(400).render("pages/applicantlogin", {
-        message:
-          "Not a valid email format",
-          emailerr: true,
-      });
-      return;
-    }
-    const emailCheck = /[A-Z0-9._-]+@[A-Z0-9.-]+\.[A-Z]{2,}/im;
-    if (!emailCheck.test(email)) {
-      res.status(400).render("pages/applicantlogin", {
-        message:
-          "email can only be alphanumeric characters and should be at least 4 characters long.",
-          emailerr: true,
-      });
-      return;
-    }
-    if (password.length < 6) {
-      res.status(400).render("pages/applicantlogin", {
-        message: "password must be longer than 6",
-        pwderr: true,
-      });
-      return;
-    }
-    if (password.indexOf(" ") >= 0) {
-      res.status(400).render("pages/applicantlogin", {
-        message: "password can't contain space",
-        pwderr: true,
-      });
-      return;
-    }
-    let tmp;
-    try {//*********change here to add recruter login in */
+  let email = req.body.email;
+  let password = req.body.password;
+  //let status = req.body.status; //**************use status to store a form data that shows the user is applicant or recruiter */
+  if (typeof email !== "string") {
+    res.status(400).render("pages/applicantlogin", {
+      message: "email and passwork must be string",
+      emailerr: true,
+    });
+    return;
+  }
+  if (typeof password !== "string") {
+    res.status(400).render("pages/applicantlogin", {
+      message: "email and passwork must be string",
+      pwderr: true,
+    });
+    return;
+  }
+  email = email.trim().toLowerCase();
+  password = password.trim();
+  if (email.length === 0 || password.length === 0) {
+    res.status(400).render("pages/applicantlogin", {
+      message: "Not a valid email format",
+      emailerr: true,
+    });
+    return;
+  }
+  const emailCheck = /[A-Z0-9._-]+@[A-Z0-9.-]+\.[A-Z]{2,}/im;
+  if (!emailCheck.test(email)) {
+    res.status(400).render("pages/applicantlogin", {
+      message:
+        "email can only be alphanumeric characters and should be at least 4 characters long.",
+      emailerr: true,
+    });
+    return;
+  }
+  if (password.length < 6) {
+    res.status(400).render("pages/applicantlogin", {
+      message: "password must be longer than 6",
+      pwderr: true,
+    });
+    return;
+  }
+  if (password.indexOf(" ") >= 0) {
+    res.status(400).render("pages/applicantlogin", {
+      message: "password can't contain space",
+      pwderr: true,
+    });
+    return;
+  }
+  let tmp;
+  try {
+    //*********change here to add recruter login in */
 
-      tmp = await users.checkUser(email, password);
-    } catch (e) {
-      res.status(400).render("pages/applicantlogin", { message: e, error: true });
-      return;
-    }
-    if (tmp.authenticated === true) {
-      req.session.user = {email: email,type:"user",id: tmp.id};
-      res.redirect("/"); //goto main page after user has logined in
-    } else {
-      res
-        .status(400)
-        .render("pages/applicantlogin", { message: "please try again", error: true });
-      return;
-    }
-  });
+    tmp = await users.checkUser(email, password);
+  } catch (e) {
+    res.status(400).render("pages/applicantlogin", { message: e, error: true });
+    return;
+  }
+  if (tmp.authenticated === true) {
+    req.session.user = { email: email, type: "user", id: tmp.id };
+    res.redirect("/"); //goto main page after user has logined in
+  } else {
+    res.status(400).render("pages/applicantlogin", {
+      message: "please try again",
+      error: true,
+    });
+    return;
+  }
+});
 
 router.get("/favor", async (req, res) => {
-  
-                            // common session code all of your private routes
-                            if(!req.session.user){
-                              return res.redirect('/users/login');
-                          }
-                  
-                          if(req.session.user){
-                              if(req.session.user.type !=='user'){
-                                  return res.redirect('/users/login');
-                              }
-                          }
-  
+  // common session code all of your private routes
+  if (!req.session.user) {
+    return res.redirect("/users/login");
+  }
+
+  if (req.session.user) {
+    if (req.session.user.type !== "user") {
+      return res.redirect("/users/login");
+    }
+  }
+
   //get all favor
   let userId = req.body.userId;
   if (!ObjectId.isValid(userId)) {
@@ -212,17 +207,16 @@ router.get("/favor", async (req, res) => {
 });
 
 router.post("/favor", async (req, res) => {
+  // common session code all of your private routes
+  if (!req.session.user) {
+    return res.redirect("/users/login");
+  }
 
-                            // common session code all of your private routes
-                            if(!req.session.user){
-                              return res.redirect('/users/login');
-                          }
-                  
-                          if(req.session.user){
-                              if(req.session.user.type !=='user'){
-                                  return res.redirect('/users/login');
-                              }
-                          }
+  if (req.session.user) {
+    if (req.session.user.type !== "user") {
+      return res.redirect("/users/login");
+    }
+  }
   let jobId = req.body.jobId;
   let userId = req.body.userId;
   if (!ObjectId.isValid(jobId) || !ObjectId.isValid(userId)) {
@@ -243,16 +237,16 @@ router.post("/favor", async (req, res) => {
 });
 
 router.delete("/favor", async (req, res) => {
-                            // common session code all of your private routes
-                            if(!req.session.user){
-                              return res.redirect('/users/login');
-                          }
-                  
-                          if(req.session.user){
-                              if(req.session.user.type !=='user'){
-                                  return res.redirect('/users/login');
-                              }
-                          }
+  // common session code all of your private routes
+  if (!req.session.user) {
+    return res.redirect("/users/login");
+  }
+
+  if (req.session.user) {
+    if (req.session.user.type !== "user") {
+      return res.redirect("/users/login");
+    }
+  }
 
   let jobId = req.body.jobId;
   let userId = req.body.userId;
@@ -274,17 +268,16 @@ router.delete("/favor", async (req, res) => {
 });
 
 router.post("/apply", async (req, res) => {
+  // common session code all of your private routes
+  if (!req.session.user) {
+    return res.redirect("/users/login");
+  }
 
-                            // common session code all of your private routes
-                            if(!req.session.user){
-                              return res.redirect('/users/login');
-                          }
-                  
-                          if(req.session.user){
-                              if(req.session.user.type !=='user'){
-                                  return res.redirect('/users/login');
-                              }
-                          }
+  if (req.session.user) {
+    if (req.session.user.type !== "user") {
+      return res.redirect("/users/login");
+    }
+  }
 
   let jobId = req.body.jobId;
   let userId = req.body.userId;
@@ -306,16 +299,16 @@ router.post("/apply", async (req, res) => {
 });
 
 router.delete("/apply", async (req, res) => {
-                            // common session code all of your private routes
-                            if(!req.session.user){
-                              return res.redirect('/users/login');
-                          }
-                  
-                          if(req.session.user){
-                              if(req.session.user.type !=='user'){
-                                  return res.redirect('/users/login');
-                              }
-                          }
+  // common session code all of your private routes
+  if (!req.session.user) {
+    return res.redirect("/users/login");
+  }
+
+  if (req.session.user) {
+    if (req.session.user.type !== "user") {
+      return res.redirect("/users/login");
+    }
+  }
 
   let jobId = req.body.jobId;
   let userId = req.body.userId;
@@ -337,17 +330,16 @@ router.delete("/apply", async (req, res) => {
 });
 
 router.get("/apply/:id", async (req, res) => {
+  // common session code all of your private routes
+  if (!req.session.user) {
+    return res.redirect("/users/login");
+  }
 
-                            // common session code all of your private routes
-                            if(!req.session.user){
-                              return res.redirect('/users/login');
-                          }
-                  
-                          if(req.session.user){
-                              if(req.session.user.type !=='user'){
-                                  return res.redirect('/users/login');
-                              }
-                          }
+  if (req.session.user) {
+    if (req.session.user.type !== "user") {
+      return res.redirect("/users/login");
+    }
+  }
 
   let userId = req.body.userId;
   let jobId = req.params.jobId;
@@ -371,17 +363,16 @@ router.get("/apply/:id", async (req, res) => {
 });
 
 router.get("/apply", async (req, res) => {
+  // common session code all of your private routes
+  if (!req.session.user) {
+    return res.redirect("/users/login");
+  }
 
-                            // common session code all of your private routes
-                            if(!req.session.user){
-                              return res.redirect('/users/login');
-                          }
-                  
-                          if(req.session.user){
-                              if(req.session.user.type !=='user'){
-                                  return res.redirect('/users/login');
-                              }
-                          }
+  if (req.session.user) {
+    if (req.session.user.type !== "user") {
+      return res.redirect("/users/login");
+    }
+  }
   let userId = req.body.userId;
   if (!ObjectId.isValid(userId)) {
     return res.status(400).render("pages/error", {
