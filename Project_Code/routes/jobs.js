@@ -52,6 +52,21 @@ router.get("/jobs/state/:state", async (req, res) => {
   } catch (e) {}
 });
 
+router.get('/logout', (req, res) => {
+  if(req.session.user){
+      req.session.destroy((function(err){
+          res.clearCookie('AuthCookie').render('pages/logout');
+  
+      }));
+      return;
+  }
+  else{
+      res.render('pages/error');
+      return;
+  }
+
+});
+
 module.exports = router;
 
 // to write a route for patching the database using the update function from the job data file ;
