@@ -44,14 +44,14 @@
             </div>
         </div>
         {{/if}}
-        <button class="btn btn-primary" type="button"><a href="/recruiters/jobs/{{recid}}" class="text-decoration-none link-light">Create New Job</a></button>
+        <button class="btn btn-primary" type="button"><a href="/recruiters/jobs/new" class="text-decoration-none link-light">Create New Job</a></button>
         <div class="row job-section">
             <div class="accordion" id="job-accordion">
                 {{#each jobs}}
                 <div class="accordion-item">
                     <h2 class="accordion-header" id="jobheading{{@index}}">
                         <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseJob{{@index}}" aria-expanded="true" aria-controls="collapseJob{{@index}}">
-                            {{jobDetails.title}}
+                            <a href="/recruiters/jobs/new" class="text-decoration-none link-light">{{jobDetails.title}}</a>
                         </button>
                     </h2>
                     <div id="collapseJob{{@index}}" class="accordion-collapse collapse show" aria-labelledby="jobheading{{@index}}" data-bs-parent="job-accordion">

@@ -121,9 +121,9 @@ async function createJob(recuriterId, recruiterEmail, jobDetails){
     if(!jobDetails.details || typeof jobDetails.details !== 'object') throw `Please provide a valid details`;
     
     // to write checfunction for postDate and expiry date.
-    if(!jobDetails.postDate|| typeof jobDetails.postDate !== 'object') throw `please provide a valid post date`;
+    // if(!jobDetails.postDate|| typeof jobDetails.postDate !== 'object') throw `please provide a valid post date`;
     let currentDay = new Date();
-    if(!jobDetails.expiryDate|| typeof jobDetails.expiryDate !== 'object'|| +jobDetails.expiryDate < +currentDay) throw `please provide a valid expiry date`;
+    // if(!jobDetails.expiryDate|| typeof jobDetails.expiryDate !== 'object'|| +jobDetails.expiryDate < +currentDay) throw `please provide a valid expiry date`;
 
     if(!jobDetails.details.summary || typeof jobDetails.details.summary !== 'string' || jobDetails.details.summary.trim().length < 1) throw `Please provide a valid summary in details`;
 
@@ -145,8 +145,8 @@ async function createJob(recuriterId, recruiterEmail, jobDetails){
         contact : recruiterEmail.trim().toLowerCase(),
         city : jobDetails.city.trim().toLowerCase(),
         state : jobDetails.state.trim().toLowerCase(),
-        postDate : jobDetails.postDate,
-        expiryDate: jobDetails.expiryDate,
+        // postDate : jobDetails.postDate,
+        // expiryDate: jobDetails.expiryDate,
         details : jobDetails.details,
         payRange : jobDetails.payRange,
         
