@@ -2,11 +2,26 @@
     <div class="container">
         <div class="row">
             <div class="col-6">
-                <img src="{{recruiter.profile}}"</img>
+                {{!-- <img src="{{recruiter.profile.photo}}"></img> --}}
             </div>
             <div class="col-6">
                 <h2>{{recruiter.firstName}} {{recruiter.lastName}}</h2>
+                {{#if newRec}}
+                {{else}}
                 <h6>{{recruiter.profile.company.position}}, {{recruiter.profile.company.name}}</h6>
+                {{/if}}
+            </div>
+        </div>
+        {{#if newRec}}
+        <div class="row createprofilebtn">
+            <div class="col">
+                <button type="button" class="btn btn-danger" id="recCreateProfileBtn"><a href="/recruiters/profile/{{recid}}" class="text-decoration-none link-light">Create Profile</a></button>
+            </div>
+        </div>
+        {{else}}
+        <div class="row editprofilebtn">
+            <div class="col">
+                <button type="button" class="btn btn-primary" id="recEditProfileBtn"><a href="/recruiters/profile/{{recid}}" class="text-decoration-none link-light">Edit Profile</a></button>
             </div>
         </div>
         <div class="row profile-section">
@@ -28,6 +43,8 @@
                 <p>{{recruiter.profile.company.description}}</p>
             </div>
         </div>
+        {{/if}}
+        <button class="btn btn-primary" type="button"><a href="/recruiters/jobs/{{recid}}" class="text-decoration-none link-light">Create New Job</a></button>
         <div class="row job-section">
             <div class="accordion" id="job-accordion">
                 {{#each jobs}}
@@ -43,10 +60,10 @@
                                 {{#each applicants}}
                                 <li>
                                     <div class="container" id="appContainer">
-                                        <div class="row" id="appDetails">
+                                        <div class="row p-3 border-bottom" id="appDetails">
                                             <div class="col-3">{{firstName}} {{lastName}}</div>
-                                            <div class="col-2"><button type="button" class="btn btn-success">Accept</button></div>
-                                            <div class="col-2"><button type="button" class="btn btn-danger">Reject</button></div>
+                                            <div class="col d-md-flex justify-content-md-end"><button type="button" class="btn btn-success me-md-2">Accept</button>
+                                            <button type="button" class="btn btn-danger me-md-2">Reject</button></div>
                                         </div>
                                     </div>
                                 </li>
