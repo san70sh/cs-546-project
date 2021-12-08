@@ -3,6 +3,10 @@ const express = require("express");
 const router = express.Router();
 const users = require("../data/users");
 
+router.get("/", async(req, res) => {
+  return res.render('pages/applicantlogin', {title:"Applicant Login"});
+});
+
 router.post("/", async (req, res) => {
     let email = req.body.email;
     let password = req.body.password;

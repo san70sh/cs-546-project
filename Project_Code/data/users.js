@@ -203,6 +203,46 @@ const addResume = async (userId, fileId) => {
   return await get(userId.toString());
 };
 
+const removeResume = async (userId, fileId) => {
+  if (!ObjectId.isValid(fileId) && typeof fileId !== "string") {
+    throw new CustomError(400, "Invalid fileId");
+  } else {
+    fileId = ObjectId(fileId);
+  }
+
+  if (!ObjectId.isValid(userId) && typeof userId !== "string") {
+    throw new CustomError(400, "Invalid fileId");
+  } else {
+    userId = ObjectId(userId);
+  }
+
+  await getFile(fileId);
+
+  const usersCollection = await users();
+  const thisUser = await usersCollection.findOne({ _id: userId });
+  if (thisUser === null) throw new CustomError(400, "user did not exist");
+
+  let newProfile = thisUser.profile;
+
+  if (!newProfile.resume.includes(fileId.toString())) {
+    throw new CustomError(400, "resume not exists");
+  }
+
+  newProfile.resume = newProfile.resume.filter(function (ele) {
+    return ele !== fileId.toString();
+  });
+
+  const insertInfo = await usersCollection.updateOne(
+    { _id: userId },
+    { $set: { profile: newProfile } }
+  );
+
+  if (insertInfo.modifiedCount === 0)
+    throw new CustomError(400, "Could not update the user");
+
+  return await get(userId.toString());
+};
+
 const getAllResume = async (userId) => {
   if (!ObjectId.isValid(userId) && typeof userId !== "string") {
     throw new CustomError(400, "Invalid fileId");
@@ -855,45 +895,7 @@ const checkUser = async (email, password) => {
   }
 };
 
-const removeResume = async (userId, fileId) => {
-  if (!ObjectId.isValid(fileId) && typeof fileId !== "string") {
-    throw new CustomError(400, "Invalid fileId");
-  } else {
-    fileId = ObjectId(fileId);
-  }
 
-  if (!ObjectId.isValid(userId) && typeof userId !== "string") {
-    throw new CustomError(400, "Invalid fileId");
-  } else {
-    userId = ObjectId(userId);
-  }
-
-  await getFile(fileId);
-
-  const usersCollection = await users();
-  const thisUser = await usersCollection.findOne({ _id: userId });
-  if (thisUser === null) throw new CustomError(400, "user did not exist");
-
-  let newProfile = thisUser.profile;
-
-  if (!newProfile.resume.includes(fileId.toString())) {
-    throw new CustomError(400, "resume not exists");
-  }
-
-  newProfile.resume = newProfile.resume.filter(function (ele) {
-    return ele !== fileId.toString();
-  });
-
-  const insertInfo = await usersCollection.updateOne(
-    { _id: userId },
-    { $set: { profile: newProfile } }
-  );
-
-  if (insertInfo.modifiedCount === 0)
-    throw new CustomError(400, "Could not update the user");
-
-  return await get(userId.toString());
-};
 
 
 module.exports = {
