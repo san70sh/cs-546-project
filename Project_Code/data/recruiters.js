@@ -364,8 +364,8 @@ async function postJob(recruiterId, jobDetails) {
     const recruiterCol = await recruiters();
     let recruiter = await getRecruiter(recruiterId);
     if(recruiter.recFound) {
-      let resObj = await jobMethods.createJob(id, recruiter.data.email, jobDetails);
-      const jobPost = await recruiterCol.updateOne({ _id: recruiterId }, { $push: { "jobs.job_id": resObj._id } });
+      let resObj = await jobMethods.createJob(recruiterId, recruiter.data.email, jobDetails);
+      const jobPost = await recruiterCol.updateOne({ _id: new ObjectId(recruiterId) }, { $push: { jobs : {"job_id": resObj._id }} });
       if (jobPost.modifiedCount === 0) {
         throw new CustomError(400,"The job could not be created.");
       } else {

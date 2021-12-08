@@ -194,11 +194,13 @@ router.get('/:id', async (req, res) => {
             }
             let applicantList = [];
             await Promise.all(recruiter.data.jobs.map(async (e) => {
-                await Promise.all(e.applicant_id.map(async (e) => {
-                    e = e.toString();
-                    let appDetails = await usrDat.get(e);
-                    applicantList.push(appDetails);
-                }));
+                if(e.applicant_id){
+                    await Promise.all(e.applicant_id.map(async (e) => {
+                        e = e.toString();
+                        let appDetails = await usrDat.get(e);
+                        applicantList.push(appDetails);
+                    }));
+                }
                 let job = await jobDat.getJobsById(e.job_id.toString());
                 e["jobDetails"] = job;
                 e["applicants"] = applicantList;
@@ -238,6 +240,26 @@ router.get('/profile/:id', async (req, res) => {
     }
 });
 
+
+router.get('/jobs/new', async (req,res) => {
+    
+    try {
+        // common session code all of your private routes
+        if(!req.session.user){
+            return res.redirect('/recruiters/login');
+        }
+
+        if(req.session.user){
+            if(req.session.user.type !=='recruiter'){
+                return res.redirect('/recruiters/login');
+            }
+        }
+        return res.render('pages/jobpost', {title: "Create", recid: "new", method: "POST"})    
+    } catch (e) {
+        return res.status(e.status).render('pages/jobpost', {message: e.message, err: true});
+    }
+});
+
 router.get('/jobs/:id', async (req,res) => {
     let id = req.params.id;
     
@@ -257,8 +279,6 @@ router.get('/jobs/:id', async (req,res) => {
             console.log(job);
             if(job) {
                 return res.render('pages/jobpost', {title: "Create", recid: "update/"+id, method: "POST"})    
-            } else {
-                return res.render('pages/jobpost', {title: "Create", recid: id, method: "POST"})
             }
         }
     } catch (e) {
@@ -423,7 +443,7 @@ router.delete('/:id', async (req, res) => {
     }
 });
 
-router.post('/jobs/:id', async (req, res) => {
+router.post('/jobs/new', async (req, res) => {
                     // common session code all of your private routes
                     if(!req.session.user){
                         return res.redirect('/recruiters/login');
@@ -435,36 +455,39 @@ router.post('/jobs/:id', async (req, res) => {
                         }
                     }
                     console.log(req.body);
-    let id = req.params.id;
-    let {title, type, company, city, state/*, postDate*/, expiryDate, summary, description, jobTags, jobMinPay, jobMaxPay} = req.body;
+    let id = req.session.user.id;
+    let {title, jobType, company, city, state/*, postDate*/, jobExpiry, summary, description, jobTags, jobMinPay, jobMaxPay} = req.body;
 
     if(!title || title.trim().length < 1) return res.status(400).render('pages/jobpost', {message: `Please provide a valid title`, jtitleErr: true});
-    if(!type || type.trim().length < 1) return res.status(400).render('pages/jobpost', {message: `Please provide a valid type of job`, jtypeErr: true});
+    if(!jobType || jobType.trim().length < 1) return res.status(400).render('pages/jobpost', {message: `Please provide a valid type of job`, jtypeErr: true});
     if(!company || company.trim().length < 1) return res.status(400).render('pages/jobpost', {message: `Please provide a valid company`, compErr: true});
     if(!city || city.trim().length < 1) return res.status(400).render('pages/jobpost', {message: `Please provide a valid city`, cityErr: true});
     if(!state || state.trim().length < 1) return res.status(400).render('pages/jobpost', {message: `Please provide a valid state`, stateErr: true});
 
     if(!summary || summary.trim().length < 1) return res.status(400).render('pages/jobpost', {message: `Please provide a valid summary`, jobSumErr: true});
     if(!description || description.trim().length < 1) return res.status(400).render('pages/jobpost', {message: `Please provide a valid description`, jobDesc: true});
-    if(!jobTags || required.length < 1 ) return res.status(400).render('pages/jobpost', {message: `Please provide a valid required skilset`, jobReqErr: true});
+    if(!jobTags || jobTags.length < 1 ) return res.status(400).render('pages/jobpost', {message: `Please provide a valid required skilset`, jobReqErr: true});
 
     let currentDay = new Date();
     // if(!postDate|| typeof postDate !== 'object') return res.status(400).render('pages/jobpost', {message: `please provide a valid post date`});
-    if(!expiryDate || +expiryDate < +currentDay.toISOString().split('T')[0]) return res.status(400).render('pages/jobpost', {message: `please provide a valid expiry date`, jobExp: true});
+    // if(!jobExpiry || +jobExpiry < +currentDay.toISOString().split('T')[0]) return res.status(400).render('pages/jobpost', {message: `please provide a valid expiry date`, jobExp: true});
     jobTags = jobTags.split(",");
     if(parseInt(jobMinPay) > parseInt(jobMaxPay)) return res.status(400).render('pages/jobpost', {message: "Invalid payrange", jobPayErr: true});
     let payrange = jobMinPay + '-' +jobMaxPay;
 
     try {
-        if(ObjectId.isValid(id)) {
-            let jobDetails = {title, type, company, city, state, expiryDate, details :{summary, description, jobTags}, payrange};
+        // if(ObjectId.isValid(id)) {
+            
+            let jobDetails = {title, type: jobType, company, city, state, jobExpiry, details :{summary, description, required: jobTags}, payrange};
             let output = await recruiterDat.postJob(id, jobDetails);
-            console.log("I am here",id);
+            console.log("I am here",output);
+
             if(output) {
-                return res.redirect('/recruiters/'+req.session.user.id)
+                return res.redirect('/recruiters/'+req.session.user.id);
             }
-        }
+        // }
     } catch(e) {
+        console.log(e);
         return res.status(e.status).render('pages/jobpost', {message: e.message, mainErr: true});
     }
 });
@@ -484,10 +507,10 @@ router.post('/jobs/update/:id', async (req, res) => {
     let jobId = req.params.id;
     let recId = req.session.user.id;
 
-    let {title, type, company, city, state, postDate, expiryDate, summary, description, jobTags, jobMaxPay, jobMinPay} = req.body;
+    let {title, jobType, company, city, state, postDate, jobExpiry, summary, description, jobTags, jobMaxPay, jobMinPay} = req.body;
 
     if(!title || title.trim().length < 1) return res.status(400).render('pages/jobpost', {message: `Please provide a valid title`, jtitleErr: true});
-    if(!type || type.trim().length < 1) return res.status(400).render('pages/jobpost', {message: `Please provide a valid type of job`, jtypeErr: true});
+    if(!jobType || jobType.trim().length < 1) return res.status(400).render('pages/jobpost', {message: `Please provide a valid type of job`, jtypeErr: true});
     if(!company || company.trim().length < 1) return res.status(400).render('pages/jobpost', {message: `Please provide a valid company`, compErr: true});
     if(!city || city.trim().length < 1) return res.status(400).render('pages/jobpost', {message: `Please provide a valid city`, cityErr: true});
     if(!state || state.trim().length < 1) return res.status(400).render('pages/jobpost', {message: `Please provide a valid state`, stateErr: true});
@@ -498,7 +521,7 @@ router.post('/jobs/update/:id', async (req, res) => {
 
     let currentDay = new Date();
     // if(!postDate|| typeof postDate !== 'object') return res.status(400).render('pages/jobpost', {message: `please provide a valid post date`});
-    if(!expiryDate|| +expiryDate < +currentDay) return res.status(400).render('pages/jobpost', {message: `please provide a valid expiry date`, jobExp: true});
+    if(!jobExpiry|| +jobExpiry < +currentDay) return res.status(400).render('pages/jobpost', {message: `please provide a valid expiry date`, jobExp: true});
 
     let re = /^[0-9]+ - [0-9]+$/
     if(!re.test(payRange)) return res.status(400).render('pages/jobpost', {message: "Invalid payrange"});
@@ -507,7 +530,7 @@ router.post('/jobs/update/:id', async (req, res) => {
 
     try {
         if(ObjectId.isValid(recId) && ObjectId.isValid(jobId)) {
-            let jobDetails = {title, type, company, city, state, expiryDate, details :{summary, description, jobTags}, payrange};
+            let jobDetails = {title, jobType, company, city, state, jobExpiry, details :{summary, description, jobTags}, payrange};
             let output = await recruiterDat.updateJob(recId, jobId, jobDetails);
             if(output) {
                 return res.redirect('/recruiters/'+id)
