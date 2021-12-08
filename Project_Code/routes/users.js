@@ -72,6 +72,19 @@ router.get("/login", async(req, res) => {
 return res.render('pages/applicantlogin', {title:"Applicant Login"});
 });
 
+router.get('/signup', async (req, res) => {
+  if(req.session.user){
+      if (req.session.user.type == 'user'){
+          return res.redirect('/');       
+      }
+
+      if(req.session.user.type == 'recruiter'){
+          return res.redirect('/recruiter/signup');
+      }
+  }
+  return res.render('pages/applicantSignup', {title:"Applicant Sign-up"});
+})
+
 router.post("/login", async (req, res) => {
     let email = req.body.email;
     let password = req.body.password;
