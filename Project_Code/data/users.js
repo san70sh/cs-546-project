@@ -310,70 +310,69 @@ const getAllResume = async (userId) => {
 // };
 // test();
 
-// const createProfile = async (
-//   userId,
-//   photo,
-//   gender,
-//   city,
-//   state,
-//   experience,
-//   education,
-//   skills,
-//   languages,
-//   tags
-// ) => {
-//   if (
-//     typeof userId !== "string" ||
-//     typeof photo !== "string" ||
-//     typeof gender !== "string" ||
-//     typeof city !== "string" ||
-//     typeof state !== "string"
-//   ) {
-//     throw new CustomError(400, "photo, gender, city must be stirng type and can't be null");
-//   }
-//   if (!ObjectId.isValid(userId)) {
-//     throw new CustomError(400, "Invalid userID");
-//   } else {
-//     userId = ObjectId(userId);
-//   }
-//   if (
-//     photo.trim().length === 0 ||
-//     gender.trim().length === 0 ||
-//     city.trim().length === 0 ||
-//     state.trim().length === 0
-//   ) {
-//     // not optional, the user must fill in this data when regiester
-//     throw new CustomError(400, "name, location, phoneNumber, website, priceRange can't be empty or just spaces");
-//   }
-//   if (gender !== "M" && gender !== "F") {
-//     throw new CustomError(400, "gender must be M(male) or F(female)");
-//   }
-//   //checkWeb(photo);
-//   checkEx(experience);
-//   checkEd(education);
-//   checkSk(skills);
-//   checkTa(tags);
-//   checkLa(languages);
-//   const usersCollection = await users();
-//   let _id = ObjectId();
-//   let newProfiles = {
-//     _id,
-//     photo,
-//     gender,
-//     city,
-//     state,
-//     experience,
-//     education,
-//     skills,
-//     languages,
-//     tags,
-//   };
-//   const insertInfo = await usersCollection.updateOne(
-//     { _id: userId },
-//     { $addToSet: { profile: newProfiles } }
-//   );
-//   if (insertInfo.modifiedCount === 0) throw new CustomError(400, "Could not add the profile");
-// };
+const createProfile = async (
+  userId,
+  photo,
+  gender,
+  city,
+  state,
+  experience,
+  education,
+  skills,
+  languages,
+  tags
+) => {
+  if (
+    typeof userId !== "string" ||
+    typeof photo !== "string" ||
+    typeof gender !== "string" ||
+    typeof city !== "string" ||
+    typeof state !== "string"
+  ) {
+    throw new CustomError(400, "photo, gender, city must be stirng type and can't be null");
+  }
+  if (!ObjectId.isValid(userId)) {
+    throw new CustomError(400, "Invalid userID");
+  } else {
+    userId = ObjectId(userId);
+  }
+  if (
+    photo.trim().length === 0 ||
+    gender.trim().length === 0 ||
+    city.trim().length === 0 ||
+    state.trim().length === 0
+  ) {
+    throw new CustomError(400, "name, location, phoneNumber, website, priceRange can't be empty or just spaces");
+  }
+  if (gender !== "M" && gender !== "F") {
+    throw new CustomError(400, "gender must be M(male) or F(female)");
+  }
+  //checkWeb(photo);
+  checkEx(experience);
+  checkEd(education);
+  checkSk(skills);
+  checkTa(tags);
+  checkLa(languages);
+  const usersCollection = await users();
+  //let _id = ObjectId();
+  let newProfiles = {
+    //_id,
+    photo,
+    gender,
+    city,
+    state,
+    experience,
+    education,
+    skills,
+    languages,
+    tags,
+  };
+  const insertInfo = await usersCollection.updateOne(
+    { _id: userId },
+    { $set: { profile: newProfiles } }
+  );
+  if (insertInfo.modifiedCount === 0) throw new CustomError(400, "Could not add the profile");
+};
 
 const create = async (
   email,
@@ -381,7 +380,6 @@ const create = async (
   firstname,
   lastname,
   password,
-  newProfile
 ) => {
   if (
     typeof email !== "string" ||
@@ -422,7 +420,7 @@ const create = async (
     throw new CustomError(400, "user already exists");
   }
   const jobs = [];
-  const profile = [];
+  const resume = [];
   const favor = [];
   const hash = await bcrypt.hash(password, saltRounds);
   const usersCollection = await users();
@@ -433,28 +431,12 @@ const create = async (
     lastname,
     password: hash,
     jobs,
-    profile,
+    resume,
+    profile:{},
     favor,
   };
   const insertInfo = await usersCollection.insertOne(newUser);
   if (!insertInfo.acknowledged) throw "Could not add the User";
-  // if (newProfile !== undefined) {
-  //   newProfile.forEach((ele) => {
-  //     createProfile(
-  //       insertInfo.insertedId,
-  //       ele.userId,
-  //       ele.photo,
-  //       ele.gender,
-  //       ele.city,
-  //       ele.state,
-  //       ele.experience,
-  //       ele.education,
-  //       ele.skills,
-  //       ele.languages,
-  //       ele.tags
-  //     );
-  //   });
-  // }
   return insertInfo.insertedId;
 };
 
@@ -566,7 +548,7 @@ const update = async (userId, email, phone, firstname, lastname, password) => {
   if (!emailCheck.test(email)) {
     throw new CustomError(400, "Wrong email format");
   }
-  const phoneCheck = /^([0-9]{3})[-]([0-9]{3})[-]([0-9]{4})$/;
+  const phoneCheck = /[0-9]{10}/;
   if (!phoneCheck.test(phone)) {
     throw new CustomError(400, "Wrong phoneNo format xxx-xxx-xxxx");
   }
@@ -574,6 +556,9 @@ const update = async (userId, email, phone, firstname, lastname, password) => {
     throw new CustomError(400, "Invalid userID");
   } else {
     userId = ObjectId(userId);
+  }
+  if (await checkDuplicateP(phone) || await checkDuplicateE(email)) {
+    throw new CustomError(400, "the email or phone number has already been used");
   }
   const hash = await bcrypt.hash(password, saltRounds);
   const usersCollection = await users();
@@ -926,6 +911,7 @@ module.exports = {
   create,
   getFile,
   addResume,
+  createProfile,
   update,
   remove,
   apply,
@@ -947,7 +933,7 @@ module.exports = {
 //console.log(ObjectId.isValid('timtomtamted'));
 
 // createProfile(
-//     "61a33e54ded974aae50bb725",
+//     "61b078ea5805134fecbbf766",
 //     "one url",
 //     "M",
 //     "Hoboken",
@@ -957,10 +943,10 @@ module.exports = {
 //     ["Java", "JS"],
 //     ["english"],
 //     ["SDE","DS"]
-// ).catch(e => log(e));
+// ).catch(e => console.log(e));
 //tmp =
 
-//create("sega@gmail.com", "848-242-6666", "demo", "sega", "ccc11111111", undefined)
+//create("sega@gmail.com", "8482426666", "demo", "sega", "ccc11111111").catch(e => console.log(e));
 
 // updateProfile(
 //     '61a34056fbd0613af9d399fc',
@@ -976,7 +962,7 @@ module.exports = {
 //     ["SDE","DS","Web"]
 // )
 
-//update("61a33e13067da688cb1f8e39","Wangyou@gmail.com", "848-242-6666", "you", "wang", "$2a$08$XdvNkfdNIL8F8xsuIUeSbNOFgK0M0iV5HOskfVn7.PWncShU.O").catch(ele => console.log(ele));
+//update("61b078ea5805134fecbbf766","Wangyou@gmail.com", "8482426556", "you", "wang", "12345678").catch(ele => console.log(ele));
 //apply("61a33e454966f774489ca999","61a4236167e3b3f821f5e374").catch(ele => console.log(ele));
 //cancel("61a33e454966f774489ca999", "61a4236167e3b3f821f5e374");
 
