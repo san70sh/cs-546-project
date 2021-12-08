@@ -8,10 +8,10 @@ const download = require("../data/upload").download;
 router.get("/profile", async (req, res) => {
   try {
     // const resumes = await users.getAllResume(req.body.userId);
-    const resumes = await users.getAllResume("61aee25ee978e8a5d47c5ffc");
+    const resumes = await users.getAllResume("61b01cfc70d31d9c65cad488");
     res.render("pages/userProfile", { resumes });
   } catch (e) {
-    return res.render("pages/userProfile", { error: e });
+    return res.render("pages/userProfile", { error: e.message });
   }
 });
 
@@ -27,12 +27,12 @@ router.post("/profile/upload", upload.single("file"), async (req, res) => {
   console.log(res.req.file);
   try {
     const addRes = await users.addResume(
-      "61aee25ee978e8a5d47c5ffc",
+      "61b01cfc70d31d9c65cad488",
       res.req.file.id
     );
     console.log(addRes);
   } catch (e) {
-    res.send({ error: e });
+    res.render("pages/userProfile", { error: e.message });
     console.log(e);
   }
   res.redirect("/users/profile");

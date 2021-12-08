@@ -17,6 +17,8 @@ const setup = async () => {
     await db.collection("users").drop();
     await db.collection("recruiters").drop();
     await db.collection("jobs").drop();
+    await db.collection("userProfiles.files").drop();
+    await db.collection("userProfiles.chunks").drop();
   } catch (e) {}
 
   // seed jobs, get id
