@@ -61,68 +61,85 @@ router.get("/profile/resume/:id", async (req, res) => {
 });
 
 router.delete("/profile/resume/:id", async (req, res) => {});
-// router.post("/login", async (req, res) => {
-//   let email = req.body.email;
-//   let password = req.body.password;
-//   if (typeof email !== "string" || typeof password !== "string") {
-//     res.status(400).render("pages/loginform", {
-//       message: "email and passwork must be string",
-//       error: true,
-//     });
-//     return;
-//   }
-//   email = email.trim().toLowerCase();
-//   password = password.trim();
-//   if (email.length === 0 || password.length === 0) {
-//     res.status(400).render("pages/loginform", {
-//       message:
-//         "Not a valid email format",
-//       error: true,
-//     });
-//     return;
-//   }
-//   const emailCheck = /[A-Z0-9._-]+@[A-Z0-9.-]+\.[A-Z]{2,}/im;
-//   if (!emailCheck.test(email)) {
-//     res.status(400).render("pages/loginform", {
-//       message:
-//         "email can only be alphanumeric characters and should be at least 4 characters long.",
-//       error: true,
-//     });
-//     return;
-//   }
-//   if (password.length < 6) {
-//     res.status(400).render("pages/loginform", {
-//       message: "password must be longer than 6",
-//       error: true,
-//     });
-//     return;
-//   }
-//   if (password.indexOf(" ") >= 0) {
-//     res.status(400).render("pages/loginform", {
-//       message: "password can't contain space",
-//       error: true,
-//     });
-//     return;
-//   }
-//   let tmp;
-//   try {
-//     tmp = await users.checkUser(email, password);
-//   } catch (e) {
-//     res.status(400).render("pages/loginform", { message: e, error: true });
-//     return;
-//   }
-//   if (tmp.authenticated === true) {
-//     req.session.id = tmp.id; //user id
-//     res.redirect("/"); //goto main page if user has logined in
-//   } else {
-//     res
-//       .status(400)
-//       .render("pages/loginform", { message: "please try again", error: true });
-//     return;
-//   }
-// });
 
-// if ...  should have else throw otherwise it would have no respondes
+router.get("/login", async(req, res) => {
+  // if (req.session.user.type == 'recruiter'){
+  //   res.redirect("/user/login");
+  // }else if(req.session.user.type == 'user'){
+  //   console.log('user : already logged in');
+  //   return res.redirect('/');     
+  // }
+return res.render('pages/applicantlogin', {title:"Applicant Login"});
+});
+
+router.post("/login", async (req, res) => {
+    let email = req.body.email;
+    let password = req.body.password;
+    //let status = req.body.status; //**************use status to store a form data that shows the user is applicant or recruiter */
+    if (typeof email !== "string" ) {
+      res.status(400).render("pages/applicantlogin", {
+        message: "email and passwork must be string",
+        emailerr: true,
+      });
+      return;
+    }
+    if (typeof password !== "string") {
+      res.status(400).render("pages/applicantlogin", {
+        message: "email and passwork must be string",
+        pwderr: true,
+      });
+      return;
+    }
+    email = email.trim().toLowerCase();
+    password = password.trim();
+    if (email.length === 0 || password.length === 0) {
+      res.status(400).render("pages/applicantlogin", {
+        message:
+          "Not a valid email format",
+          emailerr: true,
+      });
+      return;
+    }
+    const emailCheck = /[A-Z0-9._-]+@[A-Z0-9.-]+\.[A-Z]{2,}/im;
+    if (!emailCheck.test(email)) {
+      res.status(400).render("pages/applicantlogin", {
+        message:
+          "email can only be alphanumeric characters and should be at least 4 characters long.",
+          emailerr: true,
+      });
+      return;
+    }
+    if (password.length < 6) {
+      res.status(400).render("pages/applicantlogin", {
+        message: "password must be longer than 6",
+        pwderr: true,
+      });
+      return;
+    }
+    if (password.indexOf(" ") >= 0) {
+      res.status(400).render("pages/applicantlogin", {
+        message: "password can't contain space",
+        pwderr: true,
+      });
+      return;
+    }
+    let tmp;
+    try {//*********change here to add recruter login in */
+      tmp = await users.checkUser(email, password);
+    } catch (e) {
+      res.status(400).render("pages/applicantlogin", { message: e, error: true });
+      return;
+    }
+    if (tmp.authenticated === true) {
+      req.session.user = {email: email,type:"user",id: tmp.id};
+      res.redirect("/"); //goto main page after user has logined in
+    } else {
+      res
+        .status(400)
+        .render("pages/applicantlogin", { message: "please try again", error: true });
+      return;
+    }
+  });
 
 router.get("/favor", async (req, res) => {
   //get all favor
