@@ -184,17 +184,17 @@ const addResume = async (userId, fileId) => {
   const thisUser = await usersCollection.findOne({ _id: userId });
   if (thisUser === null) throw new CustomError(400, "user did not exist");
 
-  let newProfile = thisUser.profile;
+  let newResume = thisUser.resume;
 
-  if (newProfile.resume.includes(fileId.toString())) {
+  if (newResume.includes(fileId.toString())) {
     throw new CustomError(400, "resume already added");
   }
 
-  newProfile.resume.push(fileId.toString());
+  newResume.push(fileId.toString());
 
   const insertInfo = await usersCollection.updateOne(
     { _id: userId },
-    { $set: { profile: newProfile } }
+    { $set: { resume: newResume } }
   );
 
   if (insertInfo.modifiedCount === 0)
@@ -222,19 +222,19 @@ const removeResume = async (userId, fileId) => {
   const thisUser = await usersCollection.findOne({ _id: userId });
   if (thisUser === null) throw new CustomError(400, "user did not exist");
 
-  let newProfile = thisUser.profile;
+  let newResume = thisUser.resume;
 
-  if (!newProfile.resume.includes(fileId.toString())) {
+  if (!newResume.includes(fileId.toString())) {
     throw new CustomError(400, "resume not exists");
   }
 
-  newProfile.resume = newProfile.resume.filter(function (ele) {
+  newResume = newResume.filter(function (ele) {
     return ele !== fileId.toString();
   });
 
   const insertInfo = await usersCollection.updateOne(
     { _id: userId },
-    { $set: { profile: newProfile } }
+    { $set: { resume: newResume } }
   );
 
   if (insertInfo.modifiedCount === 0)
@@ -256,7 +256,7 @@ const getAllResume = async (userId) => {
   // find user if not throw
   const thisUser = await usersCollection.findOne({ _id: userId });
   if (thisUser === null) throw new CustomError(400, "user did not exist");
-  const resumes = thisUser.profile.resume;
+  const resumes = thisUser.resume;
 
   // check if have resume
   if (resumes.length === 0) throw new CustomError(400, "no resume found");
@@ -264,28 +264,28 @@ const getAllResume = async (userId) => {
   return resumes;
 };
 
-const test = async () => {
-  try {
-    // const a = await addResume(
-    //   "61aee25ee978e8a5d47c5ffc",
-    //   "61ae51c711da680d18f74240"
-    // );
-    const a = await removeResume(
-      "61aee25ee978e8a5d47c5ffc",
-      "61aefe42b0b871b69e98a5b5"
-    );
-    console.log(a);
-  } catch (e) {
-    console.log(e);
-  }
-  // try {
-  //   const a = await getFile("61ae4e111168d15491514883");
-  //   console.log(a);
-  // } catch (e) {
-  //   console.log(e);
-  // }
-};
-test();
+// const test = async () => {
+//   try {
+//     // const a = await addResume(
+//     //   "61aee25ee978e8a5d47c5ffc",
+//     //   "61ae51c711da680d18f74240"
+//     // );
+//     const a = await removeResume(
+//       "61aee25ee978e8a5d47c5ffc",
+//       "61aefe42b0b871b69e98a5b5"
+//     );
+//     console.log(a);
+//   } catch (e) {
+//     console.log(e);
+//   }
+//   // try {
+//   //   const a = await getFile("61ae4e111168d15491514883");
+//   //   console.log(a);
+//   // } catch (e) {
+//   //   console.log(e);
+//   // }
+// };
+// test();
 
 // const createProfile = async (
 //   userId,
@@ -895,9 +895,6 @@ const checkUser = async (email, password) => {
   }
 };
 
-
-
-
 module.exports = {
   create,
   getFile,
@@ -915,7 +912,7 @@ module.exports = {
   getAll,
   checkUser,
   getAllResume,
-  removeResume
+  removeResume,
 };
 // test functions **IMPORTANT**
 //checkEx([{title:"Maintenance Engineer", employmentType: "full time", companyName:"Apple",startDate: "08/05/2017", endDate: "08/05/2018"}])
