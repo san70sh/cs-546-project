@@ -6,6 +6,16 @@ const upload = require("../data/upload").upload;
 const download = require("../data/upload").download;
 
 router.get("/profile", async (req, res) => {
+                            // common session code all of your private routes
+                            if(!req.session.user){
+                              return res.redirect('/users/login');
+                          }
+                  
+                          if(req.session.user){
+                              if(req.session.user.type !=='user'){
+                                  return res.redirect('/users/login');
+                              }
+                          }
   try {
     // const resumes = await users.getAllResume(req.body.userId);
     const resumes = await users.getAllResume("61b01cfc70d31d9c65cad488");
@@ -16,6 +26,18 @@ router.get("/profile", async (req, res) => {
 });
 
 router.post("/profile/upload", upload.single("file"), async (req, res) => {
+  
+                            // common session code all of your private routes
+                            if(!req.session.user){
+                              return res.redirect('/users/login');
+                          }
+                  
+                          if(req.session.user){
+                              if(req.session.user.type !=='user'){
+                                  return res.redirect('/users/login');
+                              }
+                          }
+  
   // check file existence
   if (req.file === undefined) {
     return res.render("pages/userProfile", { error: "you must select a file" });
@@ -39,6 +61,19 @@ router.post("/profile/upload", upload.single("file"), async (req, res) => {
 });
 
 router.get("/profile/resume/:id", async (req, res) => {
+                          // common session code all of your private routes
+                          if(!req.session.user){
+                            return res.redirect('/users/login');
+                        }
+                
+                        if(req.session.user){
+                            if(req.session.user.type !=='user'){
+                                return res.redirect('/users/login');
+                            }
+                        }
+
+
+
   try {
     const downloadStream = await download(req.params.id);
     downloadStream.on("data", function (data) {
@@ -125,6 +160,7 @@ router.post("/login", async (req, res) => {
     }
     let tmp;
     try {//*********change here to add recruter login in */
+
       tmp = await users.checkUser(email, password);
     } catch (e) {
       res.status(400).render("pages/applicantlogin", { message: e, error: true });
@@ -142,6 +178,18 @@ router.post("/login", async (req, res) => {
   });
 
 router.get("/favor", async (req, res) => {
+  
+                            // common session code all of your private routes
+                            if(!req.session.user){
+                              return res.redirect('/users/login');
+                          }
+                  
+                          if(req.session.user){
+                              if(req.session.user.type !=='user'){
+                                  return res.redirect('/users/login');
+                              }
+                          }
+  
   //get all favor
   let userId = req.body.userId;
   if (!ObjectId.isValid(userId)) {
@@ -164,6 +212,17 @@ router.get("/favor", async (req, res) => {
 });
 
 router.post("/favor", async (req, res) => {
+
+                            // common session code all of your private routes
+                            if(!req.session.user){
+                              return res.redirect('/users/login');
+                          }
+                  
+                          if(req.session.user){
+                              if(req.session.user.type !=='user'){
+                                  return res.redirect('/users/login');
+                              }
+                          }
   let jobId = req.body.jobId;
   let userId = req.body.userId;
   if (!ObjectId.isValid(jobId) || !ObjectId.isValid(userId)) {
@@ -184,6 +243,17 @@ router.post("/favor", async (req, res) => {
 });
 
 router.delete("/favor", async (req, res) => {
+                            // common session code all of your private routes
+                            if(!req.session.user){
+                              return res.redirect('/users/login');
+                          }
+                  
+                          if(req.session.user){
+                              if(req.session.user.type !=='user'){
+                                  return res.redirect('/users/login');
+                              }
+                          }
+
   let jobId = req.body.jobId;
   let userId = req.body.userId;
   if (!ObjectId.isValid(jobId) || !ObjectId.isValid(userId)) {
@@ -204,6 +274,18 @@ router.delete("/favor", async (req, res) => {
 });
 
 router.post("/apply", async (req, res) => {
+
+                            // common session code all of your private routes
+                            if(!req.session.user){
+                              return res.redirect('/users/login');
+                          }
+                  
+                          if(req.session.user){
+                              if(req.session.user.type !=='user'){
+                                  return res.redirect('/users/login');
+                              }
+                          }
+
   let jobId = req.body.jobId;
   let userId = req.body.userId;
   if (!ObjectId.isValid(jobId) || !ObjectId.isValid(userId)) {
@@ -224,6 +306,17 @@ router.post("/apply", async (req, res) => {
 });
 
 router.delete("/apply", async (req, res) => {
+                            // common session code all of your private routes
+                            if(!req.session.user){
+                              return res.redirect('/users/login');
+                          }
+                  
+                          if(req.session.user){
+                              if(req.session.user.type !=='user'){
+                                  return res.redirect('/users/login');
+                              }
+                          }
+
   let jobId = req.body.jobId;
   let userId = req.body.userId;
   if (!ObjectId.isValid(jobId) || !ObjectId.isValid(userId)) {
@@ -244,6 +337,18 @@ router.delete("/apply", async (req, res) => {
 });
 
 router.get("/apply/:id", async (req, res) => {
+
+                            // common session code all of your private routes
+                            if(!req.session.user){
+                              return res.redirect('/users/login');
+                          }
+                  
+                          if(req.session.user){
+                              if(req.session.user.type !=='user'){
+                                  return res.redirect('/users/login');
+                              }
+                          }
+
   let userId = req.body.userId;
   let jobId = req.params.jobId;
   if (!ObjectId.isValid(jobId) || !ObjectId.isValid(userId)) {
@@ -266,6 +371,17 @@ router.get("/apply/:id", async (req, res) => {
 });
 
 router.get("/apply", async (req, res) => {
+
+                            // common session code all of your private routes
+                            if(!req.session.user){
+                              return res.redirect('/users/login');
+                          }
+                  
+                          if(req.session.user){
+                              if(req.session.user.type !=='user'){
+                                  return res.redirect('/users/login');
+                              }
+                          }
   let userId = req.body.userId;
   if (!ObjectId.isValid(userId)) {
     return res.status(400).render("pages/error", {
