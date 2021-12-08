@@ -4,6 +4,7 @@ const router = express.Router();
 const recruiterDat = require("../data/recruiters");
 const jobDat = require("../data/jobs");
 const usrDat = require("../data/users");
+const e = require('express');
 router.get('/login', async (req, res) => {
     // $("#reclogin").show("modal");
 
@@ -205,10 +206,12 @@ router.get('/:id', async (req, res) => {
                 e["jobDetails"] = job;
                 e["applicants"] = applicantList;
                 e.job_id = e.job_id.toString();
+                const dum_id = e.job_id
             }));
         } catch(e) {
             console.log(e);
         }
+        console.log(recruiter.data.jobs);
         return res.render('pages/recruiterProfile',{recruiter: recruiter.data, jobs: recruiter.data.jobs, recid: id, newRec: newRec});
     }
 });

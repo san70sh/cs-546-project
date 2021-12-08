@@ -51,7 +51,7 @@
                 <div class="accordion-item">
                     <h2 class="accordion-header" id="jobheading{{@index}}">
                         <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseJob{{@index}}" aria-expanded="true" aria-controls="collapseJob{{@index}}">
-                            <a href="/recruiters/jobs/new" class="text-decoration-none link-light">{{jobDetails.title}}</a>
+                            <a href="/jobs/recruiters/id/"+{{job_id}} class="text-decoration-none link-light">{{jobDetails.title}}</a>
                         </button>
                     </h2>
                     <div id="collapseJob{{@index}}" class="accordion-collapse collapse show" aria-labelledby="jobheading{{@index}}" data-bs-parent="job-accordion">
