@@ -157,7 +157,7 @@ async function getJobsByRecruiterId(recruiterId) {
 async function createProfile(recruiterId, profile) {
   const recruiterCol = await recruiters();
 
-  let {gender, photo, city, state, company} = profile
+  let {gender, /*photo, */city, state, company} = profile
   let recruiter = await getRecruiter(recruiterId);
   //gender validation
   let re = /[A-Z]/i
@@ -169,20 +169,20 @@ async function createProfile(recruiterId, profile) {
   //company validation
   let {position, name, description} = company;
   let re2 = /[A-Z0-9.-]/i
-  position = position.trim();
-  name = name.trim();
   if(name == "" || name == undefined) throw new CustomError(400,"Please enter your place of work.")
+  name = name.trim();
   if(!re2.test(name)) throw new CustomError(400,`${name} is not a valid company.`);
   if(position == "" || position == undefined) throw new CustomError(400,"Please enter your position.")
+  position = position.trim();
   if(!re2.test(position)) throw new CustomError(400,`${position} is not a valid position at ${name}.`);
 
   //city validation
   let re3 = /[A-Z-]/i
-  city = city.trim();
-  state = state.trim();
   if(city == "" || city == undefined) throw new CustomError(400,"Please enter your location of work.")
+  city = city.trim();
   if(!re3.test(city)) throw new CustomError(400,`${city} is not a valid city.`);
   if(state == "" || state == undefined) throw new CustomError(400,"Please enter your location of work.")
+  state = state.trim();
   if(!re3.test(state)) throw new CustomError(400,`${state} is not a valid state.`);
 
   if(recruiter.recFound) {
@@ -192,7 +192,7 @@ async function createProfile(recruiterId, profile) {
       city: city,
       state: state,
       company: company,
-      photo: photo
+      // photo: photo
     }
     const recruiterUpdate = await recruiterCol.updateOne({ _id: recId }, { $set: { profile: newProfile } });
     if (recruiterUpdate.modifiedCount === 0) {
@@ -237,44 +237,74 @@ async function updateProfile(recruiterId, profile) {
   if(ObjectId.isValid(recruiterId)) {
     let recruiter = await getRecruiter(recruiterId);
 
-    let {gender, photo, city, state, company} = profile;
+    let {gender, /*photo, */city, state, company} = profile;
     //gender validation
-    let re = /[A-Z]/i
-    gender = gender.trim();
-    if(gender == "" || gender == undefined) throw new CustomError(400,"Please enter your gender.");
-    if(!re.test(gender)) throw new CustomError(400,"Your gender should not contain special characters.");
-    if(gender.length != 1) throw new CustomError(400,"Please enter a valid gender.");
+    if(gender){
+      let re = /[A-Z]/i
+      if(gender == "" || gender == undefined) throw new CustomError(400,"Please enter your gender.");
+      gender = gender.trim();
+      if(!re.test(gender)) throw new CustomError(400,"Your gender should not contain special characters.");
+      if(gender.length != 1) throw new CustomError(400,"Please enter a valid gender.");
+    } else {
+      gender = recruiter.data.profile.gender;
+    }
 
     //company validation
     let {position, name, description} = company;
-    let re2 = /[A-Z0-9.-]/i
-    position = position.trim();
-    name = name.trim();
-    if(name == "" || name == undefined) throw new CustomError(400,"Please enter your place of work.")
-    if(re2.test(name)) throw new CustomError(400,`${name} is not a valid company.`);
-    if(position == "" || position == undefined) throw new CustomError(400,"Please enter your position.")
-    if(re2.test(position)) throw new CustomError(400,`${position} is not a valid position at ${name}.`);
+
+    let re2 = /[A-Z]+[ ]?[A-Z]*/i
+    if(name){
+      if(name == "" || name == undefined) throw new CustomError(400,"Please enter your place of work.")
+      name = name.trim();
+      if(!re2.test(name)) throw new CustomError(400,`${name} is not a valid company.`);
+    } else {
+      name = recruiter.data.profile.company.name;
+    }
+    
+    if(position){
+      if(position == "" || position == undefined) throw new CustomError(400,"Please enter your position.")
+      position = position.trim();
+      if(!re2.test(position)) throw new CustomError(400,`${position} is not a valid position at ${name}.`);
+    } else {
+      position = recruiter.data.profile.company.position;
+    }
 
     //city validation
-    let re3 = /[A-Z-]/i
-    city = city.trim();
-    state = state.trim();
-    if(city == "" || city == undefined) throw new CustomError(400,"Please enter your location of work.")
-    if(re3.test(city)) throw new CustomError(400,`${city} is not a valid city.`);
-    if(state == "" || state == undefined) throw new CustomError(400,"Please enter your location of work.")
-    if(re3.test(state)) throw new CustomError(400,`${state} is not a valid state.`);
+    let re3 = /[A-Z]+[ ]?[A-Z]*[ ]?[A-Z]*/i
+
+    if(city){
+      if(city == "" || city == undefined) throw new CustomError(400,"Please enter your location of work.")
+      city = city.trim();
+      if(!re3.test(city)) throw new CustomError(400,`${city} is not a valid city.`);
+      if(city.length < 3) throw new CustomError(400,"Please enter a valid city.");
+    } else {
+      city = recruiter.data.profile.city;
+    }
+
+    if(state){
+      if(state == "" || state == undefined) throw new CustomError(400,"Please enter your location of work.")
+      state = state.trim();
+      if(!re3.test(state)) throw new CustomError(400,`${state} is not a valid state.`);
+      if(state.length < 2) throw new CustomError(400,"Please enter a valid state.");
+    } else {
+      state = recruiter.data.profile.state;
+    }
 
     if(recruiter.recFound) {
-      if(recruiter.data.profile.gender == gender && recruiter.data.profile.city == city && recruiter.data.profile.state == state
-        && recruiter.data.profile.company == company) throw new CustomError(400,`No fields are being updated.`)
+      
+      if((gender && recruiter.data.profile.gender == gender) && (city && recruiter.data.profile.city == city) && (state && recruiter.data.profile.state == state)
+        && (name && recruiter.data.profile.company.name == name) && (position && recruiter.data.profile.company.position == position) && (description && recruiter.data.profile.company.description == description)) {
+          throw new CustomError(400,`No fields are being updated.`);
+        } 
       else {
+        
         let recId = new ObjectId(recruiter.data._id);
         let updatedProfile = {
           gender: gender,
           city: city,
           state: state,
           company: company,
-          photo: photo
+          // photo: photo
         }
         const recruiterUpdate = await recruiterCol.updateOne({ _id: recId }, { $set: { profile: updatedProfile } });
         if (recruiterUpdate.modifiedCount === 0) {
