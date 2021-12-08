@@ -15,9 +15,19 @@ app.use(
     name: "AuthCookie",
     secret: "This is a secret.. shhh don't tell anyone",
     saveUninitialized: true,
-    resave: false,
+    resave: false
   })
 );
+
+app.use ((req, res, next) => {
+  //console.log(req.session.user);
+  if (!req.session.user) {
+    console.log(new Date().toUTCString(),': ',req.method, ' ',req.path,'  (Non-Authenticated User)');
+  } else {
+    console.log(new Date().toUTCString(),': ',req.method, ' ',req.path,'  (Authenticated User)');
+  }
+  next();
+});
 
 // app.use('/users', (req, res, next) => {//*****************setting private pages
 //   if (!req.session.userId) {
