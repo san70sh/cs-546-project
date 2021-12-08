@@ -90,10 +90,10 @@ async function createRecruiter(email, password, firstName, lastName, phone) {
 
   //phone validation
   phone = phone.trim();
-  let re4 = /[^0-9+$]/
+  let re4 = /[0-9]{10}/
   if(phone == "" || phone == undefined) throw new CustomError(400,"Please enter your phone number.");
   if(phone.length != 10) throw new CustomError(400,"Your phone number is of 10 digits.");
-  if(!re.test(phone)) throw new CustomError(400,"Invalid phone number");
+  if(!re4.test(phone)) throw new CustomError(400,"Invalid phone number");
 
   phone = phone.replace(/(\d{3})(\d{3})(\d{4})/, "$1-$2-$3");
 
