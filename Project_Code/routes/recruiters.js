@@ -10,7 +10,7 @@ router.get('/login', async (req, res) => {
     if(req.session.user){
         if (req.session.user.type == 'recruiter'){
             //console.log('recruiter : already logged in');
-            // return res.redirect('/ ##### BAPI YOUR ROUTE HERE');       
+            return res.redirect('/recruiters/'+req.session.user.id);       
         }
 
         if(req.session.user.type == 'user'){
@@ -162,7 +162,7 @@ router.post('/signup', async (req, res) => {
                 if(!recruiter.data.profile){
                     profileCreated = false;
                 }
-                return res.redirect('/recruiters/'+recId);
+                return res.redirect('/profile/'+recId);
             }
         } catch (e) {
             return res.status(e.status).render('pages/recruiterSignup', { message: e.message, mainerr: true});
@@ -459,8 +459,9 @@ router.post('/jobs/:id', async (req, res) => {
         if(ObjectId.isValid(id)) {
             let jobDetails = {title, type, company, city, state, expiryDate, details :{summary, description, jobTags}, payrange};
             let output = await recruiterDat.postJob(id, jobDetails);
+            console.log("I am here",id);
             if(output) {
-                return res.redirect('/recruiters/'+id)
+                return res.redirect('/recruiters/'+req.session.user.id)
             }
         }
     } catch(e) {
