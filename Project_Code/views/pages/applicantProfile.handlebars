@@ -16,16 +16,19 @@
         {{#if newUser}}
         <div class="row createprofilebtn">
             <div class="col">
-                <button type="button" class="btn btn-danger" id="recCreateProfileBtn"><a
-                        href="/users/profile/{{userId}}" class="text-decoration-none link-light">Create
-                        Profile</a></button>
+                <button type="button" class="btn btn-danger" id="recCreateProfileBtn"
+                    onclick = "location.href='/users/profile/{{userId}}';">Create
+                    Profile</button>
+                {{!-- <a href="/users/profile/{{userId}}" class="text-decoration-none link-light">Create
+                    Profile</a> --}}
             </div>
         </div>
         {{else}}
         <div class="row editprofilebtn">
             <div class="col">
-                <button type="button" class="btn btn-primary" id="recEditProfileBtn"><a href="/users/profile/{{userId}}"
-                        class="text-decoration-none link-light">Edit Profile</a></button>
+                <button type="button" class="btn btn-primary" id="recEditProfileBtn" onclick="location.href = '
+                    /users/profile/{{userId}}';"> </button>
+                {{!-- <a href="/users/profile/{{userId}}" class="text-decoration-none link-light">Edit Profile</a> --}}
             </div>
         </div>
         <div class="row profile-section">
@@ -74,7 +77,8 @@
     </div>
     {{/if}}
 
-    <button class="btn btn-primary" type="button" onclick="location.href = '/users/{{userId}}/resume';">Arrange Resume</button>
+    <button class="btn btn-primary" type="button" onclick="location.href = '/users/{{userId}}/resume';">Arrange
+        Resume</button>
 
     {{#if resumeError}}
     <p class="error">{{resumeError}}</p>
@@ -84,7 +88,8 @@
     {{#each resumes}}
     <ul id='resumeList'>
         <div class='resumeList'> <a href="./profile/resume/{{this}}" target="_blank">resume{{math @index "+" 1}}.pdf</a>
-            <button type="button" value={{this}} class="delete btn-primary" onclick="deleteResume(this.value)">delete</button>
+            <button type="button" value={{this}} class="delete btn-primary"
+                onclick="deleteResume(this.value)">delete</button>
         </div>
     </ul>
     {{/each}}
