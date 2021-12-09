@@ -17,45 +17,56 @@ router.get("/profile", async (req, res) => {
     }
   }
 
+  // get resumes
   try {
     // const resumes = await users.getAllResume(req.body.userId);
     const resumes = await users.getAllResume(req.session.user.id);
-    res.render("pages/userProfile", { resumes });
+    res.render("pages/applicantProfile", { resumes });
   } catch (e) {
-    return res.render("pages/userProfile", { error: e.message });
+    console.log(e);
+    return res.render("pages/applicantProfile", { resumeError: e.message });
   }
 });
 
-router.post("/profile/upload", upload.single("file"), async (req, res) => {
-  // common session code all of your private routes
-  if (!req.session.user) {
-    return res.redirect("/users/login");
-  }
-
-  if (req.session.user) {
-    if (req.session.user.type !== "user") {
+router.post(
+  "/profile/resume/upload",
+  upload.single("file"),
+  async (req, res) => {
+    // common session code all of your private routes
+    if (!req.session.user) {
       return res.redirect("/users/login");
     }
-  }
 
-  // check file existence
-  if (req.file === undefined) {
-    return res.render("pages/userProfile", { error: "you must select a file" });
+    if (req.session.user) {
+      if (req.session.user.type !== "user") {
+        return res.redirect("/users/login");
+      }
+    }
+
+    // check file existence
+    if (req.file === undefined) {
+      return res.render("pages/applicantProfile", {
+        error: "you must select a file",
+      });
+    }
+    // check file type
+    if (req.file.mimetype !== "application/pdf") {
+      return res.render("pages/applicantProfile", { error: "file type error" });
+    }
+    console.log(res.req.file);
+    try {
+      const addRes = await users.addResume(
+        req.session.user.id,
+        res.req.file.id
+      );
+      console.log(addRes);
+    } catch (e) {
+      res.render("pages/applicantProfile", { error: e.message });
+      console.log(e);
+    }
+    res.redirect("/users/applicantProfile");
   }
-  // check file type
-  if (req.file.mimetype !== "application/pdf") {
-    return res.render("pages/userProfile", { error: "file type error" });
-  }
-  console.log(res.req.file);
-  try {
-    const addRes = await users.addResume(req.session.user.id, res.req.file.id);
-    console.log(addRes);
-  } catch (e) {
-    res.render("pages/userProfile", { error: e.message });
-    console.log(e);
-  }
-  res.redirect("/users/profile");
-});
+);
 
 router.get("/profile/resume/:id", async (req, res) => {
   // common session code all of your private routes
@@ -92,30 +103,30 @@ router.get("/profile/resume/:id", async (req, res) => {
 
 router.delete("/profile/resume/:id", async (req, res) => {});
 
-router.get("/login", async(req, res) => {
-  if(req.session.user){
-  if (req.session.user.type == 'recruiter'){
-    res.redirect("/recruiter/login");
-  }else if(req.session.user.type == 'user'){
-    console.log('user : already logged in');
-    return res.redirect('/');     
+router.get("/login", async (req, res) => {
+  if (req.session.user) {
+    if (req.session.user.type == "recruiter") {
+      res.redirect("/recruiter/login");
+    } else if (req.session.user.type == "user") {
+      console.log("user : already logged in");
+      return res.redirect("/");
+    }
   }
-}
-return res.render('pages/applicantlogin', {title:"Applicant Login"});
+  return res.render("pages/applicantlogin", { title: "Applicant Login" });
 });
 
-router.get('/signup', async (req, res) => {
-  if(req.session.user){
-      if (req.session.user.type == 'user'){
-          return res.redirect('/');       
-      }
+router.get("/signup", async (req, res) => {
+  if (req.session.user) {
+    if (req.session.user.type == "user") {
+      return res.redirect("/");
+    }
 
-      if(req.session.user.type == 'recruiter'){
-          return res.redirect('/recruiter/signup');
-      }
+    if (req.session.user.type == "recruiter") {
+      return res.redirect("/recruiter/signup");
+    }
   }
-  return res.render('pages/applicantSignup', {title:"Applicant Sign-up"});
-})
+  return res.render("pages/applicantSignup", { title: "Applicant Sign-up" });
+});
 
 router.post("/login", async (req, res) => {
   let email = req.body.email;
@@ -123,14 +134,14 @@ router.post("/login", async (req, res) => {
   //let status = req.body.status; //**************use status to store a form data that shows the user is applicant or recruiter */
   if (typeof email !== "string") {
     res.status(400).render("pages/applicantlogin", {
-      message: "email and passwork must be string",
+      message: "email and password must be string",
       emailerr: true,
     });
     return;
   }
   if (typeof password !== "string") {
     res.status(400).render("pages/applicantlogin", {
-      message: "email and passwork must be string",
+      message: "email and password must be string",
       pwderr: true,
     });
     return;
@@ -188,43 +199,118 @@ router.post("/login", async (req, res) => {
   }
 });
 
-router.post('/signup', async (req, res) => {
-      let {email, password, firstName, lastName, phone} = req.body;
-      let re = /[A-Z0-9._-]+@[A-Z0-9.-]+\.[A-Z]{2,}/im
-      if(email == "" || email == undefined) return res.status(400).render('pages/applicantSignup', {title: "Sign Up/Register", message: "Please enter your email.", emailerr: true});
-      if(email.length < 6) return res.status(400).render('pages/applicantSignup', {title: "Sign Up/Register", message: "The email is too short.", emailerr: true});
-      if(!re.test(email)) return res.status(400).render('pages/applicantSignup', {title: "Sign Up/Register", message: `${email} is not a valid email.`, emailerr: true});
-      email = email.toLowerCase();
+router.post("/signup", async (req, res) => {
+  let { email, password, firstName, lastName, phone } = req.body;
+  let re = /[A-Z0-9._-]+@[A-Z0-9.-]+\.[A-Z]{2,}/im;
+  if (email == "" || email == undefined)
+    return res.status(400).render("pages/applicantSignup", {
+      title: "Sign Up/Register",
+      message: "Please enter your email.",
+      emailerr: true,
+    });
+  if (email.length < 6)
+    return res.status(400).render("pages/applicantSignup", {
+      title: "Sign Up/Register",
+      message: "The email is too short.",
+      emailerr: true,
+    });
+  if (!re.test(email))
+    return res.status(400).render("pages/applicantSignup", {
+      title: "Sign Up/Register",
+      message: `${email} is not a valid email.`,
+      emailerr: true,
+    });
+  email = email.toLowerCase();
 
-      //password validation
-      let re2 = /\s/i
-      if(!password) return res.status(400).render('pages/applicantSignup',{title: "Sign Up/Register", message: `Please enter your password`, pwderr: true});
-      if(re2.test(password)) return res.status(400).render('pages/applicantSignup', {title: "Sign Up/Register", message: "Spaces are not allowed in passwords.", pwderr: true});
-      if(password.length < 6) return res.status(400).render('pages/applicantSignup', {title: "Sign Up/Register", message: "Password is too short.", pwderr: true});
+  //password validation
+  let re2 = /\s/i;
+  if (!password)
+    return res.status(400).render("pages/applicantSignup", {
+      title: "Sign Up/Register",
+      message: `Please enter your password`,
+      pwderr: true,
+    });
+  if (re2.test(password))
+    return res.status(400).render("pages/applicantSignup", {
+      title: "Sign Up/Register",
+      message: "Spaces are not allowed in passwords.",
+      pwderr: true,
+    });
+  if (password.length < 6)
+    return res.status(400).render("pages/applicantSignup", {
+      title: "Sign Up/Register",
+      message: "Password is too short.",
+      pwderr: true,
+    });
 
-      //name validation
-      let re3 = /[A-Z]/i
-      firstName = firstName.trim();
-      lastName = lastName.trim();
-      if(firstName == "" || firstName == undefined) return res.status(400).render('pages/applicantSignup', {title: "Sign Up/Register", message: "Please enter your first name.", fnerr: true});
-      if(!re3.test(firstName)) return res.status(400).render('pages/applicantSignup', {title: "Sign Up/Register", message: "Your name should not contain special characters.", fnerr: true});
-      if(lastName == "" || lastName == undefined) return res.status(400).render('pages/applicantSignup', {title: "Sign Up/Register", message: "Please enter your last name.", lnerr: true});
-      if(!re3.test(lastName)) return res.status(400).render('pages/applicantSignup', {title: "Sign Up/Register", message: "Your name should not contain special characters.", lnerr: true});
+  //name validation
+  let re3 = /[A-Z]/i;
+  firstName = firstName.trim();
+  lastName = lastName.trim();
+  if (firstName == "" || firstName == undefined)
+    return res.status(400).render("pages/applicantSignup", {
+      title: "Sign Up/Register",
+      message: "Please enter your first name.",
+      fnerr: true,
+    });
+  if (!re3.test(firstName))
+    return res.status(400).render("pages/applicantSignup", {
+      title: "Sign Up/Register",
+      message: "Your name should not contain special characters.",
+      fnerr: true,
+    });
+  if (lastName == "" || lastName == undefined)
+    return res.status(400).render("pages/applicantSignup", {
+      title: "Sign Up/Register",
+      message: "Please enter your last name.",
+      lnerr: true,
+    });
+  if (!re3.test(lastName))
+    return res.status(400).render("pages/applicantSignup", {
+      title: "Sign Up/Register",
+      message: "Your name should not contain special characters.",
+      lnerr: true,
+    });
 
-      //phone validation
-      let re4 = /[0-9]{10}/
-      phone = phone.trim();
-      if(phone == "" || phone == undefined) return res.status(400).render('pages/applicantSignup', {title: "Sign Up/Register", message: "Please enter your phone number.", pherr: true});
-      if(phone.length != 10) return res.status(400).render('pages/applicantSignup', {title: "Sign Up/Register", message: "Invalid phone number.", pherr: true});
-      if(!re4.test(phone)) return res.status(400).render('pages/applicantSignup', {title: "Sign Up/Register", message: "Invalid phone number.", pherr: true});
-      try {
-          let userId = await users.create(email, phone, firstName, lastName, password);
-              req.session.user = {email: email,type:"user",id: userId};
-              console.log(req.session.user)
-              return res.redirect(`/`);
-      } catch (e) {
-          return res.status(e.status).render('pages/applicantSignup', {title: "Sign Up/Register", message: e.message, mainerr: true});
-      }
+  //phone validation
+  let re4 = /[0-9]{10}/;
+  phone = phone.trim();
+  if (phone == "" || phone == undefined)
+    return res.status(400).render("pages/applicantSignup", {
+      title: "Sign Up/Register",
+      message: "Please enter your phone number.",
+      pherr: true,
+    });
+  if (phone.length != 10)
+    return res.status(400).render("pages/applicantSignup", {
+      title: "Sign Up/Register",
+      message: "Invalid phone number.",
+      pherr: true,
+    });
+  if (!re4.test(phone))
+    return res.status(400).render("pages/applicantSignup", {
+      title: "Sign Up/Register",
+      message: "Invalid phone number.",
+      pherr: true,
+    });
+  try {
+    let userId = await users.create(
+      email,
+      phone,
+      firstName,
+      lastName,
+      password
+    );
+    req.session.user = { email: email, type: "user", id: userId };
+    console.log(req.session.user);
+    return res.redirect(`/`);
+  } catch (e) {
+    return res.status(e.status).render("pages/applicantSignup", {
+      title: "Sign Up/Register",
+      message: e.message,
+      mainerr: true,
+    });
+  }
 });
 router.get("/favor", async (req, res) => {
   // common session code all of your private routes
@@ -421,15 +507,15 @@ router.get("/apply", async (req, res) => {
     return res.redirect("/users/login");
   }
 
-    // common session code all of your private routes
-    if(!req.session.user){
-      return res.redirect('/users/login');
+  // common session code all of your private routes
+  if (!req.session.user) {
+    return res.redirect("/users/login");
   }
 
-  if(req.session.user){
-      if(req.session.user.type !=='user'){
-          return res.redirect('/users/login');
-      }
+  if (req.session.user) {
+    if (req.session.user.type !== "user") {
+      return res.redirect("/users/login");
+    }
   }
   let userId = req.session.user.id;
   if (!ObjectId.isValid(userId)) {
