@@ -93,29 +93,82 @@ router.get("/profile/resume/:id", async (req, res) => {
 router.delete("/profile/resume/:id", async (req, res) => {});
 
 router.get("/login", async(req, res) => {
-  if(req.session.user){
-  if (req.session.user.type == 'recruiter'){
-    res.redirect("/recruiter/login");
-  }else if(req.session.user.type == 'user'){
-    console.log('user : already logged in');
-    return res.redirect('/');     
-  }
-}
-return res.render('pages/applicantlogin', {title:"Applicant Login"});
+//   if(req.session.user){
+//   if (req.session.user.type == 'recruiter'){
+//     res.redirect("/recruiter/login");
+//   }else if(req.session.user.type == 'user'){
+//     console.log('user : already logged in');
+//     return res.redirect('/');     
+//   }
+// }
+  return res.render('pages/applicantlogin', {title:"Applicant Login"});
 });
 
 router.get('/signup', async (req, res) => {
-  if(req.session.user){
-      if (req.session.user.type == 'user'){
-          return res.redirect('/');       
-      }
+  // if(req.session.user){
+  //     if (req.session.user.type == 'user'){
+  //         return res.redirect('/');       
+  //     }
 
-      if(req.session.user.type == 'recruiter'){
-          return res.redirect('/recruiter/signup');
-      }
-  }
+  //     if(req.session.user.type == 'recruiter'){
+  //         return res.redirect('/recruiter/signup');
+  //     }
+  // }
   return res.render('pages/applicantSignup', {title:"Applicant Sign-up"});
 })
+
+router.get('/:id', async (req, res) => {
+  if(!req.session.user){
+    return res.redirect('/users/login');
+}
+
+ if(req.session.user){
+    if(req.session.user.type !=='user'){
+        return res.redirect('/users/login');
+        }
+    }
+  let id = req.params.id, user, newUser;
+  if(ObjectId.isValid(id)) {
+      try{
+          user = await users.get(id);
+          if(Object.keys(user.profile).length == 0) {
+              newUser = true;
+          } else {
+              newUser = false
+          }
+      } catch(e) {
+          console.log(e);
+      }
+      return res.render('pages/applicantProfile',{user: user, jobs: user.jobs, userId: id, newUser: newUser});
+  }
+});
+
+router.get('/profile/:id', async (req, res) => {
+  let id = req.params.id;
+  try {
+       // common session code all of your private routes
+       if(!req.session.user){
+          return res.redirect('/users/login');
+      }
+
+      if(req.session.user){
+          if(req.session.user.type !=='user'){
+              return res.redirect('/users/login');
+          }
+      }
+      if(ObjectId.isValid(id)) {
+          let user = await users.get(id);
+          console.log(user);
+          if(Object.keys(user.profile).length != 0) {
+              return res.render('pages/applicanteditprofile', {title: "Update", method: "POST", recid: "update/"+id});
+          } else {
+              return res.render('pages/applicanteditprofile', {title: "Create", method: "POST", recid: id});
+          }
+      }
+  } catch (e) {
+      return res.status(e.status).render('pages/applicanteditprofile', {message: e.message, err: true});
+  }
+});
 
 router.post("/login", async (req, res) => {
   let email = req.body.email;
@@ -173,16 +226,16 @@ router.post("/login", async (req, res) => {
 
     tmp = await users.checkUser(email, password);
   } catch (e) {
-    res.status(400).render("pages/applicantlogin", { message: e, error: true });
+    res.status(400).render("pages/applicantlogin", { message: e.message, mainerr: true });
     return;
   }
   if (tmp.authenticated === true) {
     req.session.user = { email: email, type: "user", id: tmp.id };
-    res.redirect("/"); //goto main page after user has logined in
+    res.redirect(`/users/${tmp.id}`); //goto main page after user has logined in
   } else {
     res.status(400).render("pages/applicantlogin", {
       message: "please try again",
-      error: true,
+      mainerr: true,
     });
     return;
   }
@@ -221,7 +274,7 @@ router.post('/signup', async (req, res) => {
           let userId = await users.create(email, phone, firstName, lastName, password);
               req.session.user = {email: email,type:"user",id: userId};
               console.log(req.session.user)
-              return res.redirect(`/`);
+              return res.redirect(`/users/${userId}`);
       } catch (e) {
           return res.status(e.status).render('pages/applicantSignup', {title: "Sign Up/Register", message: e.message, mainerr: true});
       }
