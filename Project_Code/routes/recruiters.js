@@ -4,7 +4,6 @@ const router = express.Router();
 const recruiterDat = require("../data/recruiters");
 const jobDat = require("../data/jobs");
 const usrDat = require("../data/users");
-const e = require('express');
 router.get('/login', async (req, res) => {
     // $("#reclogin").show("modal");
 
@@ -203,15 +202,14 @@ router.get('/:id', async (req, res) => {
                     }));
                 }
                 let job = await jobDat.getJobsById(e.job_id.toString());
+                job._id = job._id.toString();
                 e["jobDetails"] = job;
                 e["applicants"] = applicantList;
                 e.job_id = e.job_id.toString();
-                const dum_id = e.job_id
             }));
         } catch(e) {
             console.log(e);
         }
-        console.log(recruiter.data.jobs);
         return res.render('pages/recruiterProfile',{recruiter: recruiter.data, jobs: recruiter.data.jobs, recid: id, newRec: newRec});
     }
 });
@@ -263,7 +261,7 @@ router.get('/jobs/new', async (req,res) => {
     }
 });
 
-router.get('/jobs/:id', async (req,res) => {
+router.get('/jobs/update/:id', async (req,res) => {
     let id = req.params.id;
     
     try {
@@ -281,7 +279,7 @@ router.get('/jobs/:id', async (req,res) => {
             let job = await jobDat.getJobsById(id);
             console.log(job);
             if(job) {
-                return res.render('pages/jobpost', {title: "Create", recid: "update/"+id, method: "POST"})    
+                return res.render('pages/jobpost', {title: "Update", recid: "update/"+id, method: "POST"})    
             }
         }
     } catch (e) {
@@ -510,7 +508,7 @@ router.post('/jobs/update/:id', async (req, res) => {
     let jobId = req.params.id;
     let recId = req.session.user.id;
 
-    let {title, jobType, company, city, state, postDate, jobExpiry, summary, description, jobTags, jobMaxPay, jobMinPay} = req.body;
+    let {title, jobType, company, city, state, postDate, jobExpiry, summary, benefits, description, jobTags, jobMaxPay, jobMinPay} = req.body;
 
     if(!title || title.trim().length < 1) return res.status(400).render('pages/jobpost', {message: `Please provide a valid title`, jtitleErr: true});
     if(!jobType || jobType.trim().length < 1) return res.status(400).render('pages/jobpost', {message: `Please provide a valid type of job`, jtypeErr: true});
@@ -520,23 +518,21 @@ router.post('/jobs/update/:id', async (req, res) => {
 
     if(!summary || summary.trim().length < 1) return res.status(400).render('pages/jobpost', {message: `Please provide a valid summary`, jobSumErr: true});
     if(!description || description.trim().length < 1) return res.status(400).render('pages/jobpost', {message: `Please provide a valid description`, jobDesc: true});
-    if(!required || required.length < 1 ) return res.status(400).render('pages/jobpost', {message: `Please provide a valid required skilset `, jobReqErr: true});
+    if(!jobTags || jobTags.length < 1 ) return res.status(400).render('pages/jobpost', {message: `Please provide a valid required skilset `, jobReqErr: true});
 
     let currentDay = new Date();
     // if(!postDate|| typeof postDate !== 'object') return res.status(400).render('pages/jobpost', {message: `please provide a valid post date`});
-    if(!jobExpiry|| +jobExpiry < +currentDay) return res.status(400).render('pages/jobpost', {message: `please provide a valid expiry date`, jobExp: true});
+    // if(!jobExpiry|| +jobExpiry < +currentDay) return res.status(400).render('pages/jobpost', {message: `please provide a valid expiry date`, jobExp: true});
 
-    let re = /^[0-9]+ - [0-9]+$/
-    if(!re.test(payRange)) return res.status(400).render('pages/jobpost', {message: "Invalid payrange"});
     jobTags = jobTags.split(",");
     if(parseInt(jobMinPay) > parseInt(jobMaxPay)) return res.status(400).render('pages/jobpost', {message: "Invalid payrange", jobPayErr: true});
-
+    let payrange = jobMinPay +"-"+jobMaxPay;
     try {
         if(ObjectId.isValid(recId) && ObjectId.isValid(jobId)) {
-            let jobDetails = {title, jobType, company, city, state, jobExpiry, details :{summary, description, jobTags}, payrange};
+            let jobDetails = {title, type: jobType, company, city, state, jobExpiry, details :{summary, description, required: jobTags}, payrange, benefits};
             let output = await recruiterDat.updateJob(recId, jobId, jobDetails);
             if(output) {
-                return res.redirect('/recruiters/'+id)
+                return res.redirect('/recruiters/'+recId)
             }
         }
     } catch(e) {
@@ -544,7 +540,7 @@ router.post('/jobs/update/:id', async (req, res) => {
     }
 });
 
-router.delete('/jobs/:id', async (req, res) => {
+router.get('/jobs/delete/:id', async (req, res) => {
     let jobId = req.params.id;
     try {
                         // common session code all of your private routes
@@ -558,11 +554,14 @@ router.delete('/jobs/:id', async (req, res) => {
                             }
                         }
         if(ObjectId.isValid(jobId)) {
-            let userId = req.session.user;
+            let userId = req.session.user.id;
             let output = await recruiterDat.removeJob(userId, jobId);
-            return res.json(output);
+            if(output.deleted) {
+                return res.redirect('/recruiters/'+req.session.user.id)
+            }
         }
     } catch (e) {
+        console.log(e);
         return res.status(e.status).render('pages/rec', {message: e.message, err: true});
     }
 });
