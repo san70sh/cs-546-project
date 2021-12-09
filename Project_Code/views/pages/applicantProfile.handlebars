@@ -5,7 +5,7 @@
                 {{!-- <img src="{{user.profile.photo}}"></img> --}}
             </div>
             <div class="col-6">
-                <h2>{{user.firstName}} {{user.lastName}}</h2>
+                <h2>Hello {{user.firstname}}{{user.lastname}}</h2>
                 {{#if newUser}}
                 <h6>For your better experience, please complete your personal information first</h6>
                 {{else}}
@@ -19,16 +19,13 @@
                 <button type="button" class="btn btn-danger" id="recCreateProfileBtn"
                     onclick = "location.href='/users/profile/{{userId}}';">Create
                     Profile</button>
-                {{!-- <a href="/users/profile/{{userId}}" class="text-decoration-none link-light">Create
-                    Profile</a> --}}
             </div>
         </div>
         {{else}}
         <div class="row editprofilebtn">
             <div class="col">
                 <button type="button" class="btn btn-primary" id="recEditProfileBtn" onclick="location.href = '
-                    /users/profile/{{userId}}';"> </button>
-                {{!-- <a href="/users/profile/{{userId}}" class="text-decoration-none link-light">Edit Profile</a> --}}
+                    /users/profile/{{userId}}';">EditProfile </button>
             </div>
         </div>
         <div class="row profile-section">
@@ -41,44 +38,41 @@
             <div class="col">
                 <p>Experience:</p>
                 {{#each user.profile.experience}}
-                <div class="container" id="appContainer">
-                    <div class="row p-3 border-bottom" id="appDetails">
-                        <dt>CompanyName: {{companyName}}</dt>
-                        <dd>Title: {{title}}</dd>
-                        <dd>EmploymentType: {{employmentType}}</dd>
-                        <dd>StartDate: {{startDate}}</dd>
-                        <dd>EndDate: {{endDate}}</dd>
-                        {{!-- <button type="button" class="btn btn-success me-md-2">Accept</button> --}}
-                        {{!-- <button type="button" class="btn btn-danger me-md-2">Reject</button>
-                    </div> --}}
+                <div class="container" id="exContainer">
+                    <ul id = "exDetails">
+                        <li>CompanyName: {{companyName}}</li>
+                        <li>Title: {{title}}</li>
+                        <li>EmploymentType: {{employmentType}}</li>
+                        <li>StartDate: {{startDate}}</li>
+                        <li>EndDate: {{endDate}}</li>
+                    </ul>
                 </div>
             </div>
             {{/each}}
             <p>Education: </p>
             {{#each user.profile.education}}
-            <div class="container" id="appContainer">
-                <div class="row p-3 border-bottom" id="appDetails">
-                    <dt>School: {{school}}</dt>
-                    <dd>Major: {{major}}</dd>
-                    <dd>Degree: {{degree}}</dd>
-                    <dd>StartDate: {{startDate}}</dd>
-                    <dd>EndDate: {{endDate}}</dd>
-                </div>
+            <div class="container" id="edContainer">
+                <ul id = "edDetails">
+                    <li>School: {{school}}</li>
+                    <li>Major: {{major}}</li>
+                    <li>Degree: {{degree}}</li>
+                    <li>StartDate: {{startDate}}</li>
+                    <li>EndDate: {{endDate}}</li>
+                </ul>
             </div>
             {{/each}}
         </div>
-    </div>
-    <div class="row about-section">
+        <div class="row about-section">
         <div class="col">
             <p>Skills: {{user.profile.skills}}</p>
             <p>Languages: {{user.profile.languages}}</p>
             <p>Tags: {{user.profile.tags}}</p>
         </div>
     </div>
+    </div>
     {{/if}}
 
-    <button class="btn btn-primary" type="button" onclick="location.href = '/users/{{userId}}/resume';">Arrange
-        Resume</button>
+    <button class="btn btn-primary" type="button" onclick="location.href = '/users/{{userId}}/resume';">Arrange Resume</button>
 
     {{#if resumeError}}
     <p class="error">{{resumeError}}</p>
@@ -88,8 +82,7 @@
     {{#each resumes}}
     <ul id='resumeList'>
         <div class='resumeList'> <a href="./profile/resume/{{this}}" target="_blank">resume{{math @index "+" 1}}.pdf</a>
-            <button type="button" value={{this}} class="delete btn-primary"
-                onclick="deleteResume(this.value)">delete</button>
+            <button type="button" value={{this}} class="delete btn-primary" onclick="deleteResume(this.value)">delete</button>
         </div>
     </ul>
     {{/each}}
