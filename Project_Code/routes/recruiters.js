@@ -4,7 +4,9 @@ const router = express.Router();
 const recruiterDat = require("../data/recruiters");
 const jobDat = require("../data/jobs");
 const usrDat = require("../data/users");
+const xss = require('xss');
 router.get('/login', async (req, res) => {
+    
     // $("#reclogin").show("modal");
 
     if(req.session.user){
@@ -37,6 +39,7 @@ router.get('/signup', async (req, res) => {
 router.post('/login', async (req, res) => {
     // if (req.session.user) return res.redirect('/private')
     // else {
+        //xss(req.body);
         let {email, password} = req.body;
         let re = /[A-Z0-9._-]+@[A-Z0-9.-]+\.[A-Z]{2,}/im
         if(email == "" || email == undefined) return res.status(400).render('pages/recruiterlogin', {message: "Please enter your email.", emailerr: true});

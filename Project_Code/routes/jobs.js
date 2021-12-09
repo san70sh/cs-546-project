@@ -40,11 +40,12 @@ router.get("/jobs/id/:id", async (req, res) => {
   } catch (e) {}
 });
 
+/*
 router.post("/jobs/id/:id/apply", async (req, res) => {
   // await users.apply(req.params.id,)
   res.status(200).send("success!");
 });
-
+*/
 router.get("/jobs/state/:state", async (req, res) => {
   try {
     const result = await jobData.getJobByState(req.params.state);
@@ -76,8 +77,11 @@ router.get("/jobs/recruiters/id/:id", async (req, res) => {
     const result = await jobData.getJobsById(req.params.id);
     const jobId = req.params.id;
     console.log(jobId);
-    res.render("pages/singleJob", { data: result, jobId: jobId });
-  } catch (e) {}
+    res.render("pages/recJob", { data: result, jobId: jobId });
+  } catch (e) {
+    // write a function here to render page heere
+    
+  }
 });
 
 module.exports = router;

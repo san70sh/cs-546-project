@@ -5,6 +5,7 @@ const static = express.static(__dirname + "/public");
 const configRoutes = require("./routes");
 const exphbs = require("express-handlebars");
 const session = require("express-session");
+const xss = require('xss');
 
 app.use("/public", static);
 app.use(express.json());
@@ -38,6 +39,14 @@ app.use ((req, res, next) => {
 //     next();
 //   }
 // });
+
+// middle ware function to check all our post rout body for xss attacks
+app.use ((req, res, next) => {
+  if(req.body){
+    xss(req.body);
+  }
+  next();
+});
 
 app.use(express.json());
 
