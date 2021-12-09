@@ -3,7 +3,7 @@
     <div class="col-sm-8 mt-3">
         <h4>Node.js upload</h4>
 
-        <form class="mt-4" action="/users/profile/upload" method="POST" enctype="multipart/form-data">
+        <form class="mt-4" action="/users/profile/resume/upload" method="POST" enctype="multipart/form-data">
             <div class="form-group">
                 <input type="file" name="file" id="input-files" class="form-control-file border" />
             </div>
@@ -11,14 +11,14 @@
         </form>
     </div>
 
-    {{#if resumes}}
+    {{!-- {{#if resumes}}
     {{#each resumes}}
     <ul>
         <a href="./profile/resume/{{this}}" target="_blank">resume{{math @index "+" 1}}.pdf</a>
         <button value={{this}}  class="delete btn-primary">delete</button>
     </ul>
     {{/each}}
-    {{/if}}
+    {{/if}} --}}
 
     {{#if error}}
     <p class='error'>{{error}}</p>

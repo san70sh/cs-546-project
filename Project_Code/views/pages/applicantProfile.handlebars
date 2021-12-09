@@ -73,20 +73,23 @@
         </div>
     </div>
     {{/if}}
-    <button class="btn btn-primary" type="button"><a href="/users/profile/resume/upload"
-            class="text-decoration-none link-light">Arrangement resume</a></button>
+
+    <button class="btn btn-primary" type="button" onclick="location.href = '/users/{{userId}}/resume';">Arrange Resume</button>
+
     {{#if resumeError}}
     <p class="error">{{resumeError}}</p>
     {{/if}}
 
-    {{#if resume}}
-    {{#each resume}}
+    {{#if resumes}}
+    {{#each resumes}}
     <ul id='resumeList'>
-        <a href="./profile/resume/{{this}}" target="_blank">resume{{math @index "+" 1}}.pdf</a>
-        <button value={{this}} class="delete btn-primary">delete</button>
+        <div class='resumeList'> <a href="./profile/resume/{{this}}" target="_blank">resume{{math @index "+" 1}}.pdf</a>
+            <button type="button" value={{this}} class="delete btn-primary" onclick="deleteResume(this.value)">delete</button>
+        </div>
     </ul>
     {{/each}}
     {{/if}}
+
     <div class="row job-section">
         <div class="accordion" id="job-accordion">
             {{#each jobs}}
@@ -99,3 +102,10 @@
         </div>
     </div>
 </section>
+
+<script src="https://code.jquery.com/jquery-2.2.4.min.js"
+    integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"
+    integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS"
+    crossorigin="anonymous"></script>
+<script src="../../public/script/userProfile.js"></script>
