@@ -67,6 +67,19 @@ router.get('/logout', (req, res) => {
 
 });
 
+router.get("/jobs/recruiters/id/:id", async (req, res) => {
+  try {
+    if(!req.session.user || req.session.user.type != 'recruiter'){
+      //alert("PLEASE LOGIN FIRST");
+      return res.render('pages/home',{errorclass: true});
+    }
+    const result = await jobData.getJobsById(req.params.id);
+    const jobId = req.params.id;
+    console.log(jobId);
+    res.render("pages/singleJob", { data: result, jobId: jobId });
+  } catch (e) {}
+});
+
 module.exports = router;
 
 // to write a route for patching the database using the update function from the job data file ;

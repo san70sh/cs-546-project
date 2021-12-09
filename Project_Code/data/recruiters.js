@@ -364,8 +364,8 @@ async function postJob(recruiterId, jobDetails) {
     const recruiterCol = await recruiters();
     let recruiter = await getRecruiter(recruiterId);
     if(recruiter.recFound) {
-      let resObj = await jobMethods.createJob(id, recruiter.data.email, jobDetails);
-      const jobPost = await recruiterCol.updateOne({ _id: recruiterId }, { $push: { "jobs.job_id": resObj._id } });
+      let resObj = await jobMethods.createJob(recruiterId, recruiter.data.email, jobDetails);
+      const jobPost = await recruiterCol.updateOne({ _id: new ObjectId(recruiterId) }, { $push: { jobs : {"job_id": resObj._id }} });
       if (jobPost.modifiedCount === 0) {
         throw new CustomError(400,"The job could not be created.");
       } else {
@@ -381,9 +381,9 @@ async function updateJob(id, jobId, jobDetails) {
   
   if(ObjectId.isValid(id)) {
     let recruiter = await getRecruiter(id);
-    if(recruiter) {
+    if(recruiter.recFound) {
       let jobList = await getJobsByRecruiterId(id);
-      if(jobList.some(e => e.job_id == new ObjectId(jobId))) {
+      if(jobList.some(e => e.job_id.toString() == jobId.toString())) {
         let resObj = await jobMethods.updateJob(jobId, jobDetails);
         return resObj;
       } else throw new CustomError(403,"Recruiter does not have this job");
@@ -394,34 +394,45 @@ async function updateJob(id, jobId, jobDetails) {
 }
 
 async function removeJob(recruiterId, jobId) {
-  
-  if(ObjectId.isValid(recruiterId || ObjectId.isValid(jobId))) {
-    const recruiterCol = await recruiters();
-    const userCol = await usrs();
-    let recruiter = await getRecruiter(recruiterId);
-    if(recruiter.recFound) {
-      let applicants = await recruiterCol.find({"jobs.job_id": jobId}).project({_id: 0, jobs: {"applicant_id": 1}}).toArray();
-      let appliedUserSet = [];
-      if(applicants.length != 0) appliedUserSet = applicants[0].jobs[0].applicant_id;
-      let usrUpdate = await userCol.updateMany({_id: {$in: [...appliedUserSet]}}, {$pull: {jobs: {job: {$eq: jobId}}, favor: {$eq: jobId}}});
-      if(usrUpdate.modifiedCount == appliedUserSet.size){
-        jobId = new ObjectId(jobId);
-        let jobList = await getJobsByRecruiterId(recruiterId);
-        if(jobList.some(e => e.job_id == jobId)) {
-          let jobDel = await recruiterCol.updateOne({ }, {$pull: { jobs: {job_id: jobId } } } );
-          if(jobDel.modifiedCount === 0){
-            let resObj = await jobMethods.deleteJob(jobId);
-            if(resObj) {
-              jobId = new ObjectId(jobId);
-              throw new CustomError(400,`The job with ID ${jobId} could not be removed.`);
-            } else {
-              let jobD = {"jobId" : jobId.toString(), "deleted": true};
+  try {
+
+    if(ObjectId.isValid(recruiterId) && ObjectId.isValid(jobId)) {
+      const recruiterCol = await recruiters();
+      const userCol = await usrs();
+      let recruiter = await getRecruiter(recruiterId);
+      jobId = new ObjectId(jobId);
+      if(recruiter.recFound) {
+        let applicants = await recruiterCol.find({"jobs.job_id": jobId}).project({_id: 0, jobs: {"job_id": 1,"applicant_id": 1}}).toArray();
+        let appliedUserSet = [], usrUpdate;
+        
+        if(applicants[0].jobs[0].applicant_id){
+          appliedUserSet = applicants[0].jobs[0].applicant_id;
+          usrUpdate = await userCol.updateMany({_id: {$in: appliedUserSet}}, {$pull: {jobs: {job: {$eq: jobId}}, favor: {$eq: jobId}}});
+        } 
+        
+        if(!applicants[0].jobs[0].applicant_id || usrUpdate.modifiedCount == appliedUserSet.length){
+          let jobList = await getJobsByRecruiterId(recruiterId);
+          if(jobList.some(e => e.job_id.toString() == jobId.toString())) {
+            let jobDel = await recruiterCol.updateOne({_id: new ObjectID(recruiterId)}, {$pull: { jobs: {job_id: jobId } } } );
+            console.log(jobDel);
+            if(jobDel.modifiedCount === 1){
+              let resObj = await jobMethods.deleteJob(jobId.toString());
+              if(resObj) {
+                let jobD = {"jobId" : jobId.toString(), "deleted": true};
+                return jobD; 
               return jobD; 
+                return jobD; 
+              return jobD; 
+                return jobD; 
+                
+              } else throw new CustomError(400,`The job with ID ${jobId} could not be removed.`);
             }
-          }
-        } else throw new CustomError(403,"Recruiter does not have this job");
-      } else throw new CustomError(400,"Job could not be removed.");
-    } else throw new CustomError(400,"This Recruiter does not exist in the database.");
+          } else throw new CustomError(403,"Recruiter does not have this job");
+        } else throw new CustomError(400,"Job could not be removed.");
+      } else throw new CustomError(400,"This Recruiter does not exist in the database.");
+    }
+  } catch(e) {
+    console.log(e);
   }
 }
 
