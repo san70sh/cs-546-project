@@ -8,11 +8,17 @@ const jobData = data.jobs;
 router.get("/", async (req, res) => {
   try {
     const result = await jobData.getAllJobs();
+    if(result){
+      if(result.length == 0 ){
+        res.render("pages/home",{nullJob:true, message:"No Jobs posted yet"});
+      }
+    }
     for (let i = 0; i < result.length; i++) {
       result[i].unique = String(result[i]._id);
     }
-    console.log(result);
-    res.render("pages/home", { jobs: result });
+    //console.log(result);
+
+    res.render("pages/home", { jobFound:true,jobs: result });
   } catch (e) {
     res.status(500).json({ error: "Internal Server Error" });
   }
@@ -23,7 +29,7 @@ router.get("/jobs/city/:city", async (req, res) => {
     const result = await jobData.getJobByCity(req.params.city);
     res.json(result);
   } catch (e) {
-    console.log(e);
+    res.status(400).render("pages/error",{message: e});
   }
 });
 
@@ -37,7 +43,9 @@ router.get("/jobs/id/:id", async (req, res) => {
     const jobId = req.params.id;
     console.log(jobId);
     res.render("pages/singleJob", { data: result, jobId: jobId });
-  } catch (e) {}
+  } catch (e) {
+    res.status(400).render("pages/error",{message: e});
+  }
 });
 
 /*
@@ -50,7 +58,9 @@ router.get("/jobs/state/:state", async (req, res) => {
   try {
     const result = await jobData.getJobByState(req.params.state);
     res.json(result);
-  } catch (e) {}
+  } catch (e) {
+    res.status(400).render("pages/error",{message: e});
+  }
 });
 
 router.get('/logout', (req, res) => {
@@ -80,7 +90,8 @@ router.get("/jobs/recruiters/id/:id", async (req, res) => {
     res.render("pages/recJob", { data: result, jobId: jobId });
   } catch (e) {
     // write a function here to render page heere
-    
+    res.status(400).render("pages/error",{message: e});
+
   }
 });
 

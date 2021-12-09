@@ -12,7 +12,7 @@ router.get("/:id/resume", async (req, res) => {
 
   if (req.session.user) {
     if (req.session.user.type !== "user") {
-      return res.redirect("/users/login");
+      return res.redirect("/logout");
     }
   }
 
@@ -27,7 +27,7 @@ router.post("/:id/resume/upload", upload.single("file"), async (req, res) => {
 
   if (req.session.user) {
     if (req.session.user.type !== "user") {
-      return res.redirect("/users/login");
+      return res.redirect("logout");
     }
   }
 
@@ -60,7 +60,7 @@ router.get("/profile/resume/:id", async (req, res) => {
 
   if (req.session.user) {
     if (req.session.user.type !== "user") {
-      return res.redirect("/users/login");
+      return res.redirect("/logout");
     }
   }
 
@@ -92,7 +92,7 @@ router.delete("/profile/resume/:id", async (req, res) => {
 
   if (req.session.user) {
     if (req.session.user.type !== "user") {
-      return res.redirect("/users/login");
+      return res.redirect("/logout");
     }
   }
   const fileId = req.params.id;
@@ -115,6 +115,11 @@ router.get("/login", async (req, res) => {
   //     return res.redirect('/');
   //   }
   // }
+  if (req.session.user) {
+    if (req.session.user.type !== "user") {
+      return res.redirect("/logout");
+    }
+  }
   return res.render("pages/applicantlogin", { title: "Applicant Login" });
 });
 
@@ -138,7 +143,7 @@ router.get("/:id", async (req, res) => {
 
   if (req.session.user) {
     if (req.session.user.type !== "user") {
-      return res.redirect("/users/login");
+      return res.redirect("/logout");
     }
   }
   let id = req.params.id,
@@ -186,7 +191,7 @@ router.get("/profile/:id", async (req, res) => {
 
     if (req.session.user) {
       if (req.session.user.type !== "user") {
-        return res.redirect("/users/login");
+        return res.redirect("/logout");
       }
     }
 
@@ -408,7 +413,7 @@ router.get("/favor", async (req, res) => {
 
   if (req.session.user) {
     if (req.session.user.type !== "user") {
-      return res.redirect("/users/login");
+      return res.redirect("/logout");
     }
   }
 
@@ -441,7 +446,7 @@ router.post("/favor", async (req, res) => {
 
   if (req.session.user) {
     if (req.session.user.type !== "user") {
-      return res.redirect("/users/login");
+      return res.redirect("/logout");
     }
   }
   let jobId = req.body.jobId;
@@ -471,7 +476,7 @@ router.delete("/favor", async (req, res) => {
 
   if (req.session.user) {
     if (req.session.user.type !== "user") {
-      return res.redirect("/users/login");
+      return res.redirect("/logout");
     }
   }
 
@@ -502,7 +507,7 @@ router.post("/apply", async (req, res) => {
 
   if (req.session.user) {
     if (req.session.user.type !== "user") {
-      return res.redirect("/users/login");
+      return res.redirect("/logout");
     }
   }
 
@@ -533,7 +538,7 @@ router.delete("/apply", async (req, res) => {
 
   if (req.session.user) {
     if (req.session.user.type !== "user") {
-      return res.redirect("/users/login");
+      return res.redirect("/logout");
     }
   }
 
@@ -564,7 +569,7 @@ router.get("/apply/:id", async (req, res) => {
 
   if (req.session.user) {
     if (req.session.user.type !== "user") {
-      return res.redirect("/users/login");
+      return res.redirect("/logout");
     }
   }
 
@@ -597,7 +602,7 @@ router.get("/apply", async (req, res) => {
 
   // common session code all of your private routes
   if (!req.session.user) {
-    return res.redirect("/users/login");
+    return res.redirect("/logout");
   }
 
   if (req.session.user) {
