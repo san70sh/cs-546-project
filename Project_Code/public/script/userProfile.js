@@ -1,10 +1,12 @@
-$(document).ready(function () {
-  $(".delete").click(function () {
-    $.ajax({
-      url: "posts/test",
-      //   success: function (result) {
-      //     $(".title").html(result);
-      //   },
+function deleteResume(id) {
+  if (confirm("Are you sure you want to delete it?")) {
+    delReq = {
+      method: "delete",
+      url: `profile/resume/${id}`,
+    };
+    $.ajax(delReq).then((res) => {
+      alert(res.message);
+      location.reload(true);
     });
-  });
-});
+  }
+}
