@@ -3,7 +3,7 @@ const users = mongoCollections.users;
 const userProfiles = mongoCollections.userProfiles;
 let { ObjectId } = require("mongodb");
 bcrypt = require("bcrypt");
-const saltRounds = 8;
+const saltRounds = 5;
 
 // const checkWeb = (web) => {
 // //depends on the url link
@@ -933,7 +933,7 @@ module.exports = {
 //console.log(ObjectId.isValid('timtomtamted'));
 
 // createProfile(
-//     "61b078ea5805134fecbbf766",
+//     "61b15aafb06d8df4d3ec63c3",
 //     "one url",
 //     "M",
 //     "Hoboken",
@@ -963,7 +963,7 @@ module.exports = {
 // )
 
 //update("61b078ea5805134fecbbf766","Wangyou@gmail.com", "8482426556", "you", "wang", "12345678").catch(ele => console.log(ele));
-//apply("61a33e454966f774489ca999","61a4236167e3b3f821f5e374").catch(ele => console.log(ele));
+//apply("61b15a1e8c17796d6171015d","61b15aafb06d8df4d3ec63c3").catch(ele => console.log(ele));
 //cancel("61a33e454966f774489ca999", "61a4236167e3b3f821f5e374");
 
 //track("61a33e454966f774489ca999", "61a4236167e3b3f821f5e374").then(ele => console.log(ele));
