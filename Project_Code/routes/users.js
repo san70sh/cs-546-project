@@ -198,19 +198,11 @@ router.get("/profile/:id", async (req, res) => {
     if (ObjectId.isValid(id)) {
       let user = await users.get(id);
       console.log(user);
-      if (Object.keys(user.profile).length != 0) {
         return res.render("pages/applicanteditprofile", {
           title: "Update",
           method: "POST",
-          recid: "update/" + id,
+          recid:  id,
         });
-      } else {
-        return res.render("pages/applicanteditprofile", {
-          title: "Create",
-          method: "POST",
-          recid: id,
-        });
-      }
     }
   } catch (e) {
     return res
@@ -624,6 +616,67 @@ router.get("/apply", async (req, res) => {
   } catch (e) {
     return res.status(e.status).render("pages/error", {
       title: "Favor",
+      message: e.message,
+      error: true,
+    });
+  }
+});
+
+router.get("/ex/:id", async (req, res) => {
+  if (!req.session.user) {
+    return res.redirect("/users/login");
+  }
+
+  if (req.session.user) {
+    if (req.session.user.type !== "user") {
+      return res.redirect("/users/login");
+    }
+  }
+  let userId = req.session.user.id;
+  if (!ObjectId.isValid(userId)) {
+    res.status(e.status).render("pages/error", {
+      title: "Favor",
+      message: "inValid userId",
+      error: true,
+    });
+  }
+  try {
+    let output = await users.getEx(userId);
+    return res.json(output);
+  } catch (e) {
+    return res.status(e.status).render("pages/error", {
+      title: "experience",
+      message: e.message,
+      error: true,
+    });
+  }
+});
+
+router.post("/ex/:id", async (req, res) => {
+  let experience = req.body.tmp;
+  // console.log(experience+"************");
+  if (!req.session.user) {
+    return res.redirect("/users/login");
+  }
+
+  if (req.session.user) {
+    if (req.session.user.type !== "user") {
+      return res.redirect("/users/login");
+    }
+  }
+  let userId = req.session.user.id;
+  if (!ObjectId.isValid(userId)) {
+    res.status(e.status).render("pages/error", {
+      title: "Favor",
+      message: "inValid userId",
+      error: true,
+    });
+  }
+  try {
+    let output = await users.addEx(experience,userId);
+  } catch (e) {
+    return res.status(e.status).render("pages/error", {
+      title: "experience",
       message: e.message,
       error: true,
     });

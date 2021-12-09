@@ -88,7 +88,7 @@ const checkEd = (education) => {
         "Value of education in each elements can't be empty or just spaces"
       );
     }
-    date_regex = /^\d{2}\/\d{2}\/\d{4}$/;
+    date_regex = /^\d{4}\/\d{2}\/\d{2}$/;
     if (!date_regex.test(ele.startDate) && date_regex.test(ele.endDate)) {
       throw new CustomError(400, "Wrong date formate MM/DD/YYYY");
     }
@@ -914,7 +914,79 @@ const checkUser = async (email, password) => {
     throw new CustomError(400, "Either the email or password is invalid");
   }
 };
+const getEx = async(userId) => {
+  if (!userId) {
+    throw new CustomError(400, "id must be provided");
+  }
+  if (typeof userId !== "string") {
+    throw new CustomError(
+      400,
+      "the userId must be non-empty string and can't just be space"
+    );
+  }
+  if (!ObjectId.isValid(userId)) {
+    throw new CustomError(400, "Invalid userID");
+  } else {
+    userId = ObjectId(userId);
+  }
+  const usersCollection = await users();
+  const res = await usersCollection.findOne({ _id: userId });
+  if (res === null) throw new CustomError(400, "user did not exists");
+  return res.profile.experience;
+}
 
+const addEx = async(experience,userId) => {
+  if (!userId) {
+    throw new CustomError(400, "id must be provided");
+  }
+  if (typeof userId !== "string") {
+    throw new CustomError(
+      400,
+      "the userId must be non-empty string and can't just be space"
+    );
+  }
+  if (!ObjectId.isValid(userId)) {
+    throw new CustomError(400, "Invalid userID");
+  } else {
+    userId = ObjectId(userId);
+  }
+  if (
+    typeof experience.title != "string" ||
+    typeof experience.employmentType != "string" ||
+    typeof experience.companyName != "string" ||
+    typeof experience.startDate != "string" ||
+    typeof experience.endDate != "string"
+  ) {
+    throw new CustomError(
+      400,
+      "Value of experience in each elements must be string"
+    );
+  }
+  if (
+    experience.title.trim().length === 0 ||
+    experience.employmentType.trim().length === 0 ||
+    experience.companyName.trim().length === 0 ||
+    experience.startDate.trim().length === 0 ||
+    experience.endDate.trim().length === 0
+  ) {
+    // not optional, the user must fill in this data when regiester
+    throw new CustomError(
+      400,
+      "Value of experience in each elements can't be empty or just spaces"
+    );
+  }
+  date_regex = /^\d{4}\/\d{2}\/\d{2}$/;
+  if (!date_regex.test(experience.startDate) && date_regex.test(experience.endDate)) {
+    throw new CustomError(400, "Wrong date formate MM/DD/YYYY");
+  }
+  const usersCollection = await users();
+  const insertInfo = await usersCollection.updateOne(
+    { _id: userId},
+    { $addToSet: { "profile.experience": experience} }
+  );
+  if (insertInfo.modifiedCount === 0) throw new CustomError(400,"Could not update the experience");
+  return insertInfo.insertedId;
+}
 module.exports = {
   create,
   getFile,
@@ -934,6 +1006,8 @@ module.exports = {
   checkUser,
   getAllResume,
   removeResume,
+  getEx,
+  addEx,
 };
 // test functions **IMPORTANT**
 //checkEx([{title:"Maintenance Engineer", employmentType: "full time", companyName:"Apple",startDate: "08/05/2017", endDate: "08/05/2018"}])
@@ -982,3 +1056,4 @@ module.exports = {
 //getFavourites("61a33e13067da688cb1f8e39").then(ele => console.log(ObjectId(ele[0])))
 //delFavourites("61a4236167e3b3f821f5eeee","61a33e13067da688cb1f8e39");
 //checkUser("sega@gmail.com", "ccc11111111").then(ele => console.log(ele)).catch(e => console.log(e));
+//addEx({title:"cctv Engineer", employmentType: "full time", companyName:"Apple",startDate: "2017/05/17", endDate: "2021/05/12"},"61b15aafb06d8df4d3ec63c3").catch(e=>console.log(e))
