@@ -5,7 +5,21 @@ const users = require("../data/users");
 const upload = require("../data/upload").upload;
 const download = require("../data/upload").download;
 
-router.get("/profile", async (req, res) => {
+router.get("/:id/resume", async (req, res) => {
+  if (!req.session.user) {
+    return res.redirect("/users/login");
+  }
+
+  if (req.session.user) {
+    if (req.session.user.type !== "user") {
+      return res.redirect("/users/login");
+    }
+  }
+
+  res.render("pages/applicantResume", { id: req.session.user.id });
+});
+
+router.post("/:id/resume/upload", upload.single("file"), async (req, res) => {
   // common session code all of your private routes
   if (!req.session.user) {
     return res.redirect("/users/login");
@@ -17,56 +31,26 @@ router.get("/profile", async (req, res) => {
     }
   }
 
-  // get resumes
+  // check file existence
+  if (req.file === undefined) {
+    return res.render("pages/applicantResume", {
+      error: "you must select a file",
+    });
+  }
+  // check file type
+  if (req.file.mimetype !== "application/pdf") {
+    return res.render("pages/applicantResume", { error: "file type error" });
+  }
+  console.log(res.req.file);
   try {
-    // const resumes = await users.getAllResume(req.body.userId);
-    const resumes = await users.getAllResume(req.session.user.id);
-    res.render("pages/applicantProfile", { resumes });
+    const addRes = await users.addResume(req.session.user.id, res.req.file.id);
+    console.log(addRes);
   } catch (e) {
+    res.render("pages/applicantResume", { error: e.message });
     console.log(e);
-    return res.render("pages/applicantProfile", { resumeError: e.message });
   }
+  res.redirect(`users/${req.params.id}`);
 });
-
-router.post(
-  "/profile/resume/upload",
-  upload.single("file"),
-  async (req, res) => {
-    // common session code all of your private routes
-    if (!req.session.user) {
-      return res.redirect("/users/login");
-    }
-
-    if (req.session.user) {
-      if (req.session.user.type !== "user") {
-        return res.redirect("/users/login");
-      }
-    }
-
-    // check file existence
-    if (req.file === undefined) {
-      return res.render("pages/applicantProfile", {
-        error: "you must select a file",
-      });
-    }
-    // check file type
-    if (req.file.mimetype !== "application/pdf") {
-      return res.render("pages/applicantProfile", { error: "file type error" });
-    }
-    console.log(res.req.file);
-    try {
-      const addRes = await users.addResume(
-        req.session.user.id,
-        res.req.file.id
-      );
-      console.log(addRes);
-    } catch (e) {
-      res.render("pages/applicantProfile", { error: e.message });
-      console.log(e);
-    }
-    res.redirect("/users/applicantProfile");
-  }
-);
 
 router.get("/profile/resume/:id", async (req, res) => {
   // common session code all of your private routes
@@ -101,7 +85,26 @@ router.get("/profile/resume/:id", async (req, res) => {
   // res.redirect("/users/profile");
 });
 
-router.delete("/profile/resume/:id", async (req, res) => {});
+router.delete("/profile/resume/:id", async (req, res) => {
+  if (!req.session.user) {
+    return res.redirect("/users/login");
+  }
+
+  if (req.session.user) {
+    if (req.session.user.type !== "user") {
+      return res.redirect("/users/login");
+    }
+  }
+  const fileId = req.params.id;
+  const userId = req.session.user.id;
+
+  try {
+    await users.removeResume(userId, fileId);
+    res.json({ message: "Delete Successfully" });
+  } catch (e) {
+    res.json({ message: e });
+  }
+});
 
 router.get("/login", async (req, res) => {
   //   if(req.session.user){
@@ -152,11 +155,23 @@ router.get("/:id", async (req, res) => {
     } catch (e) {
       console.log(e);
     }
+
+    let resumes = undefined;
+    let resumeError = undefined;
+    try {
+      // const resumes = await users.getAllResume(req.body.userId);
+      resumes = await users.getAllResume(req.session.user.id);
+    } catch (e) {
+      resumeError = e.message;
+    }
+
     return res.render("pages/applicantProfile", {
       user: user,
       jobs: user.jobs,
       userId: id,
       newUser: newUser,
+      resumes,
+      resumeError,
     });
   }
 });
@@ -174,6 +189,7 @@ router.get("/profile/:id", async (req, res) => {
         return res.redirect("/users/login");
       }
     }
+
     if (ObjectId.isValid(id)) {
       let user = await users.get(id);
       console.log(user);

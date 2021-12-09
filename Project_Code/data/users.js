@@ -163,8 +163,8 @@ const checkDuplicateE = async (email) => {
     return false;
   }
   return true;
-}
-const checkDuplicateP = async(phone) => {
+};
+const checkDuplicateP = async (phone) => {
   const phoneCheck = /[0-9]{10}/;
   if (!phoneCheck.test(phone)) {
     throw new CustomError(400, "Phone number should be 10 digits");
@@ -175,7 +175,7 @@ const checkDuplicateP = async(phone) => {
     return false;
   }
   return true;
-}
+};
 const getFile = async (fileId) => {
   if (!ObjectId.isValid(fileId) && typeof fileId !== "string") {
     throw new CustomError(400, "Invalid fileId");
@@ -251,9 +251,13 @@ const removeResume = async (userId, fileId) => {
     throw new CustomError(400, "resume not exists");
   }
 
-  newResume = newResume.filter(function (ele) {
-    return ele !== fileId.toString();
-  });
+  if (newResume.length === 1) {
+    newResume = [];
+  } else {
+    newResume = newResume.filter(function (ele) {
+      return ele !== fileId.toString();
+    });
+  }
 
   const insertInfo = await usersCollection.updateOne(
     { _id: userId },
@@ -329,7 +333,10 @@ const createProfile = async (
     typeof city !== "string" ||
     typeof state !== "string"
   ) {
-    throw new CustomError(400, "photo, gender, city must be stirng type and can't be null");
+    throw new CustomError(
+      400,
+      "photo, gender, city must be stirng type and can't be null"
+    );
   }
   if (!ObjectId.isValid(userId)) {
     throw new CustomError(400, "Invalid userID");
@@ -342,7 +349,10 @@ const createProfile = async (
     city.trim().length === 0 ||
     state.trim().length === 0
   ) {
-    throw new CustomError(400, "name, location, phoneNumber, website, priceRange can't be empty or just spaces");
+    throw new CustomError(
+      400,
+      "name, location, phoneNumber, website, priceRange can't be empty or just spaces"
+    );
   }
   if (gender !== "M" && gender !== "F") {
     throw new CustomError(400, "gender must be M(male) or F(female)");
@@ -371,16 +381,11 @@ const createProfile = async (
     { _id: userId },
     { $set: { profile: newProfiles } }
   );
-  if (insertInfo.modifiedCount === 0) throw new CustomError(400, "Could not add the profile");
+  if (insertInfo.modifiedCount === 0)
+    throw new CustomError(400, "Could not add the profile");
 };
 
-const create = async (
-  email,
-  phone,
-  firstname,
-  lastname,
-  password,
-) => {
+const create = async (email, phone, firstname, lastname, password) => {
   if (
     typeof email !== "string" ||
     typeof phone !== "string" ||
@@ -416,7 +421,7 @@ const create = async (
   // if (newProfile !== undefined && !Array.isArray(newProfile)) {
   //   throw new CustomError(400, "Profile must be array");
   // }
-  if (await checkDuplicateP(phone) || await checkDuplicateE(email)) {
+  if ((await checkDuplicateP(phone)) || (await checkDuplicateE(email))) {
     throw new CustomError(400, "user already exists");
   }
   const jobs = [];
@@ -432,7 +437,7 @@ const create = async (
     password: hash,
     jobs,
     resume,
-    profile:{},
+    profile: {},
     favor,
   };
   const insertInfo = await usersCollection.insertOne(newUser);
@@ -557,8 +562,11 @@ const update = async (userId, email, phone, firstname, lastname, password) => {
   } else {
     userId = ObjectId(userId);
   }
-  if (await checkDuplicateP(phone) || await checkDuplicateE(email)) {
-    throw new CustomError(400, "the email or phone number has already been used");
+  if ((await checkDuplicateP(phone)) || (await checkDuplicateE(email))) {
+    throw new CustomError(
+      400,
+      "the email or phone number has already been used"
+    );
   }
   const hash = await bcrypt.hash(password, saltRounds);
   const usersCollection = await users();
