@@ -12,7 +12,7 @@ router.get('/login', async (req, res) => {
     if(req.session.user){
         if (req.session.user.type == 'recruiter'){
             //console.log('recruiter : already logged in');
-            return res.redirect('/recruiters/'+req.session.user.id);       
+            return res.redirect('/recruiters/');       
         }
 
         if(req.session.user.type == 'user'){
@@ -57,10 +57,10 @@ router.post('/login', async (req, res) => {
             if(output.authenticated) {
                 // req.session.user = output.id;
                 // return res.redirect('/private');
-                let recid = output.id;
-                req.session.user = {email: email,type:"recruiter",id: recid};
+                let recId = output.id;
+                req.session.user = {email: email,type:"recruiter",id: recId};
             // doe for redirection of urls
-                return res.redirect('/recruiters/'+recid);
+                return res.redirect('/recruiters/');
             }
         } catch (e) {
             return res.render('pages/recruiterlogin', {message: e.message, mainerr: true});
@@ -80,10 +80,14 @@ router.post('/accept', async (req, res) => {
                 return res.redirect('/recruiters/login');
             }
         }
+
+        let recruiterId = req.session.user.id;
+        console.log(req.body);
+        let {jobId, applicantId} = req.body;
         // if(!req.session.user) {
         //     return res.status(403).render('partials/loginform', {, message: "Unauthorized Access", err: true})
         // } else {
-            let {recruiterId, applicantId, jobId} = req.body;
+            if(!jobId) return res.status(400).render('pages/recruiterProfile', {message: "Invalid ID", genErr: true});
             if(ObjectId.isValid(recruiterId) && ObjectId.isValid(applicantId) && ObjectId.isValid(jobId)) {
                 let output = await recruiterDat.acceptDecision(recruiterId, applicantId, jobId);
                 res.json(output);
@@ -159,13 +163,13 @@ router.post('/signup', async (req, res) => {
             let recruiter = await recruiterDat.createRecruiter(email, password, firstName, lastName, phone);
             if(recruiter.recFound) {
                 let recId = recruiter.data._id;
-                req.session.user = {email: email,type:"recruiter",id: recid};
+                req.session.user = {email: email,type:"recruiter",id: recId};
 
                 let profileCreated = true;
                 if(!recruiter.data.profile){
                     profileCreated = false;
                 }
-                return res.redirect('/profile/'+recId);
+                return res.redirect('/recruiters');
             }
         } catch (e) {
             return res.status(e.status).render('pages/recruiterSignup', { message: e.message, mainerr: true});
@@ -173,7 +177,7 @@ router.post('/signup', async (req, res) => {
     // }
 });
 
-router.get('/:id', async (req, res) => {
+router.get('/', async (req, res) => {
         // !!!!!!!!!!!!!!!!!!!!! Your code should be in try catch !!!!!!!!!!!!!!!!!!!!!
     
     // common session code all of your private routes
@@ -186,7 +190,7 @@ router.get('/:id', async (req, res) => {
             return res.redirect('/recruiters/login');
             }
         }
-    let id = req.params.id, recruiter, newRec;
+    let id = req.session.user.id, recruiter, newRec;
     if(ObjectId.isValid(id)) {
         try{
             recruiter = await recruiterDat.getRecruiter(id);
@@ -195,19 +199,22 @@ router.get('/:id', async (req, res) => {
             } else {
                 newRec = false
             }
-            let applicantList = [];
+
             await Promise.all(recruiter.data.jobs.map(async (e) => {
                 if(e.applicant_id){
-                    await Promise.all(e.applicant_id.map(async (e) => {
+                    let applicantList = [];
+                    await e.applicant_id.map(async (e) => {
                         e = e.toString();
                         let appDetails = await usrDat.get(e);
                         applicantList.push(appDetails);
-                    }));
+                    });
+
+                    e["applicants"] = applicantList;
                 }
                 let job = await jobDat.getJobsById(e.job_id.toString());
                 job._id = job._id.toString();
                 e["jobDetails"] = job;
-                e["applicants"] = applicantList;
+
                 e.job_id = e.job_id.toString();
             }));
         } catch(e) {
@@ -217,8 +224,8 @@ router.get('/:id', async (req, res) => {
     }
 });
 
-router.get('/profile/:id', async (req, res) => {
-    let id = req.params.id;
+router.get('/profile', async (req, res) => {
+
     try {
          // common session code all of your private routes
          if(!req.session.user){
@@ -230,13 +237,24 @@ router.get('/profile/:id', async (req, res) => {
                 return res.redirect('/recruiters/login');
             }
         }
+        let id = req.session.user.id;
+
+
+        // Check for unwanted params
+        // if(req.params.id) {
+        //     if(id !== req.params.id) {
+        //         res.render()
+        //     }
+        // }
+
+
         if(ObjectId.isValid(id)) {
             let recruiter = await recruiterDat.getRecruiter(id);
             console.log(recruiter);
             if(Object.keys(recruiter.data.profile).length != 0) {
-                return res.render('pages/recruitereditprofile', {title: "Update", method: "POST", recid: "update/"+id});
+                return res.render('pages/recruitereditprofile', {title: "Update", method: "POST", action: "update"});
             } else {
-                return res.render('pages/recruitereditprofile', {title: "Create", method: "POST", recid: id});
+                return res.render('pages/recruitereditprofile', {title: "Create", method: "POST", action: "create"});
             }
         }
     } catch (e) {
@@ -244,6 +262,9 @@ router.get('/profile/:id', async (req, res) => {
     }
 });
 
+router.get('/jobs', async(req, res) => {
+    res.redirect('/recruiters/');
+})
 
 router.get('/jobs/new', async (req,res) => {
     
@@ -258,15 +279,13 @@ router.get('/jobs/new', async (req,res) => {
                 return res.redirect('/recruiters/login');
             }
         }
-        return res.render('pages/jobpost', {title: "Create", recid: "new", method: "POST"})    
+        return res.render('pages/jobpost', {title: "Create", action: "new", method: "POST"})    
     } catch (e) {
         return res.status(e.status).render('pages/jobpost', {message: e.message, err: true});
     }
 });
 
 router.get('/jobs/update/:id', async (req,res) => {
-    let id = req.params.id;
-    
     try {
         // common session code all of your private routes
         if(!req.session.user){
@@ -278,11 +297,12 @@ router.get('/jobs/update/:id', async (req,res) => {
                 return res.redirect('/recruiters/login');
             }
         }
+        let id = req.params.id;
         if(ObjectId.isValid(id)) {
             let job = await jobDat.getJobsById(id);
             console.log(job);
             if(job) {
-                return res.render('pages/jobpost', {title: "Update", recid: "update/"+id, method: "POST"})    
+                return res.render('pages/jobpost', {title: "Update", action: "update/"+id, method: "POST"})    
             }
         }
     } catch (e) {
@@ -290,7 +310,7 @@ router.get('/jobs/update/:id', async (req,res) => {
     }
 });
 
-router.post('/profile/:id', async (req, res) => {
+router.post('/profile/create', async (req, res) => {
     
     // common session code all of your private routes
     if(!req.session.user){
@@ -303,7 +323,7 @@ router.post('/profile/:id', async (req, res) => {
         }
     }
 
-    let id = req.params.id;
+    let id = req.session.user.id;
     let {gender, /*photo, */city, state, company, position, description} = req.body;
 
     //gender validation
@@ -339,7 +359,7 @@ router.post('/profile/:id', async (req, res) => {
             let profile = {"gender": gender.toUpperCase(), /*"photo": photo,*/ "city": city, "state": state, "company": {"position": position, "name": company, "description": description}}
             let output = await recruiterDat.createProfile(id, profile);
             if(output) {
-                return res.redirect('/recruiters/'+id)
+                return res.redirect('/recruiters/')
             }
         } else {
             return res.status(400).render('pages/recruitereditprofile', {message: "Invalid Recruiter ID", err: true});
@@ -351,7 +371,7 @@ router.post('/profile/:id', async (req, res) => {
     }
 });
 
-router.post('/profile/update/:id', async (req, res) => {
+router.post('/profile/update', async (req, res) => {
     // if (req.session.user) return res.redirect('/private')
     // else {
                         // common session code all of your private routes
@@ -364,7 +384,7 @@ router.post('/profile/update/:id', async (req, res) => {
                                 return res.redirect('/recruiters/login');
                             }
                         }
-        let id = req.params.id;
+        let id = req.session.user.id;
         let {gender,/* photo,*/ city, state, company, position, description} = req.body;
 
         //gender validation
@@ -414,7 +434,7 @@ router.post('/profile/update/:id', async (req, res) => {
             if(ObjectId.isValid(id)) {
                 console.log(recProfile);
                 let output = await recruiterDat.updateProfile(id, recProfile);
-                return res.redirect('/recruiters/'+id);
+                return res.redirect('/recruiters/');
             } else {
                 return res.status(400).render('pages/recruitereditprofile', {message: "Invalid Recruiter ID", err: true});
             }
@@ -425,8 +445,8 @@ router.post('/profile/update/:id', async (req, res) => {
     // }
 });
 
-router.delete('/:id', async (req, res) => {
-    let id = req.params.id;
+router.get('/delete', async (req, res) => {
+    let id = req.session.user.id;
     try {
                         // common session code all of your private routes
                         if(!req.session.user){
@@ -440,7 +460,11 @@ router.delete('/:id', async (req, res) => {
                         }
         if(ObjectId.isValid(id)) {
             let output = await recruiterDat.removeRecruiter(id);
-            return res.json(output);
+            if(output) {
+                req.session.destroy((function(err){
+                    res.clearCookie('AuthCookie').redirect('/');
+                }));
+            }
         }
     } catch (e) {
         return res.status(e.status).render('pages/rec', {message: e.message, err: true});
@@ -487,7 +511,7 @@ router.post('/jobs/new', async (req, res) => {
             console.log("I am here",output);
 
             if(output) {
-                return res.redirect('/recruiters/'+req.session.user.id);
+                return res.redirect('/recruiters');
             }
         // }
     } catch(e) {
@@ -535,7 +559,7 @@ router.post('/jobs/update/:id', async (req, res) => {
             let jobDetails = {title, type: jobType, company, city, state, jobExpiry, details :{summary, description, required: jobTags}, payrange, benefits};
             let output = await recruiterDat.updateJob(recId, jobId, jobDetails);
             if(output) {
-                return res.redirect('/recruiters/'+recId)
+                return res.redirect('/recruiters')
             }
         }
     } catch(e) {
@@ -544,23 +568,23 @@ router.post('/jobs/update/:id', async (req, res) => {
 });
 
 router.get('/jobs/delete/:id', async (req, res) => {
-    let jobId = req.params.id;
     try {
-                        // common session code all of your private routes
-                        if(!req.session.user){
-                            return res.redirect('/recruiters/login');
-                        }
-                
-                        if(req.session.user){
-                            if(req.session.user.type !=='recruiter'){
-                                return res.redirect('/recruiters/login');
-                            }
-                        }
+        // common session code all of your private routes
+        if(!req.session.user){
+            return res.redirect('/recruiters/login');
+        }
+
+        if(req.session.user){
+            if(req.session.user.type !=='recruiter'){
+                return res.redirect('/recruiters/login');
+            }
+        }
+        let jobId = req.params.id;
         if(ObjectId.isValid(jobId)) {
             let userId = req.session.user.id;
             let output = await recruiterDat.removeJob(userId, jobId);
             if(output.deleted) {
-                return res.redirect('/recruiters/'+req.session.user.id)
+                return res.redirect('/recruiters')
             }
         }
     } catch (e) {

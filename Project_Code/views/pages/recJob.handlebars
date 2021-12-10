@@ -1,7 +1,7 @@
 <div> 
-<button onclick="window.location.href='/recruiters/profile';">
-      Jobs
-</button>
+      <form style="display: inline" action="/recruiters/" method="get">
+            <button type="submit" class="btn btn-primary" id="landingBtn">All Jobs</button>
+      </form>
   <h1>{{data.name}}</h1> 
 
        <p> Type : {{data.type}}</p>
