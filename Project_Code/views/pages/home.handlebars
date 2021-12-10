@@ -9,15 +9,18 @@
 
 {{#if jobFound}}
 <input type="text" id="mySearchterm" onkeyup="filter(this);" placeholder="Search for Jobs.." title="Type in a term">
-<ul id = 'myJobList' class = 'jobList'>
+<ul id = 'myJobList' class = 'tilesWrap'>
 {{#each jobs}}
     <li>
-        <a href="/jobs/id/{{unique}}"> Title : {{title}}</a>
-         <p> Type : {{type}}</p>
-        <p> Location : {{city}},{{state}}</p>
-        <p> Job Summary : {{details.summary}}</p>
-       
-
+      <li>
+		  <h2>{{@index}}</h2>
+		  <h3>{{title}}</h3>
+		  <p>
+			Type : {{type}} <br>
+      Location : {{city}},{{state}}<br>
+      Job Summary : {{details.summary}}<br>
+		</p>
+		<button onclick="window.location.href='/jobs/id/{{unique}}'">Read more</button>
     </li>
 {{/each}}
 </ul>

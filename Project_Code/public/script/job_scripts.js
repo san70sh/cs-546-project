@@ -4,7 +4,7 @@ $(document).ready(function(){
   {
     var value = $(element).val();
     console.log(value);
-    $(".jobList > li").each(function() 
+    $(".tilesWrap > li").each(function() 
     {
       if ($(this).text().search(value) > -1){
         $(this).show();
