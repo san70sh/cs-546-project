@@ -6,7 +6,7 @@
         {{#if mainerr}}
         <div class="error">{{message}}</div>
         {{/if}}
-        <form action="/recruiters/jobs/{{recid}}" method="{{method}}" id="newJobForm" autocomplete="off">
+        <form action="/recruiters/jobs/{{action}}" method="{{method}}" id="jobForm" autocomplete="off">
             <div class="form-group row mb-3">
                 {{#if jtitleErr}}
                 <div class="error">{{message}}</div>

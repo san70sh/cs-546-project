@@ -14,7 +14,7 @@
         crossorigin="anonymous"></script>
     <script type="text/javascript" src="//cdn.jsdelivr.net/jquery.bootstrapvalidator/0.5.2/js/bootstrapValidator.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
-    <script src="/public/script/script.js"></script>
+    
     <header>
         {{!-- NavBar --}}
         <nav class="navbar navbar-expand-lg navbar-fixed-top bg-dark navbar-dark">
@@ -35,7 +35,7 @@
                     <li class="nav-item" id = 'RecLoginmain' >
                         <a href="/recruiters/login" role="button" class="btn btn-outline-light text-light nav-link d-md-table m-2" id="recruiterLoginBtn">Login as Recruiter</a>
                     </li>
-                    <li class="nav-item" id = 'userLoginmain' >
+                    <li class="nav-item" id="userLoginmain">
                         <a href="/users/login" role="button" class="btn btn-secondary text-light nav-link d-md-table m-2" id="applicantLoginBtn" >Login as Applicant</a> 
                     </li>
                 </ul>
@@ -51,20 +51,24 @@
         </nav>
     </header>
     <main>
-        <div id="wrapper">
-            {{!-- Sidebar --}}
-            <div id="sidebar-wrapper">
-            </div>
+        <div class="page-header header-filter vh-100" data-parallax="true"></div>
+            <div class="main main-raised vh-100 h-100">
+                <div id="wrapper">
+                    {{!-- Sidebar --}}
+                    <div id="sidebar-wrapper">
+                    </div>
 
-            {{!-- Main Content --}}
-            <div id="page-content-wrapper">
-                <div class="container pt-3">
-                    {{{body}}}
+                    {{!-- Main Content --}}
+                    <div id="page-content-wrapper">
+                        <div class="container pt-3">
+                            {{{body}}}
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
     </main>
-    <footer>Group1: Team members</footer>
     <!-- JavaScript Bundle with Popper -->
+    <script src="/public/script/script.js"></script>
+    <footer class="footer mt-auto py-3 bg-transparent text-dark">Group1: Team members</footer>
 </body>
 </html>

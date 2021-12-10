@@ -7,7 +7,7 @@
         <div class="error">{{message}}</div>
         {{/if}}
         <p>{{recid}}</p>
-        <form action="/recruiters/profile/{{recid}}" method="{{method}}" id="recProfileCreateEdit" autocomplete="off">
+        <form action="/recruiters/profile/{{action}}" method="{{method}}" id="recProfileCreateEdit" autocomplete="off">
             <div class="form-group">
                 {{#if genErr}}
                 <div class="error">{{message}}</div>
