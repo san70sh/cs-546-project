@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" translate="no">
 <head>
-    <meta charset="utf-8">
+    <meta charset="utf-8" content="notranslate">
     <title>JobHunt!</title>
     <link rel="stylesheet" href="/public/css/site.css">
     <!-- Bootstrap CSS only -->
@@ -40,6 +40,12 @@
                     </li>
                 </ul>
                 <ul class="navbar-nav ms-auto" id = "logout">
+                    <li class="nav-item" id = 'recProfile' >
+                        <a href="/recruiters/profile" role="button" class="btn btn-outline-light text-light nav-link d-md-table m-2" id="recruiterProfileBtn">My Profile</a>
+                    </li>
+                    <li class="nav-item" id = 'userProfile' >
+                        <a href="/users/profile" role="button" class="btn btn-outline-light text-light nav-link d-md-table m-2" id="userProfileBtn">My Profile</a>
+                    </li>
                     <li class="nav-item" id = 'logoutmain' >
                         <a href="/logout" role="button" class="btn btn-secondary text-light nav-link d-md-table m-2" id="applicantLoginBtn" >Logout</a> 
                     </li>

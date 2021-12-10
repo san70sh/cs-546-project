@@ -26,57 +26,29 @@
     {{!-- Main Profile Container --}}
             <div class="container-fluid mx-auto">
                 <div class="row py-3">
-                    <div class="container-fluid px-0">
-                        <div class="row">
-                            <div class="col-10 text-center mt-2 ml-5">
-                                <h3 class="font-weight-bold">{{recruiter.firstName}} {{recruiter.lastName}}</h3>
-                                {{#if newRec}}
-                                {{else}}
-                                <h6>{{recruiter.profile.company.position}}, {{recruiter.profile.company.name}}</h6>
-                                {{/if}}
-                            </div>
-                            <div class="col-2 my-auto">
-                                <button type="button" class="btn btn-danger w-50" id="recDeleteModalBtn" data-bs-toggle="modal" data-bs-target="#recDelModal">Delete</button>
-                            </div>
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h3 class="card-title">{{recruiter.firstName}} {{recruiter.lastName}}</h3>
+                            {{#if newRec}}
+                                <div><a href="/recruiters/profile/" role="button" class="btn btn-danger" id="recCreateProfileBtn">Create Profile</a></div>
+                            {{/if}}
+                            {{#unless newRec}}
+                                <div>
+                                <h6 class="card-subtitle mb-2 text-muted">{{recruiter.profile.company.position}}, {{recruiter.profile.company.name}}</h6>
+                                <a href="/recruiters/profile/" role="button" class="btn btn-primary my-4" id="recEditProfileBtn">Edit Profile</a>
+                                </div>
+                            {{/unless}}
+                            <p class="card-text">{{recruiter.profile.company.description}}</p>
                         </div>
-                        {{#if newRec}}
-                        <div class="row createprofilebtn">
-                            <div class="col text-center">
-                                <form style="display: inline" action="/recruiters/profile/" method="get">
-                                    <button type="button" class="btn btn-danger" id="recCreateProfileBtn">Create Profile</button>
-                                </form>
-                            </div>
-                        </div>
-                        {{else}}
-                        <div class="row editprofilebtn">
-                            <div class="col text-center">
-                                <form style="display: inline" action="/recruiters/profile/" method="get">
-                                    <button type="button" class="btn btn-primary my-4" id="recEditProfileBtn">Edit Profile</button>
-                                </form>
-                            </div>
-                        </div>
-                        {{#if recruiter.profile.state}}
-                        <div class="row profile-section">
-                            <div class="col text-center font-weight-bold">
-                                <p class="font-weight-bold">{{recruiter.profile.city}}, {{recruiter.profile.state}}</p>
-                            </div>
-                        </div>
-                        {{/if}}
-                        
-                        <div class="row about-section mt-4">
-                            <div class="col">
-                                <p>{{recruiter.profile.company.description}}</p>
-                            </div>
-                        </div>
-                        {{/if}}
                     </div>
                 </div>
                 <div class="row mt-3">
                     <div class="container-fluid py-0">
                         <div class="d-flex justify-content-end mb-5">
-                            <form style="display: inline" action="/recruiters/jobs/new" method="get">
+                            {{!-- <form style="display: inline" action="/recruiters/jobs/new" method="get">
                                     <button type="submit" class="btn btn-primary" id="newJobBtn">Post New Job</button>
-                            </form>
+                            </form> --}}
+                            <a href="/recruiters/jobs/new" role="button" class="btn btn-primary" id="newJobBtn">Post New Job</a>
                         </div>
                         <div class="row job-section">
                             <div class="accordion" id="job-accordion">
@@ -91,7 +63,7 @@
                                                     </button>
                                                 </div>
                                                 <div class="col-3 d-md-flex justify-content-md-end">
-                                                        <form style="display: inline" action="/jobs/recruiters/id/{{job_id}}" method="get">
+                                                        {{!-- <form style="display: inline" action="/jobs/recruiters/id/{{job_id}}" method="get">
                                                             <button type="submit" class="btn btn-secondary mx-2" id="openJob{{@index}}">Open</button>
                                                         </form>
                                                         <form style="display: inline" action="/recruiters/jobs/update/{{jobDetails._id}}" method="get">
@@ -99,7 +71,10 @@
                                                         </form>
                                                         <form style="display: inline" action="/recruiters/jobs/delete/{{jobDetails._id}}" method="get">
                                                             <button type="submit" class="btn btn-danger me-md-2" id="deleteJob{{@index}}">Delete</button>
-                                                        </form>
+                                                        </form> --}}
+                                                        <a href="/jobs/recruiters/id/{{job_id}}" role="button" class="btn btn-secondary mx-2" id="openJob{{@index}}">Open</a>
+                                                        <a href="/recruiters/jobs/update/{{job_id}}" role="button" class="btn btn-success me-md-2" id="updateJob{{@index}}">Update</a>
+                                                        <a href="/recruiters/jobs/delete/{{job_id}}" role="button" class="btn btn-danger me-md-2" id="deleteJob{{@index}}">Delete</a>
                                                 </div>
                                             </div>
                                         </div>
@@ -115,12 +90,15 @@
                                                             <div class="col-3">{{firstName}} {{lastName}}</div>
                                                             {{!-- hidden div to retrieve applicant id --}}
                                                             <div class="col d-md-flex justify-content-md-end">
-                                                                    <form style="display: inline" action="/recruiters/accept/" method="get">
+                                                                    {{!-- <form style="display: inline" action="/recruiters/accept/" method="get">
                                                                         <button id="acceptDecision{{@../index}}{{@index}}" type="submit" value="Accept" class="btn btn-success me-md-2 acceptDec">Accept</button>
                                                                     </form>
                                                                     <form style="display: inline" action="/recruiters/reject/" method="get">
                                                                         <button id="rejectDecision{{@../index}}{{@index}}" type="submit" value="Reject" class="btn btn-danger me-md-2">Reject</button>
-                                                                    </form>
+                                                                    </form> --}}
+                                                                    <a href="/recruiters/accept/{{../job_id}}/{{_id}}" role="button" class="btn btn-outline-success me-md-2 acceptDec" id="acceptDecision{{@../index}}{{@index}}">Accept</a>
+                                                                    <a href="rejectDecision{{@../index}}{{@index}}" role="button" class="btn btn-outline-danger me-md-2 rejectDec" id="rejectDecision{{@../index}}{{@index}}">Reject</a>
+
                                                             </div>
                                                         </div>
                                                     </div>
