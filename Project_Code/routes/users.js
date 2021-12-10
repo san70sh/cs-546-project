@@ -136,7 +136,7 @@ router.get("/signup", async (req, res) => {
   return res.render("pages/applicantSignup", { title: "Applicant Sign-up" });
 });
 
-router.get("/:id", async (req, res) => {
+router.get("/", async (req, res) => {
   if (!req.session.user) {
     return res.redirect("/users/login");
   }
@@ -146,7 +146,7 @@ router.get("/:id", async (req, res) => {
       return res.redirect("/logout");
     }
   }
-  let id = req.params.id,
+  let id = req.session.user.id,
     user,
     newUser;
   if (ObjectId.isValid(id)) {
@@ -181,8 +181,7 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-router.get("/profile/:id", async (req, res) => {
-  let id = req.params.id;
+router.get("/profile/", async (req, res) => {
   try {
     // common session code all of your private routes
     if (!req.session.user) {
@@ -194,7 +193,7 @@ router.get("/profile/:id", async (req, res) => {
         return res.redirect("/logout");
       }
     }
-
+    let id = req.session.user.id;
     if (ObjectId.isValid(id)) {
       let user = await users.get(id);
       console.log(user);
@@ -274,7 +273,7 @@ router.post("/login", async (req, res) => {
   }
   if (tmp.authenticated === true) {
     req.session.user = { email: email, type: "user", id: tmp.id };
-    res.redirect(`/users/${tmp.id}`); //goto main page after user has logined in
+    res.redirect(`/users/`); //goto main page after user has logined in
   } else {
     res.status(400).render("pages/applicantlogin", {
       message: "please try again",
@@ -622,7 +621,7 @@ router.get("/apply", async (req, res) => {
   }
 });
 
-router.get("/ex/:id", async (req, res) => {
+router.get("/ex", async (req, res) => {
   if (!req.session.user) {
     return res.redirect("/users/login");
   }
@@ -635,10 +634,11 @@ router.get("/ex/:id", async (req, res) => {
   let userId = req.session.user.id;
   if (!ObjectId.isValid(userId)) {
     res.status(e.status).render("pages/error", {
-      title: "Favor",
+      title: "experience",
       message: "inValid userId",
       error: true,
     });
+    return;
   }
   try {
     let output = await users.getEx(userId);
@@ -652,7 +652,7 @@ router.get("/ex/:id", async (req, res) => {
   }
 });
 
-router.post("/ex/:id", async (req, res) => {
+router.post("/ex", async (req, res) => {
   let experience = req.body.tmp;
   // console.log(experience+"************");
   if (!req.session.user) {
@@ -667,13 +667,16 @@ router.post("/ex/:id", async (req, res) => {
   let userId = req.session.user.id;
   if (!ObjectId.isValid(userId)) {
     res.status(e.status).render("pages/error", {
-      title: "Favor",
+      title: "experience",
       message: "inValid userId",
       error: true,
     });
+    return;
   }
   try {
     let output = await users.addEx(experience,userId);
+    console.log(output);
+    return res.json(output);
   } catch (e) {
     return res.status(e.status).render("pages/error", {
       title: "experience",
@@ -682,5 +685,193 @@ router.post("/ex/:id", async (req, res) => {
     });
   }
 });
+router.get("/edu", async (req, res) => {
+  if (!req.session.user) {
+    return res.redirect("/users/login");
+  }
 
+  if (req.session.user) {
+    if (req.session.user.type !== "user") {
+      return res.redirect("/users/login");
+    }
+  }
+  let userId = req.session.user.id;
+  if (!ObjectId.isValid(userId)) {
+    res.status(e.status).render("pages/error", {
+      title: "education",
+      message: "inValid userId",
+      error: true,
+    });
+    return;
+  }
+  try {
+    let output = await users.getEdu(userId);
+    return res.json(output);
+  } catch (e) {
+    return res.status(e.status).render("pages/error", {
+      title: "education",
+      message: e.message,
+      error: true,
+    });
+  }
+});
+
+router.post("/edu", async (req, res) => {
+  let education = req.body.tmp;
+  // console.log(experience+"************");
+  if (!req.session.user) {
+    return res.redirect("/users/login");
+  }
+
+  if (req.session.user) {
+    if (req.session.user.type !== "user") {
+      return res.redirect("/users/login");
+    }
+  }
+  let userId = req.session.user.id;
+  if (!ObjectId.isValid(userId)) {
+    res.status(e.status).render("pages/error", {
+      title: "education",
+      message: "inValid userId",
+      error: true,
+    });
+    return;
+  }
+  try {
+    let output = await users.addEdu(education,userId);
+    return res.json(output);
+  } catch (e) {
+    return res.status(e.status).render("pages/error", {
+      title: "education",
+      message: e.message,
+      error: true,
+    });
+  }
+});
+
+router.get("/sk", async (req, res) => {
+  if (!req.session.user) {
+    return res.redirect("/users/login");
+  }
+
+  if (req.session.user) {
+    if (req.session.user.type !== "user") {
+      return res.redirect("/users/login");
+    }
+  }
+  let userId = req.session.user.id;
+  if (!ObjectId.isValid(userId)) {
+    res.status(e.status).render("pages/error", {
+      title: "skill",
+      message: "inValid userId",
+      error: true,
+    });
+    return;
+  }
+  try {
+    let output = await users.getSk(userId);
+    return res.json(output);
+  } catch (e) {
+    return res.status(e.status).render("pages/error", {
+      title: "skill",
+      message: e.message,
+      error: true,
+    });
+  }
+});
+
+router.post("/sk", async (req, res) => {
+  let sk = req.body.tmp;
+  if (!req.session.user) {
+    return res.redirect("/users/login");
+  }
+
+  if (req.session.user) {
+    if (req.session.user.type !== "user") {
+      return res.redirect("/users/login");
+    }
+  }
+  let userId = req.session.user.id;
+  if (!ObjectId.isValid(userId)) {
+    res.status(e.status).render("pages/error", {
+      title: "skills",
+      message: "inValid userId",
+      error: true,
+    });
+    return;
+  }
+  try {
+    let output = await users.addSk(sk.skills,userId);
+    return res.json(output);
+  } catch (e) {
+    return res.status(e.status).render("pages/error", {
+      title: "skills",
+      message: e.message,
+      error: true,
+    });
+  }
+});
+
+router.get("/la", async (req, res) => {
+  if (!req.session.user) {
+    return res.redirect("/users/login");
+  }
+
+  if (req.session.user) {
+    if (req.session.user.type !== "user") {
+      return res.redirect("/users/login");
+    }
+  }
+  let userId = req.session.user.id;
+  if (!ObjectId.isValid(userId)) {
+    res.status(e.status).render("pages/error", {
+      title: "skill",
+      message: "inValid userId",
+      error: true,
+    });
+    return;
+  }
+  try {
+    let output = await users.getLa(userId);
+    return res.json(output);
+  } catch (e) {
+    return res.status(e.status).render("pages/error", {
+      title: "languages",
+      message: e.message,
+      error: true,
+    });
+  }
+});
+
+router.post("/la", async (req, res) => {
+  let la = req.body.tmp;
+  if (!req.session.user) {
+    return res.redirect("/users/login");
+  }
+
+  if (req.session.user) {
+    if (req.session.user.type !== "user") {
+      return res.redirect("/users/login");
+    }
+  }
+  let userId = req.session.user.id;
+  if (!ObjectId.isValid(userId)) {
+    res.status(e.status).render("pages/error", {
+      title: "languages",
+      message: "inValid userId",
+      error: true,
+    });
+    return;
+  }
+  try {
+    let output = await users.addLa(la.languages,userId);
+    return res.json(output);
+  } catch (e) {
+    return res.status(e.status).render("pages/error", {
+      title: "languages",
+      message: e.message,
+      error: true,
+    });
+  }
+});
 module.exports = router;

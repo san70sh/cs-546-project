@@ -47,7 +47,7 @@ const checkEx = (experience) => {
         "Value of experience in each elements can't be empty or just spaces"
       );
     }
-    date_regex = /^\d{2}\/\d{2}\/\d{4}$/;
+    date_regex = /^\d{4}\/\d{2}\/\d{2}$/;
     if (!date_regex.test(ele.startDate) && date_regex.test(ele.endDate)) {
       throw new CustomError(400, "Wrong date formate MM/DD/YYYY");
     }
@@ -104,8 +104,8 @@ const checkSk = (skills) => {
     throw new CustomError(400, "skills must be an array");
   }
   skills.forEach((ele) => {
-    if (typeof ele !== "string") {
-      throw new CustomError(400, "skills value must be string");
+    if (typeof ele !== "string" || ele.trim().length === 0) {
+      throw new CustomError(400, "skills value must be non-empty string");
     }
   });
 };
@@ -985,7 +985,185 @@ const addEx = async(experience,userId) => {
     { $addToSet: { "profile.experience": experience} }
   );
   if (insertInfo.modifiedCount === 0) throw new CustomError(400,"Could not update the experience");
-  return insertInfo.insertedId;
+  console.log(insertInfo)
+  return insertInfo.acknowledged;
+}
+
+const getEdu = async(userId) => {
+  if (!userId) {
+    throw new CustomError(400, "id must be provided");
+  }
+  if (typeof userId !== "string") {
+    throw new CustomError(
+      400,
+      "the userId must be non-empty string and can't just be space"
+    );
+  }
+  if (!ObjectId.isValid(userId)) {
+    throw new CustomError(400, "Invalid userID");
+  } else {
+    userId = ObjectId(userId);
+  }
+  const usersCollection = await users();
+  const res = await usersCollection.findOne({ _id: userId });
+  if (res === null) throw new CustomError(400, "user did not exists");
+  return res.profile.education;
+}
+
+const addEdu = async(education,userId) => {
+  if (!userId) {
+    throw new CustomError(400, "id must be provided");
+  }
+  if (typeof userId !== "string") {
+    throw new CustomError(
+      400,
+      "the userId must be non-empty string and can't just be space"
+    );
+  }
+  if (!ObjectId.isValid(userId)) {
+    throw new CustomError(400, "Invalid userID");
+  } else {
+    userId = ObjectId(userId);
+  }
+  if (education === undefined) {
+    throw new CustomError(400, "education is not provided");
+  }
+  if (
+    typeof education.school != "string" ||
+    typeof education.major != "string" ||
+    typeof education.degree != "string" ||
+    typeof education.startDate != "string" ||
+    typeof education.endDate != "string"
+  ) {
+    throw new CustomError(
+      400,
+      "Value of education in each elements must be string"
+    );
+  }
+  if (
+    education.school.trim().length === 0 ||
+    education.major.trim().length === 0 ||
+    education.degree.trim().length === 0 ||
+    education.startDate.trim().length === 0 ||
+    education.endDate.trim().length === 0
+  ) {
+    // not optional, the user must fill in this data when regiester
+    throw new CustomError(
+      400,
+      "Value of education in each elements can't be empty or just spaces"
+    );
+  }
+  date_regex = /^\d{4}\/\d{2}\/\d{2}$/;
+  if (!date_regex.test(education.startDate) && date_regex.test(education.endDate)) {
+    throw new CustomError(400, "Wrong date formate MM/DD/YYYY");
+  }
+ 
+  const usersCollection = await users();
+  const insertInfo = await usersCollection.updateOne(
+    { _id: userId},
+    { $addToSet: { "profile.education": education}}
+  );
+  if (insertInfo.modifiedCount === 0) throw new CustomError(400,"Could not update the education");
+  console.log(insertInfo)
+  return insertInfo.acknowledged;
+}
+
+const getSk = async(userId) => {
+  if (!userId) {
+    throw new CustomError(400, "id must be provided");
+  }
+  if (typeof userId !== "string") {
+    throw new CustomError(
+      400,
+      "the userId must be non-empty string and can't just be space"
+    );
+  }
+  if (!ObjectId.isValid(userId)) {
+    throw new CustomError(400, "Invalid userID");
+  } else {
+    userId = ObjectId(userId);
+  }
+  const usersCollection = await users();
+  const res = await usersCollection.findOne({ _id: userId });
+  if (res === null) throw new CustomError(400, "user did not exists");
+  return res.profile.skills;
+}
+
+const addSk = async(skill,userId) => {
+  if (!userId) {
+    throw new CustomError(400, "id must be provided");
+  }
+  if (typeof userId !== "string") {
+    throw new CustomError(
+      400,
+      "the userId must be non-empty string and can't just be space"
+    );
+  }
+  if (!ObjectId.isValid(userId)) {
+    throw new CustomError(400, "Invalid userID");
+  } else {
+    userId = ObjectId(userId);
+  }
+  if (typeof skill !== "string" || skill.trim().length === 0) {
+    throw new CustomError(400, "skill value must be non-empty string");
+  }
+  const usersCollection = await users();
+  const insertInfo = await usersCollection.updateOne(
+    { _id: userId},
+    { $addToSet: { "profile.skills": skill}}
+  );
+  if (insertInfo.modifiedCount === 0) throw new CustomError(400,"Could not update the skills");
+  console.log(insertInfo)
+  return insertInfo.acknowledged;
+}
+
+const getLa = async(userId) => {
+  if (!userId) {
+    throw new CustomError(400, "id must be provided");
+  }
+  if (typeof userId !== "string") {
+    throw new CustomError(
+      400,
+      "the userId must be non-empty string and can't just be space"
+    );
+  }
+  if (!ObjectId.isValid(userId)) {
+    throw new CustomError(400, "Invalid userID");
+  } else {
+    userId = ObjectId(userId);
+  }
+  const usersCollection = await users();
+  const res = await usersCollection.findOne({ _id: userId });
+  if (res === null) throw new CustomError(400, "user did not exists");
+  return res.profile.languages;
+}
+
+const addLa = async(languages,userId) => {
+  if (!userId) {
+    throw new CustomError(400, "id must be provided");
+  }
+  if (typeof userId !== "string") {
+    throw new CustomError(
+      400,
+      "the userId must be non-empty string and can't just be space"
+    );
+  }
+  if (!ObjectId.isValid(userId)) {
+    throw new CustomError(400, "Invalid userID");
+  } else {
+    userId = ObjectId(userId);
+  }
+  if (typeof languages !== "string" || languages.trim().length === 0) {
+    throw new CustomError(400, "languages value must be non-empty string");
+  }
+  const usersCollection = await users();
+  const insertInfo = await usersCollection.updateOne(
+    { _id: userId},
+    { $addToSet: { "profile.languages": languages}}
+  );
+  if (insertInfo.modifiedCount === 0) throw new CustomError(400,"Could not update the skills");
+  console.log(insertInfo)
+  return insertInfo.acknowledged;
 }
 module.exports = {
   create,
@@ -1008,6 +1186,12 @@ module.exports = {
   removeResume,
   getEx,
   addEx,
+  getEdu,
+  addEdu,
+  getSk,
+  addSk,
+  getLa,
+  addLa,
 };
 // test functions **IMPORTANT**
 //checkEx([{title:"Maintenance Engineer", employmentType: "full time", companyName:"Apple",startDate: "08/05/2017", endDate: "08/05/2018"}])
