@@ -3,16 +3,27 @@ $(document).ready(function() {
         type :'GET',
         url : '/getsession',
         success: function(data){
-            console.log(data.status);
+            console.log(data);
             if(data.status == 'inactive'){
                 console.log("hello");
                 $("#logout").hide();
                 $('#sessionactive').show();
             }
             else{
+                
                 $('#sessionactive').hide();
                 $('#logout').show();
             }
+
+            if(data.type == 'recruiter') {
+                $("recProfile").show();
+                $("userProfile").hide();
+            } else {
+                $("recProfile").hide();
+                $("userProfile").show();
+            }
+
+
         }
     });
 });

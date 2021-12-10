@@ -37,13 +37,22 @@ router.get("/getsession", async (req, res) => {
   try {
 
     if(req.session.user){
-      res.json({status: "active"});
+
+      if(req.session.user.type == 'user'){
+        return res.json({status : "active",type :'user'});
+      }
+      else{
+
+        return res.json({status : "active",type :'recruiter'});
+
+      }
+      
     }
     else{
-      res.json({status: "inactive"});
+      return res.json({status: "inactive"});
     }
   } catch (e) {
-    res.status(400).render("pages/error",{message: e});
+    return res.status(400).render("pages/error",{message: e});
   }
 });
 
