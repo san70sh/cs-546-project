@@ -6,9 +6,11 @@ $(document).ready(function() {
             console.log(data.status);
             if(data.status == 'inactive'){
                 console.log("hello");
+                $("#logout").hide();
                 $('#sessionactive').show();
             }
             else{
+                $('#sessionactive').hide();
                 $('#logout').show();
             }
         }
