@@ -27,4 +27,23 @@ $(document).ready(function() {
     //     $("#applicantLogin").modal("show");
     //     $("#applicantSignup").modal("hide");
     // })
+
+    $.ajax ({
+        type :'GET',
+        url : '/getsession',
+        success: function(data){
+            console.log(data.status);
+            if(data.status == 'inactive'){
+                console.log("hello");
+                $('#sessionactive').show();
+            }
+            else{
+                $('#logout').show();
+            }
+        }
+    });
+
+     
+ 
+
 });

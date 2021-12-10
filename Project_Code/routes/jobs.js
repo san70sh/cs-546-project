@@ -33,6 +33,20 @@ router.get("/jobs/city/:city", async (req, res) => {
   }
 });
 
+router.get("/getsession", async (req, res) => {
+  try {
+
+    if(req.session.user){
+      res.json({status: "active"});
+    }
+    else{
+      res.json({status: "inactive"});
+    }
+  } catch (e) {
+    res.status(400).render("pages/error",{message: e});
+  }
+});
+
 router.get("/jobs/id/:id", async (req, res) => {
   try {
     if(!req.session.user || req.session.user.type != 'user'){
