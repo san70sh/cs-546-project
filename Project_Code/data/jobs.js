@@ -224,15 +224,15 @@ async function updateJob(jobId, updatedJob){
 
     // to bediscussed how to store the dat in MM/DD/YYYY object or string
     
-    if(updatedJob.postDate){
-        if(typeof updatedJob.postDate !== 'object') throw `please provide a valid type`;
-        currentJob.postDate = updatedJob.postDate;
-    }
+    // if(updatedJob.postDate){
+    //     if(typeof updatedJob.postDate !== 'object') throw `please provide a valid type`;
+    //     currentJob.postDate = updatedJob.postDate;
+    // }
 
-    if(updatedJob.expiryDate){
-        if(typeof updatedJob.expiryDate !== 'object') throw `please provide a valid type`;
-        currentJob.expiryDate = updatedJob.expiryDate;
-    }
+    // if(updatedJob.expiryDate){
+    //     if(typeof updatedJob.expiryDate !== 'object') throw `please provide a valid type`;
+    //     currentJob.expiryDate = updatedJob.expiryDate;
+    // }
     
     if(updatedJob.type){
         if(typeof updatedJob.type !== 'string' || updatedJob.type.trim().length < 1) throw `please provide a valid type`;
