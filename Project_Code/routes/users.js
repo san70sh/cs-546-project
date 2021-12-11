@@ -4,6 +4,7 @@ const router = express.Router();
 const users = require("../data/users");
 const upload = require("../data/upload").upload;
 const download = require("../data/upload").download;
+const recruiters = require("../data/recruiters");
 
 router.get("/resume", async (req, res) => {
   if (!req.session.user) {
@@ -512,7 +513,7 @@ router.get("/select/:id", async (req, res) => {
   }
 
   const jobId = req.params.id;
-
+  // console.log(jobId);
   if (!ObjectId.isValid(jobId) || !ObjectId.isValid(req.session.user.id)) {
     return res.status(400).render("pages/error", {
       title: "apply",
@@ -533,8 +534,7 @@ router.get("/select/:id", async (req, res) => {
   res.render("pages/resumeSelection", { jobId, resumes, resumeError });
 });
 
-router.post("/apply", async (req, res) => {
-  // common session code all of your private routes
+router.post("/apply/:id", async (req, res) => {
   if (!req.session.user) {
     return res.redirect("/users/login");
   }
@@ -545,15 +545,29 @@ router.post("/apply", async (req, res) => {
     }
   }
 
-  let jobId = req.body.jobId;
-  let userId = req.session.user.id;
-  if (!ObjectId.isValid(jobId) || !ObjectId.isValid(userId)) {
-    return res.status(400).render("pages/error", {
-      title: "apply",
-      message: "invalid id",
-      err: true,
-    });
+  try {
+    const applyRes = await users.apply(
+      req.params.id,
+      req.session.user.id,
+      req.body.fileId
+    );
+  } catch (e) {
+    return res.json({ message: e });
   }
+
+  try {
+    await recruiters.addApplicant(req.body.fileId, req.session.user.id);
+  } catch (e) {
+    return res.json({ message: e });
+  }
+
+  let message =
+    "You have successfully applied for the job, return to the job page...";
+  res.json({
+    message,
+  });
+
+  // console.log(errors);
 });
 
 router.delete("/apply", async (req, res) => {

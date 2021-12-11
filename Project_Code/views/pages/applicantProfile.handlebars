@@ -17,14 +17,15 @@
         <div class="row createprofilebtn">
             <div class="col">
                 <button type="button" class="btn btn-danger" id="recCreateProfileBtn"
-                    onclick = "location.href='/users/profile/';">Create
+                    onclick="location.href='/users/profile/';">Create
                     Profile</button>
             </div>
         </div>
         {{else}}
         <div class="row editprofilebtn">
             <div class="col">
-                <button type="button" class="btn btn-primary" id="recEditProfileBtn" onclick="location.href = '/users/profile/';">EditProfile </button>
+                <button type="button" class="btn btn-primary" id="recEditProfileBtn"
+                    onclick="location.href = '/users/profile/';">EditProfile </button>
             </div>
         </div>
         <div class="row profile-section">
@@ -41,32 +42,32 @@
                 <div class="container">
                     <ul>
                         <li>CompanyName: {{companyName}} <br>
-                        Title: {{title}} <br>
-                        EmploymentType: {{employmentType}} <br>
-                        StartDate: {{startDate}} <br>
-                        EndDate: {{endDate}}</li>
+                            Title: {{title}} <br>
+                            EmploymentType: {{employmentType}} <br>
+                            StartDate: {{startDate}} <br>
+                            EndDate: {{endDate}}</li>
                     </ul>
                 </div>
-            {{/each}}
-            <p>Education: </p>
-            {{#each user.profile.education}}
-            <div class="container" >
-                <ul>
-                    <li>School: {{school}}<br>
-                    Major: {{major}}<br>
-                    Degree: {{degree}}<br>
-                    StartDate: {{startDate}}<br>
-                    EndDate: {{endDate}}</li>
-                </ul>
-            </div>
-            {{/each}}
+                {{/each}}
+                <p>Education: </p>
+                {{#each user.profile.education}}
+                <div class="container">
+                    <ul>
+                        <li>School: {{school}}<br>
+                            Major: {{major}}<br>
+                            Degree: {{degree}}<br>
+                            StartDate: {{startDate}}<br>
+                            EndDate: {{endDate}}</li>
+                    </ul>
+                </div>
+                {{/each}}
             </div>
         </div>
         <div class="row about-section">
             <div class="col">
-            <p>Skills: {{user.profile.skills}}</p>
-            <p>Languages: {{user.profile.languages}}</p>
-            <p>Tags: {{user.profile.tags}}</p>
+                <p>Skills: {{user.profile.skills}}</p>
+                <p>Languages: {{user.profile.languages}}</p>
+                <p>Tags: {{user.profile.tags}}</p>
             </div>
         </div>
     </div>
@@ -82,7 +83,8 @@
     {{#each resumes}}
     <ul id='resumeList'>
         <div class='resumeList'> <a href="/users/resume/{{this}}" target="_blank">resume{{math @index "+" 1}}.pdf</a>
-            <button type="button" value={{this}} class="delete btn-primary" onclick="deleteResume(this.value)">delete</button>
+            <button type="button" value={{this}} class="delete btn-primary"
+                onclick="deleteResume(this.value)">delete</button>
         </div>
     </ul>
     {{/each}}
