@@ -1,25 +1,33 @@
-<div> 
+<div>
       <a href="/" role="button" class="btn btn-primary" id="landingBtn">All Jobs</a>
-  <h1>{{data.name}}</h1> 
+      <h1>{{data.name}}</h1>
 
-       <p> Type : {{data.type}}</p>
-        <p> Location : {{data.city}},{{data.state}}</p>
-        <p> Job Summary : {{data.details.summary}}</p>
-      <form action="./{{jobId}}/apply",  method="post">
-            <button>apply</button>
-          
-      </form>
-            <form action="/users/favor/{{jobId}}",  method="post">
-            <button>save</button>
-      </form>
-      
+      <p> Type : {{data.type}}</p>
+      <p> Location : {{data.city}},{{data.state}}</p>
+      <p> Job Summary : {{data.details.summary}}</p>
 
-         
+      <form action="/users/select/{{jobId}}" , method="get">
+            <button class="btn btn-primary">apply</button>
       </form>
-            <a href="/logout" role="button"  id="buttonsaved" >Logout</a> 
+
+      <form action="/users/favor/{{jobId}}" , method="post">
+            <button class="btn btn-primary">save</button>
       </form>
-      
 
 
-  </ul>
-</div> 
+
+      </form>
+      <a href="/logout" role="button" id="buttonsaved">Logout</a>
+      </form>
+
+
+
+      </ul>
+</div>
+
+<script src="https://code.jquery.com/jquery-2.2.4.min.js"
+      integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"
+      integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS"
+      crossorigin="anonymous"></script>
+<script src='/public/script/apply.js'></script>
