@@ -16,11 +16,11 @@ $(document).ready(function() {
             }
 
             if(data.type == 'recruiter') {
-                $("recProfile").show();
-                $("userProfile").hide();
+                $("#recProfile").show();
+                $("#userProfile").hide();
             } else {
-                $("recProfile").hide();
-                $("userProfile").show();
+                $("#recProfile").hide();
+                $("#userProfile").show();
             }
 
 
@@ -28,16 +28,16 @@ $(document).ready(function() {
     });
 });
 
-$(document).on('click','.acceptDec',function(event) {
-    event.preventDefault();
-    let body = $(this).parent().attr("value");
-    body = body.split('+').toArray();
-    let jobId = body[0];
-    let applicantId = body[1];
-    $.post('/recruiters/accept',{data: {jobId, applicantId}}).done(function(res) {
-        alert("Success");
-    })
-});
+// $(document).on('click','.acceptDec',function(event) {
+//     event.preventDefault();
+//     let body = $(this).parent().attr("value");
+//     body = body.split('+').toArray();
+//     let jobId = body[0];
+//     let applicantId = body[1];
+//     $.post('/recruiters/accept',{data: {jobId, applicantId}}).done(function(res) {
+//         alert("Success");
+//     })
+// });
 
 $(document).on('shown.bs.modal', '.modal', function () {
 $('.modal-backdrop').before($(this));
