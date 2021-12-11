@@ -81,7 +81,7 @@
     {{#if resumes}}
     {{#each resumes}}
     <ul id='resumeList'>
-        <div class='resumeList'> <a href="./resume/{{this}}" target="_blank">resume{{math @index "+" 1}}.pdf</a>
+        <div class='resumeList'> <a href="/users/resume/{{this}}" target="_blank">resume{{math @index "+" 1}}.pdf</a>
             <button type="button" value={{this}} class="delete btn-primary" onclick="deleteResume(this.value)">delete</button>
         </div>
     </ul>
