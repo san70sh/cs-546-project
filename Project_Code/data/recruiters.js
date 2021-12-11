@@ -367,19 +367,21 @@ async function addApplicant(jobId, applicantId) {
     try {
       const recCol = await recruiters();
       const jobCol = await jobs();
-      let job = await jobCol.find({_id: new ObjectId(jobId)}).project({_id: 0, poster: 1}).toArray();
-      let {poster} = job[0];
-  
-      let recAppUpdate = await recCol.updateOne({$and: [{_id: poster}, {jobs: {"job_id": new ObjectId(jobId)}}]},
-       {$push: {"jobs.$.applicant_id": {"applicant_id": new ObjectId(applicantId), "status": "pending"}}, upsert: true});
-       if(recAppUpdate.upsertedId) {
-         let appId = recAppUpdate.upsertedId;
-         return {"applicationId": appId};
-       } else throw new CustomError(400,"The application could not be created.");
+      jobId = new ObjectId(jobId);
+      applicantId = new ObjectId(applicantId);
+      let job = await jobCol.find({_id: jobId}).project({_id: 0, poster: 1}).toArray();
+      console.log(job);
+      if(job) {
+        let {poster} = job[0];
+        let recAppUpdate = await recCol.updateOne({$and: [{_id: poster}, {"jobs.job_id": jobId}]},{$push: {"jobs.$.applicants": {"appId": applicantId, "status": "pending"}}},{upsert: true});
+         if(recAppUpdate.modifiedCount == 1) {
+           return "Successfully Applied";
+         } else throw new CustomError(400,"The application could not be created.");
+      }
     } catch (e) {
-      console.log(e);
-    }
-  }
+      return e;
+    } 
+  } else throw "Invalid ID";
 }
 
 async function postJob(recruiterId, jobDetails) {
