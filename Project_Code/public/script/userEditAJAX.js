@@ -65,6 +65,9 @@ $(document).ready(function(){
             </li>`//need bind del events
             $('#preEdu').append(li);
         });
+        $('#preEdu').children().each(function(index,element){
+            eduToremove($(element));
+        });
     });
     $.ajax(skConfig).then(responseMessage =>{
         //$('#error').hide();
@@ -75,6 +78,9 @@ $(document).ready(function(){
             </li>`//need bind del events
             $('#preSk').append(li);
         }
+        $('#preSk').children().each(function(index,element){
+            skToremove($(element));
+        });
     });
     $.ajax(laConfig).then(responseMessage =>{
         //$('#error').hide();
@@ -85,6 +91,9 @@ $(document).ready(function(){
             </li>`//need bind del events
             $('#preLa').append(li);
         }
+        $('#preLa').children().each(function(index,element){
+            laToremove($(element));
+        });
     });
 });
 
@@ -207,15 +216,70 @@ const exToremove = (remove) => {
     remove.on('click', event => {
         event.preventDefault();
         let obj = remove.find('a').attr('href');
-        let tmp ={
-            companyName:obj
-        }
         $.ajax({
             url: "/users/ex",
             type: "DELETE",
             data: {
-                    "companyName": companyName.val()
-                  }
+                    "companyName": obj
+                  },
+            success: function() {
+            location.reload(true);                         
+            }
          })
+
+    })
+}
+
+const eduToremove = (remove) => {
+    remove.on('click', event => {
+        event.preventDefault();
+        let obj = remove.find('a').attr('href');
+        $.ajax({
+            url: "/users/edu",
+            type: "DELETE",
+            data: {
+                    "school": obj
+                  },
+            success: function() {
+            location.reload(true);                         
+            }
+         })
+
+    })
+}
+
+const skToremove = (remove) => {
+    remove.on('click', event => {
+        event.preventDefault();
+        let obj = remove.find('a').attr('href');
+        $.ajax({
+            url: "/users/sk",
+            type: "DELETE",
+            data: {
+                    "skill": obj
+                  },
+            success: function() {
+            location.reload(true);                         
+            }
+         })
+
+    })
+}
+
+const laToremove = (remove) => {
+    remove.on('click', event => {
+        event.preventDefault();
+        let obj = remove.find('a').attr('href');
+        $.ajax({
+            url: "/users/la",
+            type: "DELETE",
+            data: {
+                    "language": obj
+                  },
+            success: function() {
+            location.reload(true);                         
+            }
+         })
+
     })
 }

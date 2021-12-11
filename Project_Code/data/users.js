@@ -1171,6 +1171,37 @@ const addEdu = async(education,userId) => {
   console.log(insertInfo)
   return insertInfo.acknowledged;
 }
+const delEdu = async(school,userId) => {
+  if (!userId) {
+    throw new CustomError(400, "id must be provided");
+  }
+  if (typeof userId !== "string") {
+    throw new CustomError(
+      400,
+      "the userId must be non-empty string and can't just be space"
+    );
+  }
+  if (!ObjectId.isValid(userId)) {
+    throw new CustomError(400, "Invalid userID");
+  } else {
+    userId = ObjectId(userId);
+  }
+  if (
+    typeof school != "string" || school.trim().length === 0
+  ) {
+    throw new CustomError(
+      400,
+      "Value of school must be non-empty string"
+    );
+  }
+  const usersCollection = await users();
+  const insertInfo = await usersCollection.updateOne(
+    { _id: userId},
+    { $pull: { "profile.education": {school:school}} }
+  );
+  if (insertInfo.modifiedCount === 0) throw new CustomError(400,"Could not del the education");
+  return insertInfo.acknowledged;
+}
 
 const getSk = async(userId) => {
   if (!userId) {
@@ -1218,6 +1249,37 @@ const addSk = async(skill,userId) => {
   );
   if (insertInfo.modifiedCount === 0) throw new CustomError(400,"Could not update the skills");
   console.log(insertInfo)
+  return insertInfo.acknowledged;
+}
+const delSk = async(skill,userId) => {
+  if (!userId) {
+    throw new CustomError(400, "id must be provided");
+  }
+  if (typeof userId !== "string") {
+    throw new CustomError(
+      400,
+      "the userId must be non-empty string and can't just be space"
+    );
+  }
+  if (!ObjectId.isValid(userId)) {
+    throw new CustomError(400, "Invalid userID");
+  } else {
+    userId = ObjectId(userId);
+  }
+  if (
+    typeof skill != "string" || skill.trim().length === 0
+  ) {
+    throw new CustomError(
+      400,
+      "Value of skill must be non-empty string"
+    );
+  }
+  const usersCollection = await users();
+  const insertInfo = await usersCollection.updateOne(
+    { _id: userId},
+    { $pull: { "profile.skills":skill } }
+  );
+  if (insertInfo.modifiedCount === 0) throw new CustomError(400,"Could not del the education");
   return insertInfo.acknowledged;
 }
 
@@ -1269,6 +1331,38 @@ const addLa = async(languages,userId) => {
   console.log(insertInfo)
   return insertInfo.acknowledged;
 }
+
+const delLa = async(language,userId) => {
+  if (!userId) {
+    throw new CustomError(400, "id must be provided");
+  }
+  if (typeof userId !== "string") {
+    throw new CustomError(
+      400,
+      "the userId must be non-empty string and can't just be space"
+    );
+  }
+  if (!ObjectId.isValid(userId)) {
+    throw new CustomError(400, "Invalid userID");
+  } else {
+    userId = ObjectId(userId);
+  }
+  if (
+    typeof language != "string" || language.trim().length === 0
+  ) {
+    throw new CustomError(
+      400,
+      "Value of language must be non-empty string"
+    );
+  }
+  const usersCollection = await users();
+  const insertInfo = await usersCollection.updateOne(
+    { _id: userId},
+    { $pull: { "profile.languages":language } }
+  );
+  if (insertInfo.modifiedCount === 0) throw new CustomError(400,"Could not del the language");
+  return insertInfo.acknowledged;
+}
 module.exports = {
   create,
   getFile,
@@ -1294,10 +1388,13 @@ module.exports = {
   delEx,
   getEdu,
   addEdu,
+  delEdu,
   getSk,
   addSk,
+  delSk,
   getLa,
   addLa,
+  delLa,
 };
 // test functions **IMPORTANT**
 //checkEx([{title:"Maintenance Engineer", employmentType: "full time", companyName:"Apple",startDate: "08/05/2017", endDate: "08/05/2018"}])
@@ -1349,3 +1446,4 @@ module.exports = {
 //addEx({title:"cctv Engineer", employmentType: "full time", companyName:"Apple",startDate: "2017/05/17", endDate: "2021/05/12"},"61b15aafb06d8df4d3ec63c3").catch(e=>console.log(e))
 //editProfile("61b409843132c093c1f3b57b","M","Ho","NJ")
 //delEx("Apple","61b409843132c093c1f3b57b")
+// delSk("JS","61b409843132c093c1f3b57b")

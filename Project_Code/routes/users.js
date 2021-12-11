@@ -387,7 +387,7 @@ router.post("/signup", async (req, res) => {
     );
     req.session.user = { email: email, type: "user", id: userId };
     console.log(req.session.user);
-    return res.redirect(`/`);
+    return res.redirect(`/users/`);
   } catch (e) {
     return res.status(e.status).render("pages/applicantSignup", {
       title: "Sign Up/Register",
@@ -729,9 +729,7 @@ router.post("/ex", async (req, res) => {
 });
 
 router.delete("/ex", async (req, res) => {
-  let companyName = req.body.tmp;
-  console.log(output+"****************")
-  // console.log(experience+"************");
+  let companyName = req.body.companyName;
   if (!req.session.user) {
     return res.redirect("/users/login");
   }
@@ -752,7 +750,6 @@ router.delete("/ex", async (req, res) => {
   }
   try {
     let output = await users.delEx(companyName,userId);
-    console.log(output+"****************")
     return res.json(output);
   } catch (e) {
     return res.status(e.status).render("pages/error", {
@@ -827,6 +824,39 @@ router.post("/edu", async (req, res) => {
   }
 });
 
+router.delete("/edu", async (req, res) => {
+  let school = req.body.school;
+  if (!req.session.user) {
+    return res.redirect("/users/login");
+  }
+
+  if (req.session.user) {
+    if (req.session.user.type !== "user") {
+      return res.redirect("/users/login");
+    }
+  }
+  let userId = req.session.user.id;
+  if (!ObjectId.isValid(userId)) {
+    res.status(e.status).render("pages/error", {
+      title: "education",
+      message: "inValid userId",
+      error: true,
+    });
+    return;
+  }
+  try {
+    let output = await users.delEdu(school,userId);
+    return res.json(output);
+  } catch (e) {
+    console.log(e);
+    return res.status(e.status).render("pages/error", {
+      title: "education",
+      message: e.message,
+      error: true,
+    });
+  }
+});
+
 router.get("/sk", async (req, res) => {
   if (!req.session.user) {
     return res.redirect("/users/login");
@@ -889,7 +919,37 @@ router.post("/sk", async (req, res) => {
     });
   }
 });
+router.delete("/sk", async (req, res) => {
+  let skill = req.body.skill;
+  if (!req.session.user) {
+    return res.redirect("/users/login");
+  }
 
+  if (req.session.user) {
+    if (req.session.user.type !== "user") {
+      return res.redirect("/users/login");
+    }
+  }
+  let userId = req.session.user.id;
+  if (!ObjectId.isValid(userId)) {
+    res.status(e.status).render("pages/error", {
+      title: "Skills",
+      message: "inValid userId",
+      error: true,
+    });
+    return;
+  }
+  try {
+    let output = await users.delSk(skill,userId);
+    return res.json(output);
+  } catch (e) {
+    return res.status(e.status).render("pages/error", {
+      title: "Skills",
+      message: e.message,
+      error: true,
+    });
+  }
+});
 router.get("/la", async (req, res) => {
   if (!req.session.user) {
     return res.redirect("/users/login");
@@ -952,4 +1012,37 @@ router.post("/la", async (req, res) => {
     });
   }
 });
+
+router.delete("/la", async (req, res) => {
+  let language = req.body.language;
+  if (!req.session.user) {
+    return res.redirect("/users/login");
+  }
+
+  if (req.session.user) {
+    if (req.session.user.type !== "user") {
+      return res.redirect("/users/login");
+    }
+  }
+  let userId = req.session.user.id;
+  if (!ObjectId.isValid(userId)) {
+    res.status(e.status).render("pages/error", {
+      title: "languages",
+      message: "inValid userId",
+      error: true,
+    });
+    return;
+  }
+  try {
+    let output = await users.delLa(language,userId);
+    return res.json(output);
+  } catch (e) {
+    return res.status(e.status).render("pages/error", {
+      title: "languages",
+      message: e.message,
+      error: true,
+    });
+  }
+});
+
 module.exports = router;
