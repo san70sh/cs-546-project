@@ -1,4 +1,5 @@
 const mongoCollections = require("../config/mongoCollections");
+const jobdata = require("./jobs");
 const users = mongoCollections.users;
 const userProfiles = mongoCollections.userProfiles;
 let { ObjectId } = require("mongodb");
@@ -708,7 +709,26 @@ const getFavourites = async (userId) => {
   const usersCollection = await users();
   const res = await usersCollection.findOne({ _id: userId });
   if (res === null) throw new CustomError(400, "user did not exists");
-  return res.favor;
+
+  // manipulating the return data here 
+
+  const jobAllData = await jobdata.getAllJobs();
+
+  const allFavourJobs = [];
+
+  for(let i = 0;i < res.favor.length;i++){
+    for(let j = 0;j<jobAllData.length;j++){
+      //console.log(jobAllData[j]._id);
+
+      if(String(jobAllData[j]._id) == String(res.favor[i])){
+        allFavourJobs.push(jobAllData[j]);
+        break;
+
+      }
+    }
+  }
+  //console.log(allFavourJobs);
+  return allFavourJobs;
 };
 
 const delFavourites = async (jobId, userId) => {

@@ -419,7 +419,16 @@ router.get("/favor", async (req, res) => {
   }
   try {
     let output = await users.getFavourites(userId);
-    return res.json(output);
+    console.log(output);
+    if(output){
+      if(output.length == 0 ){
+        return res.render("pages/favorJobs",{nullJob:true, message:"No Jobs Saved yet"});
+      }
+    }
+    for (let i = 0; i < output.length; i++) {
+      output[i].unique = String(output[i]._id);
+    }
+    return res.render("pages/favorJobs",{ jobFound:true,jobs: output });
   } catch (e) {
     return res.status(e.status).render("pages/error", {
       title: "Favor",
@@ -429,7 +438,7 @@ router.get("/favor", async (req, res) => {
   }
 });
 
-router.post("/favor", async (req, res) => {
+router.post("/favor/:id", async (req, res) => {
   // common session code all of your private routes
   if (!req.session.user) {
     return res.redirect("/users/login");
@@ -440,7 +449,7 @@ router.post("/favor", async (req, res) => {
       return res.redirect("/logout");
     }
   }
-  let jobId = req.body.jobId;
+  let jobId = req.params.id;
   let userId = req.session.user.id;
   if (!ObjectId.isValid(jobId) || !ObjectId.isValid(userId)) {
     return res.status(400).render("pages/error", {
@@ -451,7 +460,7 @@ router.post("/favor", async (req, res) => {
   }
   try {
     let output = await users.Favorites(jobId, userId);
-    return res.json(output);
+    return res.redirect('/users/favor');
   } catch (e) {
     return res
       .status(e.status)
@@ -459,7 +468,7 @@ router.post("/favor", async (req, res) => {
   }
 });
 
-router.delete("/favor", async (req, res) => {
+router.post("/favor/delete/:id", async (req, res) => {
   // common session code all of your private routes
   if (!req.session.user) {
     return res.redirect("/users/login");
@@ -471,7 +480,7 @@ router.delete("/favor", async (req, res) => {
     }
   }
 
-  let jobId = req.body.jobId;
+  let jobId = req.params.id;
   let userId = req.session.user.id;
   if (!ObjectId.isValid(jobId) || !ObjectId.isValid(userId)) {
     return res.status(400).render("pages/error", {
@@ -482,7 +491,7 @@ router.delete("/favor", async (req, res) => {
   }
   try {
     let output = await users.delFavourites(jobId, userId);
-    return res.json(output);
+    return res.redirect('/users/favor');
   } catch (e) {
     return res
       .status(e.status)

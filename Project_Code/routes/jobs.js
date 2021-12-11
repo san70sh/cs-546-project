@@ -10,7 +10,7 @@ router.get("/", async (req, res) => {
     const result = await jobData.getAllJobs();
     if(result){
       if(result.length == 0 ){
-        res.render("pages/home",{nullJob:true, message:"No Jobs posted yet"});
+        return res.render("pages/home",{nullJob:true, message:"No Jobs posted yet"});
       }
     }
     for (let i = 0; i < result.length; i++) {
@@ -18,18 +18,18 @@ router.get("/", async (req, res) => {
     }
     //console.log(result);
 
-    res.render("pages/home", { jobFound:true,jobs: result });
+    return res.render("pages/home", { jobFound:true,jobs: result });
   } catch (e) {
-    res.status(500).json({ error: "Internal Server Error" });
+    return res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
 router.get("/jobs/city/:city", async (req, res) => {
   try {
     const result = await jobData.getJobByCity(req.params.city);
-    res.json(result);
+    return res.json(result);
   } catch (e) {
-    res.status(400).render("pages/error",{message: e});
+    return res.status(400).render("pages/error",{message: e});
   }
 });
 
@@ -65,9 +65,9 @@ router.get("/jobs/id/:id", async (req, res) => {
     const result = await jobData.getJobsById(req.params.id);
     const jobId = req.params.id;
     console.log(jobId);
-    res.render("pages/singleJob", { data: result, jobId: jobId });
+    return res.render("pages/singleJob", { data: result, jobId: jobId });
   } catch (e) {
-    res.status(400).render("pages/error",{message: e});
+    return res.status(400).render("pages/error",{message: e});
   }
 });
 
@@ -80,9 +80,9 @@ router.post("/jobs/id/:id/apply", async (req, res) => {
 router.get("/jobs/state/:state", async (req, res) => {
   try {
     const result = await jobData.getJobByState(req.params.state);
-    res.json(result);
+    return res.json(result);
   } catch (e) {
-    res.status(400).render("pages/error",{message: e});
+    return res.status(400).render("pages/error",{message: e});
   }
 });
 
@@ -110,10 +110,10 @@ router.get("/jobs/recruiters/id/:id", async (req, res) => {
     const result = await jobData.getJobsById(req.params.id);
     const jobId = req.params.id;
     console.log(jobId);
-    res.render("pages/recJob", { data: result, jobId: jobId });
+    return res.render("pages/recJob", { data: result, jobId: jobId });
   } catch (e) {
     // write a function here to render page heere
-    res.status(400).render("pages/error",{message: e});
+    return res.status(400).render("pages/error",{message: e});
 
   }
 });
