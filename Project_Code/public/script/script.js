@@ -16,11 +16,11 @@ $(document).ready(function() {
             }
 
             if(data.type == 'recruiter') {
-                $("recProfile").show();
-                $("userProfile").hide();
+                $("#recProfile").show();
+                $("#userProfile").hide();
             } else {
-                $("recProfile").hide();
-                $("userProfile").show();
+                $("#recProfile").hide();
+                $("#userProfile").show();
             }
 
 

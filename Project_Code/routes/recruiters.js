@@ -92,6 +92,9 @@ router.get('/accept/:jobId/:appId', async (req, res) => {
             if(!jobId) return res.status(400).render('pages/recruiterProfile', {message: "Invalid ID", genErr: true});
             if(ObjectId.isValid(recruiterId) && ObjectId.isValid(applicantId) && ObjectId.isValid(jobId)) {
                 let output = await recruiterDat.acceptDecision(recruiterId, applicantId, jobId);
+                if(output) {
+                    return res.redirect("/recruiters");
+                }
                 
             }
         // }
@@ -128,6 +131,9 @@ router.post('/reject/:jobId/:appId', async (req, res) => {
         if(!jobId) return res.status(400).render('pages/recruiterProfile', {message: "Invalid ID", genErr: true});
         if(ObjectId.isValid(recruiterId) && ObjectId.isValid(applicantId) && ObjectId.isValid(jobId)) {
             let output = await recruiterDat.acceptDecision(recruiterId, applicantId, jobId);
+            if(output) {
+                return res.redirect("/recruiters");
+            }
             
         }
         // }
@@ -211,11 +217,11 @@ router.get('/', async (req, res) => {
             }
 
             await Promise.all(recruiter.data.jobs.map(async (e) => {
-                if(e.applicant_id){
+                if(e.applicants.length != 0){
                     let applicantList = [];
-                    await e.applicant_id.map(async (e) => {
-                        e = e.toString();
-                        let appDetails = await usrDat.get(e);
+                    await e.applicants.map(async (e) => {
+                        let appId = e.appId.toString();
+                        let appDetails = await usrDat.get(appId);
                         appDetails._id = appDetails._id.toString();
                         applicantList.push(appDetails);
                     });

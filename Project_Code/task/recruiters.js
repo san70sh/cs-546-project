@@ -1,5 +1,5 @@
 const profile1 = {
-  photo: "one url",
+  // photo: "",
   gender: "m",
   city: "Hoboken",
   state: "NJ",
@@ -11,7 +11,7 @@ const profile1 = {
 };
 
 const profile2 = {
-  photo: "one url",
+  // photo: "",
   gender: "f",
   city: "NYC",
   state: "NY",
@@ -23,7 +23,7 @@ const profile2 = {
 };
 
 const profile3 = {
-  photo: "one url",
+  // photo: "one url",
   gender: "m",
   city: "LA",
   state: "CA",

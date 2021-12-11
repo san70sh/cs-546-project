@@ -71,15 +71,15 @@ const setup = async () => {
   // suppose each recruiter post one job
   recruiterInfo.recruiter1.jobs.push({
     job_id: jobIds[0],
-    applicant_id: [userIds[0], userIds[1], userIds[2]],
+    applicants: [{appId: userIds[0], status: "pending"}, {appId: userIds[1], status: "pending"}, {appId: userIds[2], status: "pending"}],
   });
   recruiterInfo.recruiter2.jobs.push({
     job_id: jobIds[1],
-    applicant_id: [userIds[0], userIds[1]],
+    applicants: [{appId: userIds[0], status: "pending"}, {appId: userIds[1], status: "pending"}],
   });
   recruiterInfo.recruiter3.jobs.push({
     job_id: jobIds[2],
-    applicant_id: [userIds[0], userIds[2]],
+    applicants: [{appId: userIds[0], status: "pending"}, {appId: userIds[2], status: "pending"}],
   });
 
   const recruiterCol = await recruiters();
