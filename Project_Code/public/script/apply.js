@@ -6,8 +6,8 @@ function apply(fileId, jobId) {
       data: { fileId },
     };
     $.ajax(applyReq).then((res) => {
-      console.log(res.message);
-      alert(res.message.message);
+      alert(res.message.message + ", redirect to job page...");
+      window.location.href = `/jobs/id/${jobId}`;
     });
   }
 }
