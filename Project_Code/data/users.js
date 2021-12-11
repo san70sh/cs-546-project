@@ -1445,7 +1445,7 @@ module.exports = {
 //trackAll("61a4236167e3b3f821f5e374").then(ele => console.log(ele));
 // get("61a4236167e3b3f821f5e374???").then(ele => console.log(ele)).catch(ele => console.log(ele));
 //getAll().then(ele => console.log(ele));
-//Favorites("61a4236167e3b3f821f5ddde","61a33e13067da688cb1f8e39");
+//Favorites("61b15a1e8c17796d6171015f","61b409843132c093c1f3b57b");
 //getFavourites("61a33e13067da688cb1f8e39").then(ele => console.log(ObjectId(ele[0])))
 //delFavourites("61a4236167e3b3f821f5eeee","61a33e13067da688cb1f8e39");
 //checkUser("sega@gmail.com", "ccc11111111").then(ele => console.log(ele)).catch(e => console.log(e));

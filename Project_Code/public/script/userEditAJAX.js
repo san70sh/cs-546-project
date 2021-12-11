@@ -45,7 +45,7 @@ $(document).ready(function(){
             StartDate:&nbsp${ele.startDate},
             EndDate:&nbsp${ele.endDate}
             &nbsp&nbsp&nbsp&nbsp<a href = ${ele.companyName}>remove</a>
-            </li>`//need bind del events
+            </li>`
             $('#preEx').append(li);
         });
         $('#preEx').children().each(function(index,element){
@@ -62,7 +62,7 @@ $(document).ready(function(){
             StartDate:&nbsp${ele.startDate},
             EndDate:&nbsp${ele.endDate}
             &nbsp&nbsp&nbsp&nbsp<a href = ${ele.school}>remove</a>
-            </li>`//need bind del events
+            </li>`
             $('#preEdu').append(li);
         });
         $('#preEdu').children().each(function(index,element){
@@ -75,7 +75,7 @@ $(document).ready(function(){
         for(let i = 0; i < responseMessage.length; i++) {
             let li = `<li>${responseMessage[i]}
             &nbsp&nbsp&nbsp&nbsp<a href = ${responseMessage[i]}>remove</a>
-            </li>`//need bind del events
+            </li>`
             $('#preSk').append(li);
         }
         $('#preSk').children().each(function(index,element){
@@ -88,7 +88,7 @@ $(document).ready(function(){
         for(let i = 0; i < responseMessage.length; i++) {
             let li = `<li>${responseMessage[i]}
             &nbsp&nbsp&nbsp&nbsp<a href = ${responseMessage[i]}>remove</a>
-            </li>`//need bind del events
+            </li>`
             $('#preLa').append(li);
         }
         $('#preLa').children().each(function(index,element){
