@@ -561,8 +561,7 @@ router.post("/apply/:id", async (req, res) => {
     return res.json({ message: e });
   }
 
-  let message =
-    "You have successfully applied for the job, return to the job page...";
+  let message = "You have successfully applied for the job";
   res.json({
     message,
   });
