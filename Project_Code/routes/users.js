@@ -217,14 +217,14 @@ router.post("/login", async (req, res) => {
   //let status = req.body.status; //**************use status to store a form data that shows the user is applicant or recruiter */
   if (typeof email !== "string") {
     res.status(400).render("pages/applicantlogin", {
-      message: "email and password must be string",
+      message: "email must be string",
       emailerr: true,
     });
     return;
   }
   if (typeof password !== "string") {
     res.status(400).render("pages/applicantlogin", {
-      message: "email and password must be string",
+      message: "password must be string",
       pwderr: true,
     });
     return;
@@ -684,10 +684,10 @@ router.post("/editProfile", async (req, res) => {
   }
   let userId = req.session.user.id;
   if (!ObjectId.isValid(userId)) {
-    return res.status(e.status).render("pages/error", {
+    return res.status(400).render("pages/applicanteditprofile", {
       title: "basic information",
       message: "inValid userId",
-      error: true,
+      mainerr: true,
     });
   }
   try {
@@ -699,10 +699,10 @@ router.post("/editProfile", async (req, res) => {
     );
     return res.json(output);
   } catch (e) {
-    return res.status(e.status).render("pages/error", {
+    return res.status(e.status).render("pages/applicanteditprofile", {
       title: "basic information",
       message: e.message,
-      error: true,
+      genErr: true,
     });
   }
 });
@@ -719,20 +719,20 @@ router.get("/ex", async (req, res) => {
   }
   let userId = req.session.user.id;
   if (!ObjectId.isValid(userId)) {
-    return res.status(e.status).render("pages/error", {
+    return res.status(400).render("pages/applicanteditprofile", {
       title: "experience",
       message: "inValid userId",
-      error: true,
+      mainerr: true,
     });
   }
   try {
     let output = await users.getEx(userId);
     return res.json(output);
   } catch (e) {
-    return res.status(e.status).render("pages/error", {
+    return res.status(e.status).render("pages/applicanteditprofile", {
       title: "experience",
       message: e.message,
-      error: true,
+      exErr: true,
     });
   }
 });
@@ -751,17 +751,17 @@ router.post("/ex", async (req, res) => {
   }
   let userId = req.session.user.id;
   if (!ObjectId.isValid(userId)) {
-    return res.status(e.status).render("pages/error", {
+    return res.status(400).render("pages/applicanteditprofile", {
       title: "experience",
       message: "inValid userId",
-      error: true,
+      mainerr: true,
     });
   }
   if (new Date(experience.startDate) > new Date(experience.endDate)) {
-    res.status(400).render("pages/error", {
+    res.status(400).render("pages/applicanteditprofile", {
       title: "experience",
       message: "inValid start date and end date",
-      error: true,
+      exErr: true,
     });
     return;
   }
@@ -770,10 +770,10 @@ router.post("/ex", async (req, res) => {
     console.log(output);
     return res.json(output);
   } catch (e) {
-    return res.status(e.status).render("pages/error", {
+    return res.status(e.status).render("pages/applicanteditprofile", {
       title: "experience",
       message: e.message,
-      error: true,
+      exErr: true,
     });
   }
 });
@@ -791,20 +791,20 @@ router.delete("/ex", async (req, res) => {
   }
   let userId = req.session.user.id;
   if (!ObjectId.isValid(userId)) {
-    return res.status(e.status).render("pages/error", {
+    return res.status(400).render("pages/applicanteditprofile", {
       title: "experience",
       message: "inValid userId",
-      error: true,
+      mainerr: true,
     });
   }
   try {
     let output = await users.delEx(companyName, userId);
     return res.json(output);
   } catch (e) {
-    return res.status(e.status).render("pages/error", {
+    return res.status(e.status).render("pages/applicanteditprofile", {
       title: "experience",
       message: e.message,
-      error: true,
+      exErr: true,
     });
   }
 });
@@ -821,20 +821,20 @@ router.get("/edu", async (req, res) => {
   }
   let userId = req.session.user.id;
   if (!ObjectId.isValid(userId)) {
-    return res.status(e.status).render("pages/error", {
+    return res.status(400).render("pages/applicanteditprofile", {
       title: "education",
       message: "inValid userId",
-      error: true,
+      mainerr: true,
     });
   }
   try {
     let output = await users.getEdu(userId);
     return res.json(output);
   } catch (e) {
-    return res.status(e.status).render("pages/error", {
+    return res.status(e.status).render("pages/applicanteditprofile", {
       title: "education",
       message: e.message,
-      error: true,
+      eduErr: true,
     });
   }
 });
@@ -852,17 +852,17 @@ router.post("/edu", async (req, res) => {
   }
   let userId = req.session.user.id;
   if (!ObjectId.isValid(userId)) {
-    return res.status(e.status).render("pages/error", {
+    return res.status(400).render("pages/applicanteditprofile", {
       title: "education",
       message: "inValid userId",
-      error: true,
+      mainerr: true,
     });
   }
   if (new Date(education.startDate) > new Date(education.endDate)) {
-    res.status(400).render("pages/error", {
+    res.status(400).render("pages/applicanteditprofile", {
       title: "education",
       message: "inValid start date and end date",
-      error: true,
+      eduErr: true,
     });
     return;
   }
@@ -870,10 +870,10 @@ router.post("/edu", async (req, res) => {
     let output = await users.addEdu(education, userId);
     return res.json(output);
   } catch (e) {
-    return res.status(e.status).render("pages/error", {
+    return res.status(e.status).render("pages/applicanteditprofile", {
       title: "education",
       message: e.message,
-      error: true,
+      eduErr: true,
     });
   }
 });
@@ -891,10 +891,10 @@ router.delete("/edu", async (req, res) => {
   }
   let userId = req.session.user.id;
   if (!ObjectId.isValid(userId)) {
-    return res.status(e.status).render("pages/error", {
+    return res.status(400).render("pages/applicanteditprofile", {
       title: "education",
       message: "inValid userId",
-      error: true,
+      mainerr: true,
     });
   }
   try {
@@ -902,10 +902,10 @@ router.delete("/edu", async (req, res) => {
     return res.json(output);
   } catch (e) {
     console.log(e);
-    return res.status(e.status).render("pages/error", {
+    return res.status(e.status).render("pages/applicanteditprofile", {
       title: "education",
       message: e.message,
-      error: true,
+      eduErr: true,
     });
   }
 });
@@ -922,20 +922,20 @@ router.get("/sk", async (req, res) => {
   }
   let userId = req.session.user.id;
   if (!ObjectId.isValid(userId)) {
-    return res.status(e.status).render("pages/error", {
+    return res.status(400).render("pages/applicanteditprofile", {
       title: "skill",
       message: "inValid userId",
-      error: true,
+      mainerr: true,
     });
   }
   try {
     let output = await users.getSk(userId);
     return res.json(output);
   } catch (e) {
-    return res.status(e.status).render("pages/error", {
+    return res.status(e.status).render("pages/applicanteditprofile", {
       title: "skill",
       message: e.message,
-      error: true,
+      skErr: true,
     });
   }
 });
@@ -953,20 +953,20 @@ router.post("/sk", async (req, res) => {
   }
   let userId = req.session.user.id;
   if (!ObjectId.isValid(userId)) {
-    return res.status(e.status).render("pages/error", {
+    return res.status(400).render("pages/applicanteditprofile", {
       title: "skills",
       message: "inValid userId",
-      error: true,
+      mainerr: true,
     });
   }
   try {
     let output = await users.addSk(sk.skills, userId);
     return res.json(output);
   } catch (e) {
-    return res.status(e.status).render("pages/error", {
+    return res.status(e.status).render("pages/applicanteditprofile", {
       title: "skills",
       message: e.message,
-      error: true,
+      skErr: true,
     });
   }
 });
@@ -983,20 +983,20 @@ router.delete("/sk", async (req, res) => {
   }
   let userId = req.session.user.id;
   if (!ObjectId.isValid(userId)) {
-    return res.status(e.status).render("pages/error", {
+    return res.status(400).render("pages/applicanteditprofile", {
       title: "Skills",
       message: "inValid userId",
-      error: true,
+      mainerr: true,
     });
   }
   try {
     let output = await users.delSk(skill, userId);
     return res.json(output);
   } catch (e) {
-    return res.status(e.status).render("pages/error", {
+    return res.status(e.status).render("pages/applicanteditprofile", {
       title: "Skills",
       message: e.message,
-      error: true,
+      skErr: true,
     });
   }
 });
@@ -1012,20 +1012,20 @@ router.get("/la", async (req, res) => {
   }
   let userId = req.session.user.id;
   if (!ObjectId.isValid(userId)) {
-    return res.status(e.status).render("pages/error", {
-      title: "skill",
+    return res.status(400).render("pages/applicanteditprofile", {
+      title: "languages",
       message: "inValid userId",
-      error: true,
+      mainerr: true,
     });
   }
   try {
     let output = await users.getLa(userId);
     return res.json(output);
   } catch (e) {
-    return res.status(e.status).render("pages/error", {
+    return res.status(e.status).render("pages/applicanteditprofile", {
       title: "languages",
       message: e.message,
-      error: true,
+      laErr: true,
     });
   }
 });
@@ -1043,20 +1043,20 @@ router.post("/la", async (req, res) => {
   }
   let userId = req.session.user.id;
   if (!ObjectId.isValid(userId)) {
-    return res.status(e.status).render("pages/error", {
+    return res.status(400).render("pages/applicanteditprofile", {
       title: "languages",
       message: "inValid userId",
-      error: true,
+      mainerr: true,
     });
   }
   try {
     let output = await users.addLa(la.languages, userId);
     return res.json(output);
   } catch (e) {
-    return res.status(e.status).render("pages/error", {
+    return res.status(e.status).render("pages/applicanteditprofile", {
       title: "languages",
       message: e.message,
-      error: true,
+      laErr: true,
     });
   }
 });
@@ -1074,20 +1074,20 @@ router.delete("/la", async (req, res) => {
   }
   let userId = req.session.user.id;
   if (!ObjectId.isValid(userId)) {
-    return res.status(e.status).render("pages/error", {
+    return res.status(400).render("pages/applicanteditprofile", {
       title: "languages",
       message: "inValid userId",
-      error: true,
+      mainerr: true,
     });
   }
   try {
     let output = await users.delLa(language, userId);
     return res.json(output);
   } catch (e) {
-    return res.status(e.status).render("pages/error", {
+    return res.status(e.status).render("pages/applicanteditprofile", {
       title: "languages",
       message: e.message,
-      error: true,
+      laErr: true,
     });
   }
 });
