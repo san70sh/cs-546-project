@@ -2,7 +2,7 @@ let title = $('#title');
 let employmentType = $('#employmentType');
 let companyName =  $('#companyName');
 let startDateEx =  $('#startDateEx');
-let endDate =  $('#endDate');
+let endDateEx =  $('#endDate');
 let userId = $('#dumb');
 let exConfig = {
     method: 'Get',
@@ -42,7 +42,7 @@ $(document).ready(function(){
             let li = `<li>CompanyName:&nbsp ${ele.companyName}, 
             Title:&nbsp${ele.title},
             EmploymentType:&nbsp ${ele.employmentType},
-            StartDate:&nbsp${ele.startDateEx},
+            StartDate:&nbsp${ele.startDate},
             EndDate:&nbsp${ele.endDate}
             &nbsp&nbsp&nbsp&nbsp<a href = ${ele.companyName}>remove</a>
             </li>`//need bind del events
@@ -100,6 +100,7 @@ $(document).ready(function(){
 $('#userBase').submit((event) => {
     event.preventDefault();
     if(city.val().trim().length !== 0 && state.val().trim().length !== 0){
+        $('#baError').hide();
         let tmp = {
             gender:gender.val(),
             city:city.val(),
@@ -114,21 +115,28 @@ $('#userBase').submit((event) => {
         }
         );
     } else {
-        $('#exError').show();
-        $('#exError').html('skill can\'t be empty or just spaces');
-        $('#formLabel').addClass('error');
+        $('#baError').show();
+        $('#baError').html('input can\'t be empty or just spaces');
+        // $('#formLabel').addClass('error');
     }
 })
 
 $('#userEx').submit((event) => {
     event.preventDefault();
+    if (new Date(startDateEx.val())>new Date(endDateEx.val())) {
+        $('#exError').show();
+        $('#exError').html('endDate can\'t be earlier than startDate');
+        // $('#formLabel').addClass('error');
+        return;
+    }
     if(title.val().trim().length && companyName.val().trim().length !== 0){
+        $('#exError').hide();
         let tmp = {
             title:title.val(),
             employmentType:employmentType.val(),
             companyName:companyName.val(),
             startDate:startDateEx.val(),
-            endDate:endDate.val()
+            endDate:endDateEx.val()
         }
         $.post(`/users/ex/`, {tmp}, 
         function(returnedData){
@@ -141,19 +149,26 @@ $('#userEx').submit((event) => {
     } else {
         $('#exError').show();
         $('#exError').html('title and  companyName can\'t be empty or just spaces');
-        $('#formLabel').addClass('error');
+        // $('#formLabel').addClass('error');
     }
 })
 
 $('#userEdu').submit((event) => {
     event.preventDefault();
+    if (new Date(startDateEdu.val())>new Date(endDateEdu.val())) {
+        $('#eduError').show();
+        $('#eduError').html('endDate can\'t be earlier than startDate');
+        // $('#formLabel').addClass('error');
+        return;
+    }
     if(school.val().trim().length && major.val().trim().length !== 0 && degree.val().trim().length !== 0){
+        $('#eduError').hide();
         let tmp = {
             school:school.val(),
             major:major.val(),
             degree:degree.val(),
-            startDate:startDateEx.val(),
-            endDate:endDate.val()
+            startDate:startDateEdu.val(),
+            endDate:endDateEdu.val()
         }
         $.post(`/users/edu/`, {tmp}, 
         function(returnedData){
@@ -164,15 +179,16 @@ $('#userEdu').submit((event) => {
         }
         );
     } else {
-        $('#exError').show();
-        $('#exError').html('school, major and degree can\'t be empty or just spaces');
-        $('#formLabel').addClass('error');
+        $('#eduError').show();
+        $('#eduError').html('school, major and degree can\'t be empty or just spaces');
+        // $('#formLabel').addClass('error');
     }
 })
 
 $('#userSk').submit((event) => {
     event.preventDefault();
     if(skill.val().trim().length !== 0){
+        $('#skError').hide();
         let tmp = {
             skills:skill.val()
         }
@@ -185,15 +201,16 @@ $('#userSk').submit((event) => {
         }
         );
     } else {
-        $('#exError').show();
-        $('#exError').html('skill can\'t be empty or just spaces');
-        $('#formLabel').addClass('error');
+        $('#skError').show();
+        $('#skError').html('skill can\'t be empty or just spaces');
+        // $('#formLabel').addClass('error');
     }
 })
 
 $('#userLa').submit((event) => {
     event.preventDefault();
     if(languages.val().trim().length !== 0){
+        $('#laError').hide();
         let tmp = {
             languages:languages.val()
         }
@@ -206,9 +223,9 @@ $('#userLa').submit((event) => {
         }
         );
     } else {
-        $('#exError').show();
-        $('#exError').html('skill can\'t be empty or just spaces');
-        $('#formLabel').addClass('error');
+        $('#laError').show();
+        $('#laError').html('language can\'t be empty or just spaces');
+        // $('#formLabel').addClass('error');
     }
 })
 

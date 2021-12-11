@@ -48,9 +48,9 @@ const checkEx = (experience) => {
         "Value of experience in each elements can't be empty or just spaces"
       );
     }
-    date_regex = /^\d{4}\/\d{2}\/\d{2}$/;
+    date_regex = /^(\d{4})-(\d{2})-(\d{2})$/;
     if (!date_regex.test(ele.startDate) && date_regex.test(ele.endDate)) {
-      throw new CustomError(400, "Wrong date formate MM/DD/YYYY");
+      throw new CustomError(400, "Wrong date formate YYYY/MM/DD");
     }
   });
 };
@@ -89,9 +89,9 @@ const checkEd = (education) => {
         "Value of education in each elements can't be empty or just spaces"
       );
     }
-    date_regex = /^\d{4}\/\d{2}\/\d{2}$/;
+    date_regex = /^(\d{4})-(\d{2})-(\d{2})$/;
     if (!date_regex.test(ele.startDate) && date_regex.test(ele.endDate)) {
-      throw new CustomError(400, "Wrong date formate MM/DD/YYYY");
+      throw new CustomError(400, "Wrong date formate YYYY/MM/DD");
     }
   });
 };
@@ -1048,9 +1048,12 @@ const addEx = async(experience,userId) => {
       "Value of experience in each elements can't be empty or just spaces"
     );
   }
-  date_regex = /^\d{4}\/\d{2}\/\d{2}$/;
+  date_regex = /^(\d{4})-(\d{2})-(\d{2})$/;
   if (!date_regex.test(experience.startDate) && date_regex.test(experience.endDate)) {
-    throw new CustomError(400, "Wrong date formate MM/DD/YYYY");
+    throw new CustomError(400, "Wrong date formate YYYY/MM/DD");
+  }
+  if (new Date(experience.startDate)>new Date(experience.endDate)) {
+    throw new CustomError(400, "Invalid start date and end date");
   }
   const usersCollection = await users();
   const insertInfo = await usersCollection.updateOne(
@@ -1157,9 +1160,12 @@ const addEdu = async(education,userId) => {
       "Value of education in each elements can't be empty or just spaces"
     );
   }
-  date_regex = /^\d{4}\/\d{2}\/\d{2}$/;
+  date_regex = /^(\d{4})-(\d{2})-(\d{2})$/;
   if (!date_regex.test(education.startDate) && date_regex.test(education.endDate)) {
-    throw new CustomError(400, "Wrong date formate MM/DD/YYYY");
+    throw new CustomError(400, "Wrong date formate YYYY/MM/DD");
+  }
+  if (new Date(education.startDate)>new Date(education.endDate)) {
+    throw new CustomError(400, "Invalid start date and end date");
   }
  
   const usersCollection = await users();

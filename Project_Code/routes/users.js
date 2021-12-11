@@ -262,8 +262,6 @@ router.post("/login", async (req, res) => {
   }
   let tmp;
   try {
-    //*********change here to add recruter login in */
-
     tmp = await users.checkUser(email, password);
   } catch (e) {
     res
@@ -644,12 +642,11 @@ router.post("/editProfile", async (req, res) => {
   }
   let userId = req.session.user.id;
   if (!ObjectId.isValid(userId)) {
-    res.status(e.status).render("pages/error", {
+    return res.status(e.status).render("pages/error", {
       title: "basic information",
       message: "inValid userId",
       error: true,
     });
-    return;
   }
   try {
     let output = await users.editProfile(userId,base.gender,base.city, base.state);
@@ -675,12 +672,12 @@ router.get("/ex", async (req, res) => {
   }
   let userId = req.session.user.id;
   if (!ObjectId.isValid(userId)) {
-    res.status(e.status).render("pages/error", {
+    return res.status(e.status).render("pages/error", {
       title: "experience",
       message: "inValid userId",
       error: true,
     });
-    return;
+
   }
   try {
     let output = await users.getEx(userId);
@@ -708,9 +705,16 @@ router.post("/ex", async (req, res) => {
   }
   let userId = req.session.user.id;
   if (!ObjectId.isValid(userId)) {
-    res.status(e.status).render("pages/error", {
+    return res.status(e.status).render("pages/error", {
       title: "experience",
       message: "inValid userId",
+      error: true,
+    });
+  }
+  if (new Date(experience.startDate)>new Date(experience.endDate)) {
+    res.status(400).render("pages/error", {
+      title: "experience",
+      message: "inValid start date and end date",
       error: true,
     });
     return;
@@ -741,12 +745,11 @@ router.delete("/ex", async (req, res) => {
   }
   let userId = req.session.user.id;
   if (!ObjectId.isValid(userId)) {
-    res.status(e.status).render("pages/error", {
+    return res.status(e.status).render("pages/error", {
       title: "experience",
       message: "inValid userId",
       error: true,
     });
-    return;
   }
   try {
     let output = await users.delEx(companyName,userId);
@@ -772,12 +775,11 @@ router.get("/edu", async (req, res) => {
   }
   let userId = req.session.user.id;
   if (!ObjectId.isValid(userId)) {
-    res.status(e.status).render("pages/error", {
+    return res.status(e.status).render("pages/error", {
       title: "education",
       message: "inValid userId",
       error: true,
     });
-    return;
   }
   try {
     let output = await users.getEdu(userId);
@@ -793,7 +795,6 @@ router.get("/edu", async (req, res) => {
 
 router.post("/edu", async (req, res) => {
   let education = req.body.tmp;
-  // console.log(experience+"************");
   if (!req.session.user) {
     return res.redirect("/users/login");
   }
@@ -805,9 +806,16 @@ router.post("/edu", async (req, res) => {
   }
   let userId = req.session.user.id;
   if (!ObjectId.isValid(userId)) {
-    res.status(e.status).render("pages/error", {
+    return res.status(e.status).render("pages/error", {
       title: "education",
       message: "inValid userId",
+      error: true,
+    });
+  }
+  if (new Date(education.startDate)>new Date(education.endDate)) {
+    res.status(400).render("pages/error", {
+      title: "education",
+      message: "inValid start date and end date",
       error: true,
     });
     return;
@@ -837,12 +845,11 @@ router.delete("/edu", async (req, res) => {
   }
   let userId = req.session.user.id;
   if (!ObjectId.isValid(userId)) {
-    res.status(e.status).render("pages/error", {
+    return res.status(e.status).render("pages/error", {
       title: "education",
       message: "inValid userId",
       error: true,
     });
-    return;
   }
   try {
     let output = await users.delEdu(school,userId);
@@ -869,12 +876,11 @@ router.get("/sk", async (req, res) => {
   }
   let userId = req.session.user.id;
   if (!ObjectId.isValid(userId)) {
-    res.status(e.status).render("pages/error", {
+    return res.status(e.status).render("pages/error", {
       title: "skill",
       message: "inValid userId",
       error: true,
     });
-    return;
   }
   try {
     let output = await users.getSk(userId);
@@ -901,12 +907,11 @@ router.post("/sk", async (req, res) => {
   }
   let userId = req.session.user.id;
   if (!ObjectId.isValid(userId)) {
-    res.status(e.status).render("pages/error", {
+    return res.status(e.status).render("pages/error", {
       title: "skills",
       message: "inValid userId",
       error: true,
     });
-    return;
   }
   try {
     let output = await users.addSk(sk.skills,userId);
@@ -932,12 +937,11 @@ router.delete("/sk", async (req, res) => {
   }
   let userId = req.session.user.id;
   if (!ObjectId.isValid(userId)) {
-    res.status(e.status).render("pages/error", {
+    return res.status(e.status).render("pages/error", {
       title: "Skills",
       message: "inValid userId",
       error: true,
     });
-    return;
   }
   try {
     let output = await users.delSk(skill,userId);
@@ -962,12 +966,11 @@ router.get("/la", async (req, res) => {
   }
   let userId = req.session.user.id;
   if (!ObjectId.isValid(userId)) {
-    res.status(e.status).render("pages/error", {
+    return res.status(e.status).render("pages/error", {
       title: "skill",
       message: "inValid userId",
       error: true,
     });
-    return;
   }
   try {
     let output = await users.getLa(userId);
@@ -994,12 +997,11 @@ router.post("/la", async (req, res) => {
   }
   let userId = req.session.user.id;
   if (!ObjectId.isValid(userId)) {
-    res.status(e.status).render("pages/error", {
+    return res.status(e.status).render("pages/error", {
       title: "languages",
       message: "inValid userId",
       error: true,
     });
-    return;
   }
   try {
     let output = await users.addLa(la.languages,userId);
@@ -1026,12 +1028,11 @@ router.delete("/la", async (req, res) => {
   }
   let userId = req.session.user.id;
   if (!ObjectId.isValid(userId)) {
-    res.status(e.status).render("pages/error", {
+    return res.status(e.status).render("pages/error", {
       title: "languages",
       message: "inValid userId",
       error: true,
     });
-    return;
   }
   try {
     let output = await users.delLa(language,userId);

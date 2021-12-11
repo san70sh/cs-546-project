@@ -13,6 +13,7 @@
                 {{#if genErr}}
                 <div class="error">{{message}}</div>
                 {{/if}}
+                <div id = "baError"></div>
                 <label for="userGender" class="col-form-label">Gender: </label>
                 <select name="userGender" id = "userGender">
                 <option value="M" selected>Male</option>
@@ -56,9 +57,9 @@
                 <label for="companyName" class="col-form-label">companyName: </label>
                 <input type="text" name="companyName" id="companyName" class="form-control" placeholder="Apple" aria-placeholder="companyName" required>
                 <label for="startDateEx" class="col-form-label">startDate: </label>
-                <input type="date" value = "2017-06-01" name="startDateEx" id="startDateEx" class="form-control" >
+                <input type="date"  name="startDateEx" id="startDateEx" class="form-control" required>
                 <label for="endDate" class="col-form-label">endDate: </label>
-                <input type="date" value = "2017-08-01" id="endDate" class="form-control" >
+                <input type="date"  id="endDate" class="form-control" required>
                 <button type="submit" id="exSubmit" class="col-12 btn btn-dark btn-round">Add</button>
         </form>
     </div>
@@ -79,9 +80,9 @@
             <input type="text" name="degree" id="degree" class="form-control" placeholder="master" aria-placeholder="degree" required>
 
             <label for="startDateEdu" class="col-form-label">startDate: </label>
-            <input type="date" value = "2017-06-01" name="startDateEdu" id="startDateEdu" class="form-control">
-            <label for="endDate" class="col-form-label">endDate: </label>
-            <input type="date" value = "2017-08-01" id="endDate" class="form-control" >
+            <input type="date"  name="startDateEdu" id="startDateEdu" class="form-control" required>
+            <label for="endDateEdu" class="col-form-label">endDate: </label>
+            <input type="date"  id="endDateEdu" class="form-control" required>
             <button type="submit" id="eduSubmit" class="col-12 btn btn-dark btn-round">Add</button>
     </form>
     </div>
