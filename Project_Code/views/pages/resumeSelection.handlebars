@@ -1,0 +1,15 @@
+{{#if resumeError}}
+<a href="/users/resume">no resumes found, click here to add one</a>
+{{/if}}
+
+{{#if resumes}}
+{{#each resumes}}
+<ul id='resumeList'>
+    <div class='resumeList'>
+        <a href="/users/resume/{{this}}" target="_blank">resume{{math @index "+" 1}}.pdf</a>
+        <button type="button" value={{this}} class="btn btn-primary"
+            onclick="apply(this.value)">use it to apply</button>
+    </div>
+</ul>
+{{/each}}
+{{/if}}
