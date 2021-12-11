@@ -80,7 +80,7 @@ router.get("/resume/:id", async (req, res) => {
       return res.end();
     });
   } catch (e) {
-    res.send({ error: e });
+    res.render("/users", { error: e });
   }
   // res.redirect("/users/profile");
 });
@@ -500,6 +500,39 @@ router.post("/favor/delete/:id", async (req, res) => {
   }
 });
 
+router.get("/select/:id", async (req, res) => {
+  if (!req.session.user) {
+    return res.redirect("/users/login");
+  }
+
+  if (req.session.user) {
+    if (req.session.user.type !== "user") {
+      return res.redirect("/logout");
+    }
+  }
+
+  const jobId = req.params.id;
+
+  if (!ObjectId.isValid(jobId) || !ObjectId.isValid(req.session.user.id)) {
+    return res.status(400).render("pages/error", {
+      title: "apply",
+      message: "invalid id",
+      err: true,
+    });
+  }
+
+  let resumes = undefined;
+  let resumeError = undefined;
+  try {
+    // const resumes = await users.getAllResume(req.body.userId);
+    resumes = await users.getAllResume(req.session.user.id);
+  } catch (e) {
+    resumeError = e.message;
+  }
+
+  res.render("pages/resumeSelection", { jobId, resumes, resumeError });
+});
+
 router.post("/apply", async (req, res) => {
   // common session code all of your private routes
   if (!req.session.user) {
@@ -520,14 +553,6 @@ router.post("/apply", async (req, res) => {
       message: "invalid id",
       err: true,
     });
-  }
-  try {
-    let output = await users.apply(jobId, userId);
-    return res.json(output);
-  } catch (e) {
-    return res
-      .status(e.status)
-      .render("pages/error", { title: "Apply", message: e.message, err: true });
   }
 });
 
