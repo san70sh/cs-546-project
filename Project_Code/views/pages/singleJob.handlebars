@@ -9,6 +9,19 @@
         <p> Job Summary : {{data.details.summary}}</p>
       <form action="./{{jobId}}/apply",  method="post">
             <button>apply</button>
+          
       </form>
+            <form action="/users/favor/{{jobId}}",  method="post">
+            <button>save</button>
+      </form>
+      
+
+         
+      </form>
+            <a href="/logout" role="button"  id="buttonsaved" >Logout</a> 
+      </form>
+      
+
+
   </ul>
 </div> 

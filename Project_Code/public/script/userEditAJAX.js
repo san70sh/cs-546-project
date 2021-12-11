@@ -30,6 +30,10 @@ let laConfig = {
     method: 'Get',
     url: `/users/la/`
 }
+
+let gender = $('#userGender')
+let city =  $('#userCity')
+let state =  $('#state')
 $(document).ready(function(){
     $.ajax(exConfig).then(responseMessage =>{
         //$('#error').hide();
@@ -43,6 +47,9 @@ $(document).ready(function(){
             &nbsp&nbsp&nbsp&nbsp<a href = ${ele.companyName}>remove</a>
             </li>`//need bind del events
             $('#preEx').append(li);
+        });
+        $('#preEx').children().each(function(index,element){
+            exToremove($(element));
         });
     });
     $.ajax(eduConfig).then(responseMessage =>{
@@ -80,6 +87,29 @@ $(document).ready(function(){
         }
     });
 });
+
+$('#userBase').submit((event) => {
+    event.preventDefault();
+    if(city.val().trim().length !== 0 && state.val().trim().length !== 0){
+        let tmp = {
+            gender:gender.val(),
+            city:city.val(),
+            state:state.val()
+        }
+        $.post(`/users/editProfile/`, {tmp}, 
+        function(returnedData){
+            if (returnedData){
+            alert("your basic information has successfully updated!");
+            location.reload(true);
+            }
+        }
+        );
+    } else {
+        $('#exError').show();
+        $('#exError').html('skill can\'t be empty or just spaces');
+        $('#formLabel').addClass('error');
+    }
+})
 
 $('#userEx').submit((event) => {
     event.preventDefault();
@@ -172,3 +202,20 @@ $('#userLa').submit((event) => {
         $('#formLabel').addClass('error');
     }
 })
+
+const exToremove = (remove) => {
+    remove.on('click', event => {
+        event.preventDefault();
+        let obj = remove.find('a').attr('href');
+        let tmp ={
+            companyName:obj
+        }
+        $.ajax({
+            url: "/users/ex",
+            type: "DELETE",
+            data: {
+                    "companyName": companyName.val()
+                  }
+         })
+    })
+}

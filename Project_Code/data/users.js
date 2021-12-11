@@ -1,4 +1,5 @@
 const mongoCollections = require("../config/mongoCollections");
+const jobdata = require("./jobs");
 const users = mongoCollections.users;
 const userProfiles = mongoCollections.userProfiles;
 let { ObjectId } = require("mongodb");
@@ -351,7 +352,7 @@ const createProfile = async (
   ) {
     throw new CustomError(
       400,
-      "name, location, phoneNumber, website, priceRange can't be empty or just spaces"
+      "photo, gender, city can't be empty or just spaces"
     );
   }
   if (gender !== "M" && gender !== "F") {
@@ -708,7 +709,26 @@ const getFavourites = async (userId) => {
   const usersCollection = await users();
   const res = await usersCollection.findOne({ _id: userId });
   if (res === null) throw new CustomError(400, "user did not exists");
-  return res.favor;
+
+  // manipulating the return data here 
+
+  const jobAllData = await jobdata.getAllJobs();
+
+  const allFavourJobs = [];
+
+  for(let i = 0;i < res.favor.length;i++){
+    for(let j = 0;j<jobAllData.length;j++){
+      //console.log(jobAllData[j]._id);
+
+      if(String(jobAllData[j]._id) == String(res.favor[i])){
+        allFavourJobs.push(jobAllData[j]);
+        break;
+
+      }
+    }
+  }
+  //console.log(allFavourJobs);
+  return allFavourJobs;
 };
 
 const delFavourites = async (jobId, userId) => {
@@ -914,6 +934,59 @@ const checkUser = async (email, password) => {
     throw new CustomError(400, "Either the email or password is invalid");
   }
 };
+
+const editProfile = async (
+  userId,
+  gender,
+  city,
+  state,
+) => {
+  if (
+    typeof userId !== "string" ||
+    typeof gender !== "string" ||
+    typeof city !== "string" ||
+    typeof state !== "string"
+  ) {
+    throw new CustomError(
+      400,
+      "gender, city must be stirng type and can't be null"
+    );
+  }
+  if (!ObjectId.isValid(userId)) {
+    throw new CustomError(400, "Invalid userID");
+  } else {
+    userId = ObjectId(userId);
+  }
+  if (
+    gender.trim().length === 0 ||
+    city.trim().length === 0 ||
+    state.trim().length === 0
+  ) {
+    throw new CustomError(
+      400,
+      "gender, city, state can't be empty or just spaces"
+    );
+  }
+  if (gender !== "M" && gender !== "F" && gender !== "U") {
+    throw new CustomError(400, "gender must be M(male) or F(female) or U(unwilling to say)");
+  }
+  const usersCollection = await users();
+  //let _id = ObjectId();
+  // let newProfiles = {
+  //   gender,
+  //   city,
+  //   state,
+  // };
+  const insertInfo = await usersCollection.updateOne(
+    { _id: userId },
+    { $set: { "profile.gender":gender, "profile.city":city, "profile.state":state} } 
+  );
+  if (insertInfo.modifiedCount === 0) {
+    throw new CustomError(400, "Could not add the profile");
+  }
+  return insertInfo.acknowledged;
+};
+
 const getEx = async(userId) => {
   if (!userId) {
     throw new CustomError(400, "id must be provided");
@@ -985,7 +1058,38 @@ const addEx = async(experience,userId) => {
     { $addToSet: { "profile.experience": experience} }
   );
   if (insertInfo.modifiedCount === 0) throw new CustomError(400,"Could not update the experience");
-  console.log(insertInfo)
+  return insertInfo.acknowledged;
+}
+
+const delEx = async(companyName,userId) => {
+  if (!userId) {
+    throw new CustomError(400, "id must be provided");
+  }
+  if (typeof userId !== "string") {
+    throw new CustomError(
+      400,
+      "the userId must be non-empty string and can't just be space"
+    );
+  }
+  if (!ObjectId.isValid(userId)) {
+    throw new CustomError(400, "Invalid userID");
+  } else {
+    userId = ObjectId(userId);
+  }
+  if (
+    typeof companyName != "string" || companyName.trim().length === 0
+  ) {
+    throw new CustomError(
+      400,
+      "Value of companyName must be non-empty string"
+    );
+  }
+  const usersCollection = await users();
+  const insertInfo = await usersCollection.updateOne(
+    { _id: userId},
+    { $pull: { "profile.experience": {companyName:companyName}} }
+  );
+  if (insertInfo.modifiedCount === 0) throw new CustomError(400,"Could not del the experience");
   return insertInfo.acknowledged;
 }
 
@@ -1184,8 +1288,10 @@ module.exports = {
   checkUser,
   getAllResume,
   removeResume,
+  editProfile,
   getEx,
   addEx,
+  delEx,
   getEdu,
   addEdu,
   getSk,
@@ -1199,7 +1305,7 @@ module.exports = {
 //console.log(ObjectId.isValid('timtomtamted'));
 
 // createProfile(
-//     "61b15aafb06d8df4d3ec63c3",
+//     "61b409843132c093c1f3b57b",
 //     "one url",
 //     "M",
 //     "Hoboken",
@@ -1241,3 +1347,5 @@ module.exports = {
 //delFavourites("61a4236167e3b3f821f5eeee","61a33e13067da688cb1f8e39");
 //checkUser("sega@gmail.com", "ccc11111111").then(ele => console.log(ele)).catch(e => console.log(e));
 //addEx({title:"cctv Engineer", employmentType: "full time", companyName:"Apple",startDate: "2017/05/17", endDate: "2021/05/12"},"61b15aafb06d8df4d3ec63c3").catch(e=>console.log(e))
+//editProfile("61b409843132c093c1f3b57b","M","Ho","NJ")
+//delEx("Apple","61b409843132c093c1f3b57b")
