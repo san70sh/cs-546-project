@@ -468,15 +468,17 @@ async function acceptDecision(recruiterId, applicantId, jobId) {
   
       if(jobList.some(e => jobId === e.job_id.toString())) {
         jobId = new ObjectId(jobId);
-        let recAppUpdate = await recCol.findOneAndUpdate({jobs: {job: jobId}, jobs: {applicant_id: new ObjectId(applicantId)}, })
-        let applicant = await userCol.findOneAndUpdate({_id: new ObjectId(applicantId), "jobs.job": jobId},{$set: {"jobs.$.status": "Accepted"}}, {returnNewDocument: true});
-        console.log(applicant);
-        // let applicant = await userCol.updateOne({"_id": new ObjectId(applicantId), "jobs.job": jobId}, {$set: {"jobs.$.status": "Accepted"}})
-        // let applicant = await userCol.updateOne({"_id": {$eq: new ObjectId(applicantId)}}, {$set: {"jobs.$[elem].status": "Accepted"}}, {arrayFilters: [{"elem.job": {$eq: jobId}}]})
-        if(applicant.modifiedCount === 1) {
-          let appDetails = usrMethods.get(applicantId);
-          let {poster} = jobMethods.getJobsById()
-          return appDetails;
+        applicantId = new ObjectId(applicantId);
+        let recAppUpdate = await recCol.updateOne({_id: new ObjectId(recruiterId)}, {$set: {"jobs.$[job].applicants.$[app].status": "Accepted"}}, {arrayFilters: [{"app.appId": {$eq: applicantId}},{"job.job_id": jobId}]});
+        console.log(recAppUpdate);
+         if(recAppUpdate.modifiedCount === 1){
+           let applicant = await userCol.updateOne({_id: applicantId, "jobs.job": jobId},{$set: {"jobs.$.status": "Accepted"}}, {returnNewDocument: true});
+           console.log(applicant);
+          // // let applicant = await userCol.updateOne({"_id": new ObjectId(applicantId), "jobs.job": jobId}, {$set: {"jobs.$.status": "Accepted"}})
+          // let applicant = await userCol.updateOne({"_id": {$eq: new ObjectId(applicantId)}}, {$set: {"jobs.$[elem].status": "Accepted"}}, {arrayFilters: [{"elem.job": {$eq: jobId}}]})
+          if(applicant.modifiedCount === 1) {
+            return "Accepted";
+         }
         } else throw new CustomError(500,"Acceptance error");
       } else throw new CustomError(403,"Recruiter does not have this job");
     } else throw new CustomError(400,"Recruiter is not present in the database");
@@ -493,6 +495,18 @@ async function rejectDecision(recruiterId, applicantId, jobId) {
     let jobList = await getJobsByRecruiterId(recruiterId);
     if(jobList.some(e => jobId === e.job_id.toString())) {
       jobId = new ObjectId(jobId);
+      applicantId = new ObjectId(applicantId);
+        let recAppUpdate = await recCol.updateOne({_id: new ObjectId(recruiterId)}, {$set: {"jobs.$[job].applicants.$[app].status": "Rejected"}}, {arrayFilters: [{"app.appId": {$eq: applicantId}},{"job.job_id": jobId}]});
+        console.log(recAppUpdate);
+         if(recAppUpdate.modifiedCount === 1){
+           let applicant = await userCol.updateOne({_id: applicantId, "jobs.job": jobId},{$set: {"jobs.$.status": "RRejected"}}, {returnNewDocument: true});
+           console.log(applicant);
+          // // let applicant = await userCol.updateOne({"_id": new ObjectId(applicantId), "jobs.job": jobId}, {$set: {"jobs.$.status": "Accepted"}})
+          // let applicant = await userCol.updateOne({"_id": {$eq: new ObjectId(applicantId)}}, {$set: {"jobs.$[elem].status": "Accepted"}}, {arrayFilters: [{"elem.job": {$eq: jobId}}]})
+          if(applicant.modifiedCount === 1) {
+            return "Rejected";
+          }
+        }
       let applicant = await userCol.updateOne({$and: [{"_id": new ObjectId(applicantId)}, {"jobs.job": jobId}]}, {$set: {"jobs.$.status": "Rejected"}})
       if(applicant.modifiedCount === 1) {
         return "Applicant Rejected";

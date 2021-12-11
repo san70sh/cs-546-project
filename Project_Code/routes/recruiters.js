@@ -68,7 +68,7 @@ router.post('/login', async (req, res) => {
     // }
 });
 
-router.post('/accept', async (req, res) => {
+router.get('/accept/:jobId/:appId', async (req, res) => {
     try {
         // session code
         if(!req.session.user){
@@ -82,15 +82,20 @@ router.post('/accept', async (req, res) => {
         }
 
         let recruiterId = req.session.user.id;
-        console.log(req.body);
-        let {jobId, applicantId} = req.body;
+        let applicantId = req.params.appId;
+        let jobId = req.params.jobId;
+        console.log(jobId);
+        console.log(applicantId);
         // if(!req.session.user) {
         //     return res.status(403).render('partials/loginform', {, message: "Unauthorized Access", err: true})
         // } else {
             if(!jobId) return res.status(400).render('pages/recruiterProfile', {message: "Invalid ID", genErr: true});
             if(ObjectId.isValid(recruiterId) && ObjectId.isValid(applicantId) && ObjectId.isValid(jobId)) {
                 let output = await recruiterDat.acceptDecision(recruiterId, applicantId, jobId);
-                res.json(output);
+                if(output) {
+                    return res.redirect("/recruiters");
+                }
+                
             }
         // }
     } catch (e) {
@@ -99,27 +104,38 @@ router.post('/accept', async (req, res) => {
     }
 });
 
-router.post('/reject', async (req, res) => {
+router.post('/reject/:jobId/:appId', async (req, res) => {
     try {
 
-                // common session code all of your private routes
-                if(!req.session.user){
-                    return res.redirect('/recruiters/login');
-                }
-        
-                if(req.session.user){
-                    if(req.session.user.type !=='recruiter'){
-                        return res.redirect('/recruiters/login');
-                    }
-                }
+        // common session code all of your private routes
+        if(!req.session.user){
+            return res.redirect('/recruiters/login');
+        }
+
+        if(req.session.user){
+            if(req.session.user.type !=='recruiter'){
+                return res.redirect('/recruiters/login');
+            }
+        }
         // if(!req.session.user) {
         //     return res.status(403).render('partials/loginform', {, message: "Unauthorized Access", err: true})
         // } else {
-            let {recruiterId, applicantId, jobId} = req.body;
-            if(ObjectId.isValid(recruiterId) && ObjectId.isValid(applicantId) && ObjectId.isValid(jobId)) {
-                let output = await recruiterDat.rejectDecision(recruiterId, applicantId, jobId);
-                res.json(output);
+        let recruiterId = req.session.user.id;
+        let applicantId = req.params.appId;
+        let jobId = req.params.jobId;
+        console.log(jobId);
+        console.log(applicantId);
+        // if(!req.session.user) {
+        //     return res.status(403).render('partials/loginform', {, message: "Unauthorized Access", err: true})
+        // } else {
+        if(!jobId) return res.status(400).render('pages/recruiterProfile', {message: "Invalid ID", genErr: true});
+        if(ObjectId.isValid(recruiterId) && ObjectId.isValid(applicantId) && ObjectId.isValid(jobId)) {
+            let output = await recruiterDat.acceptDecision(recruiterId, applicantId, jobId);
+            if(output) {
+                return res.redirect("/recruiters");
             }
+            
+        }
         // }
     } catch (e) {
         return res.status(e.status).render('partials/loginform', {message: e.message, err: true});
@@ -201,11 +217,12 @@ router.get('/', async (req, res) => {
             }
 
             await Promise.all(recruiter.data.jobs.map(async (e) => {
-                if(e.applicant_id){
+                if(e.applicants.length != 0){
                     let applicantList = [];
-                    await e.applicant_id.map(async (e) => {
-                        e = e.toString();
-                        let appDetails = await usrDat.get(e);
+                    await e.applicants.map(async (e) => {
+                        let appId = e.appId.toString();
+                        let appDetails = await usrDat.get(appId);
+                        appDetails._id = appDetails._id.toString();
                         applicantList.push(appDetails);
                     });
 
