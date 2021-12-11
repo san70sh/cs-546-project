@@ -5,7 +5,7 @@ const users = require("../data/users");
 const upload = require("../data/upload").upload;
 const download = require("../data/upload").download;
 
-router.get("/:id/resume", async (req, res) => {
+router.get("/resume", async (req, res) => {
   if (!req.session.user) {
     return res.redirect("/users/login");
   }
@@ -19,7 +19,7 @@ router.get("/:id/resume", async (req, res) => {
   res.render("pages/applicantResume", { id: req.session.user.id });
 });
 
-router.post("/:id/resume/upload", upload.single("file"), async (req, res) => {
+router.post("/resume/upload", upload.single("file"), async (req, res) => {
   // common session code all of your private routes
   if (!req.session.user) {
     return res.redirect("/users/login");
@@ -49,10 +49,10 @@ router.post("/:id/resume/upload", upload.single("file"), async (req, res) => {
     res.render("pages/applicantResume", { error: e.message });
     console.log(e);
   }
-  res.redirect(`users/${req.params.id}`);
+  res.redirect("/users");
 });
 
-router.get("/profile/resume/:id", async (req, res) => {
+router.get("/resume/:id", async (req, res) => {
   // common session code all of your private routes
   if (!req.session.user) {
     return res.redirect("/users/login");
@@ -73,7 +73,7 @@ router.get("/profile/resume/:id", async (req, res) => {
     downloadStream.on("error", function (err) {
       return res
         .status(404)
-        .render("/users/profile", { error: "Cannot download the resume!" });
+        .render("/users", { error: "Cannot download the resume!" });
     });
 
     downloadStream.on("end", () => {
@@ -85,7 +85,7 @@ router.get("/profile/resume/:id", async (req, res) => {
   // res.redirect("/users/profile");
 });
 
-router.delete("/profile/resume/:id", async (req, res) => {
+router.delete("/resume/:id", async (req, res) => {
   if (!req.session.user) {
     return res.redirect("/users/login");
   }
@@ -197,11 +197,11 @@ router.get("/profile/", async (req, res) => {
     if (ObjectId.isValid(id)) {
       let user = await users.get(id);
       console.log(user);
-        return res.render("pages/applicanteditprofile", {
-          title: "Update",
-          method: "POST",
-          recid:  id,
-        });
+      return res.render("pages/applicanteditprofile", {
+        title: "Update",
+        method: "POST",
+        recid: id,
+      });
     }
   } catch (e) {
     return res
@@ -418,15 +418,18 @@ router.get("/favor", async (req, res) => {
   try {
     let output = await users.getFavourites(userId);
     console.log(output);
-    if(output){
-      if(output.length == 0 ){
-        return res.render("pages/favorJobs",{nullJob:true, message:"No Jobs Saved yet"});
+    if (output) {
+      if (output.length == 0) {
+        return res.render("pages/favorJobs", {
+          nullJob: true,
+          message: "No Jobs Saved yet",
+        });
       }
     }
     for (let i = 0; i < output.length; i++) {
       output[i].unique = String(output[i]._id);
     }
-    return res.render("pages/favorJobs",{ jobFound:true,jobs: output });
+    return res.render("pages/favorJobs", { jobFound: true, jobs: output });
   } catch (e) {
     return res.status(e.status).render("pages/error", {
       title: "Favor",
@@ -458,7 +461,7 @@ router.post("/favor/:id", async (req, res) => {
   }
   try {
     let output = await users.Favorites(jobId, userId);
-    return res.redirect('/users/favor');
+    return res.redirect("/users/favor");
   } catch (e) {
     return res
       .status(e.status)
@@ -489,7 +492,7 @@ router.post("/favor/delete/:id", async (req, res) => {
   }
   try {
     let output = await users.delFavourites(jobId, userId);
-    return res.redirect('/users/favor');
+    return res.redirect("/users/favor");
   } catch (e) {
     return res
       .status(e.status)
@@ -649,7 +652,12 @@ router.post("/editProfile", async (req, res) => {
     });
   }
   try {
-    let output = await users.editProfile(userId,base.gender,base.city, base.state);
+    let output = await users.editProfile(
+      userId,
+      base.gender,
+      base.city,
+      base.state
+    );
     return res.json(output);
   } catch (e) {
     return res.status(e.status).render("pages/error", {
@@ -677,7 +685,6 @@ router.get("/ex", async (req, res) => {
       message: "inValid userId",
       error: true,
     });
-
   }
   try {
     let output = await users.getEx(userId);
@@ -711,7 +718,7 @@ router.post("/ex", async (req, res) => {
       error: true,
     });
   }
-  if (new Date(experience.startDate)>new Date(experience.endDate)) {
+  if (new Date(experience.startDate) > new Date(experience.endDate)) {
     res.status(400).render("pages/error", {
       title: "experience",
       message: "inValid start date and end date",
@@ -720,7 +727,7 @@ router.post("/ex", async (req, res) => {
     return;
   }
   try {
-    let output = await users.addEx(experience,userId);
+    let output = await users.addEx(experience, userId);
     console.log(output);
     return res.json(output);
   } catch (e) {
@@ -752,7 +759,7 @@ router.delete("/ex", async (req, res) => {
     });
   }
   try {
-    let output = await users.delEx(companyName,userId);
+    let output = await users.delEx(companyName, userId);
     return res.json(output);
   } catch (e) {
     return res.status(e.status).render("pages/error", {
@@ -812,7 +819,7 @@ router.post("/edu", async (req, res) => {
       error: true,
     });
   }
-  if (new Date(education.startDate)>new Date(education.endDate)) {
+  if (new Date(education.startDate) > new Date(education.endDate)) {
     res.status(400).render("pages/error", {
       title: "education",
       message: "inValid start date and end date",
@@ -821,7 +828,7 @@ router.post("/edu", async (req, res) => {
     return;
   }
   try {
-    let output = await users.addEdu(education,userId);
+    let output = await users.addEdu(education, userId);
     return res.json(output);
   } catch (e) {
     return res.status(e.status).render("pages/error", {
@@ -852,7 +859,7 @@ router.delete("/edu", async (req, res) => {
     });
   }
   try {
-    let output = await users.delEdu(school,userId);
+    let output = await users.delEdu(school, userId);
     return res.json(output);
   } catch (e) {
     console.log(e);
@@ -914,7 +921,7 @@ router.post("/sk", async (req, res) => {
     });
   }
   try {
-    let output = await users.addSk(sk.skills,userId);
+    let output = await users.addSk(sk.skills, userId);
     return res.json(output);
   } catch (e) {
     return res.status(e.status).render("pages/error", {
@@ -944,7 +951,7 @@ router.delete("/sk", async (req, res) => {
     });
   }
   try {
-    let output = await users.delSk(skill,userId);
+    let output = await users.delSk(skill, userId);
     return res.json(output);
   } catch (e) {
     return res.status(e.status).render("pages/error", {
@@ -1004,7 +1011,7 @@ router.post("/la", async (req, res) => {
     });
   }
   try {
-    let output = await users.addLa(la.languages,userId);
+    let output = await users.addLa(la.languages, userId);
     return res.json(output);
   } catch (e) {
     return res.status(e.status).render("pages/error", {
@@ -1035,7 +1042,7 @@ router.delete("/la", async (req, res) => {
     });
   }
   try {
-    let output = await users.delLa(language,userId);
+    let output = await users.delLa(language, userId);
     return res.json(output);
   } catch (e) {
     return res.status(e.status).render("pages/error", {
