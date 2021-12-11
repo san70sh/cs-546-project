@@ -621,6 +621,39 @@ router.get("/apply", async (req, res) => {
   }
 });
 
+router.post("/editProfile", async (req, res) => {
+  let base = req.body.tmp;
+  // console.log(experience+"************");
+  if (!req.session.user) {
+    return res.redirect("/users/login");
+  }
+
+  if (req.session.user) {
+    if (req.session.user.type !== "user") {
+      return res.redirect("/users/login");
+    }
+  }
+  let userId = req.session.user.id;
+  if (!ObjectId.isValid(userId)) {
+    res.status(e.status).render("pages/error", {
+      title: "basic information",
+      message: "inValid userId",
+      error: true,
+    });
+    return;
+  }
+  try {
+    let output = await users.editProfile(userId,base.gender,base.city, base.state);
+    return res.json(output);
+  } catch (e) {
+    return res.status(e.status).render("pages/error", {
+      title: "basic information",
+      message: e.message,
+      error: true,
+    });
+  }
+});
+
 router.get("/ex", async (req, res) => {
   if (!req.session.user) {
     return res.redirect("/users/login");
@@ -685,6 +718,42 @@ router.post("/ex", async (req, res) => {
     });
   }
 });
+
+router.delete("/ex", async (req, res) => {
+  let companyName = req.body.tmp;
+  console.log(output+"****************")
+  // console.log(experience+"************");
+  if (!req.session.user) {
+    return res.redirect("/users/login");
+  }
+
+  if (req.session.user) {
+    if (req.session.user.type !== "user") {
+      return res.redirect("/users/login");
+    }
+  }
+  let userId = req.session.user.id;
+  if (!ObjectId.isValid(userId)) {
+    res.status(e.status).render("pages/error", {
+      title: "experience",
+      message: "inValid userId",
+      error: true,
+    });
+    return;
+  }
+  try {
+    let output = await users.delEx(companyName,userId);
+    console.log(output+"****************")
+    return res.json(output);
+  } catch (e) {
+    return res.status(e.status).render("pages/error", {
+      title: "experience",
+      message: e.message,
+      error: true,
+    });
+  }
+});
+
 router.get("/edu", async (req, res) => {
   if (!req.session.user) {
     return res.redirect("/users/login");
