@@ -609,8 +609,8 @@ const remove = async (userId) => {
   //**********************remove jobId in is not necessary here
 };
 
-const apply = async (jobId, userId) => {
-  if (!userId || !jobId) {
+const apply = async (jobId, userId, fileId) => {
+  if (!userId || !jobId || !fileId) {
     throw new CustomError(400, "id must be provided");
   }
   if (typeof userId !== "string" || userId.trim().length === 0) {
@@ -625,6 +625,14 @@ const apply = async (jobId, userId) => {
       "the jobId must be non-empty string and can't just be space"
     );
   }
+
+  if (typeof fileId !== "string" || jobId.trim().length === 0) {
+    throw new CustomError(
+      400,
+      "the jobId must be non-empty string and can't just be space"
+    );
+  }
+
   if (!ObjectId.isValid(userId)) {
     throw new CustomError(400, "Invalid userID");
   } else {
@@ -635,21 +643,37 @@ const apply = async (jobId, userId) => {
   } else {
     jobId = ObjectId(jobId);
   }
+
+  if (!ObjectId.isValid(fileId)) {
+    throw new CustomError(400, "Invalid jobId");
+  } else {
+    jobId = ObjectId(jobId);
+  }
+
   const usersCollection = await users();
+  const thisUser = await usersCollection.findOne({ _id: userId });
+  let thisJobs = thisUser.jobs;
+
+  thisJobs.forEach((ele) => {
+    if (ele._id.toString() === jobId.toString()) {
+      throw new CustomError(400, "You have already applied for it");
+    }
+  });
 
   let newjob = {
     _id: jobId,
     status: "pending",
+    resume: fileId,
   };
+
   const insertInfo = await usersCollection.updateOne(
     { _id: userId },
     { $addToSet: { jobs: newjob } }
   );
   if (insertInfo.modifiedCount === 0)
-    throw new CustomError(
-      400,
-      "Could not add the profile, the job is already exists or user doesn't exist"
-    );
+    throw new CustomError(400, "Could not apply this job for now");
+
+  return 1;
   //*****************recruiter collection update userId to applicantId.
 };
 
@@ -710,20 +734,19 @@ const getFavourites = async (userId) => {
   const res = await usersCollection.findOne({ _id: userId });
   if (res === null) throw new CustomError(400, "user did not exists");
 
-  // manipulating the return data here 
+  // manipulating the return data here
 
   const jobAllData = await jobdata.getAllJobs();
 
   const allFavourJobs = [];
 
-  for(let i = 0;i < res.favor.length;i++){
-    for(let j = 0;j<jobAllData.length;j++){
+  for (let i = 0; i < res.favor.length; i++) {
+    for (let j = 0; j < jobAllData.length; j++) {
       //console.log(jobAllData[j]._id);
 
-      if(String(jobAllData[j]._id) == String(res.favor[i])){
+      if (String(jobAllData[j]._id) == String(res.favor[i])) {
         allFavourJobs.push(jobAllData[j]);
         break;
-
       }
     }
   }
@@ -766,6 +789,7 @@ const delFavourites = async (jobId, userId) => {
     throw new CustomError(400, "remove favor failed");
   }
 };
+
 const cancel = async (jobId, userId) => {
   if (!userId || !jobId) {
     throw new CustomError(400, "id must be provided");
@@ -935,12 +959,7 @@ const checkUser = async (email, password) => {
   }
 };
 
-const editProfile = async (
-  userId,
-  gender,
-  city,
-  state,
-) => {
+const editProfile = async (userId, gender, city, state) => {
   if (
     typeof userId !== "string" ||
     typeof gender !== "string" ||
@@ -968,7 +987,10 @@ const editProfile = async (
     );
   }
   if (gender !== "M" && gender !== "F" && gender !== "U") {
-    throw new CustomError(400, "gender must be M(male) or F(female) or U(unwilling to say)");
+    throw new CustomError(
+      400,
+      "gender must be M(male) or F(female) or U(unwilling to say)"
+    );
   }
   const usersCollection = await users();
   //let _id = ObjectId();
@@ -979,7 +1001,13 @@ const editProfile = async (
   // };
   const insertInfo = await usersCollection.updateOne(
     { _id: userId },
-    { $set: { "profile.gender":gender, "profile.city":city, "profile.state":state} } 
+    {
+      $set: {
+        "profile.gender": gender,
+        "profile.city": city,
+        "profile.state": state,
+      },
+    }
   );
   if (insertInfo.modifiedCount === 0) {
     throw new CustomError(400, "Could not add the profile");
@@ -987,7 +1015,7 @@ const editProfile = async (
   return insertInfo.acknowledged;
 };
 
-const getEx = async(userId) => {
+const getEx = async (userId) => {
   if (!userId) {
     throw new CustomError(400, "id must be provided");
   }
@@ -1006,9 +1034,9 @@ const getEx = async(userId) => {
   const res = await usersCollection.findOne({ _id: userId });
   if (res === null) throw new CustomError(400, "user did not exists");
   return res.profile.experience;
-}
+};
 
-const addEx = async(experience,userId) => {
+const addEx = async (experience, userId) => {
   if (!userId) {
     throw new CustomError(400, "id must be provided");
   }
@@ -1049,22 +1077,26 @@ const addEx = async(experience,userId) => {
     );
   }
   date_regex = /^(\d{4})-(\d{2})-(\d{2})$/;
-  if (!date_regex.test(experience.startDate) && date_regex.test(experience.endDate)) {
+  if (
+    !date_regex.test(experience.startDate) &&
+    date_regex.test(experience.endDate)
+  ) {
     throw new CustomError(400, "Wrong date formate YYYY/MM/DD");
   }
-  if (new Date(experience.startDate)>new Date(experience.endDate)) {
+  if (new Date(experience.startDate) > new Date(experience.endDate)) {
     throw new CustomError(400, "Invalid start date and end date");
   }
   const usersCollection = await users();
   const insertInfo = await usersCollection.updateOne(
-    { _id: userId},
-    { $addToSet: { "profile.experience": experience} }
+    { _id: userId },
+    { $addToSet: { "profile.experience": experience } }
   );
-  if (insertInfo.modifiedCount === 0) throw new CustomError(400,"Could not update the experience");
+  if (insertInfo.modifiedCount === 0)
+    throw new CustomError(400, "Could not update the experience");
   return insertInfo.acknowledged;
-}
+};
 
-const delEx = async(companyName,userId) => {
+const delEx = async (companyName, userId) => {
   if (!userId) {
     throw new CustomError(400, "id must be provided");
   }
@@ -1079,24 +1111,20 @@ const delEx = async(companyName,userId) => {
   } else {
     userId = ObjectId(userId);
   }
-  if (
-    typeof companyName != "string" || companyName.trim().length === 0
-  ) {
-    throw new CustomError(
-      400,
-      "Value of companyName must be non-empty string"
-    );
+  if (typeof companyName != "string" || companyName.trim().length === 0) {
+    throw new CustomError(400, "Value of companyName must be non-empty string");
   }
   const usersCollection = await users();
   const insertInfo = await usersCollection.updateOne(
-    { _id: userId},
-    { $pull: { "profile.experience": {companyName:companyName}} }
+    { _id: userId },
+    { $pull: { "profile.experience": { companyName: companyName } } }
   );
-  if (insertInfo.modifiedCount === 0) throw new CustomError(400,"Could not del the experience");
+  if (insertInfo.modifiedCount === 0)
+    throw new CustomError(400, "Could not del the experience");
   return insertInfo.acknowledged;
-}
+};
 
-const getEdu = async(userId) => {
+const getEdu = async (userId) => {
   if (!userId) {
     throw new CustomError(400, "id must be provided");
   }
@@ -1115,9 +1143,9 @@ const getEdu = async(userId) => {
   const res = await usersCollection.findOne({ _id: userId });
   if (res === null) throw new CustomError(400, "user did not exists");
   return res.profile.education;
-}
+};
 
-const addEdu = async(education,userId) => {
+const addEdu = async (education, userId) => {
   if (!userId) {
     throw new CustomError(400, "id must be provided");
   }
@@ -1161,23 +1189,27 @@ const addEdu = async(education,userId) => {
     );
   }
   date_regex = /^(\d{4})-(\d{2})-(\d{2})$/;
-  if (!date_regex.test(education.startDate) && date_regex.test(education.endDate)) {
+  if (
+    !date_regex.test(education.startDate) &&
+    date_regex.test(education.endDate)
+  ) {
     throw new CustomError(400, "Wrong date formate YYYY/MM/DD");
   }
-  if (new Date(education.startDate)>new Date(education.endDate)) {
+  if (new Date(education.startDate) > new Date(education.endDate)) {
     throw new CustomError(400, "Invalid start date and end date");
   }
- 
+
   const usersCollection = await users();
   const insertInfo = await usersCollection.updateOne(
-    { _id: userId},
-    { $addToSet: { "profile.education": education}}
+    { _id: userId },
+    { $addToSet: { "profile.education": education } }
   );
-  if (insertInfo.modifiedCount === 0) throw new CustomError(400,"Could not update the education");
-  console.log(insertInfo)
+  if (insertInfo.modifiedCount === 0)
+    throw new CustomError(400, "Could not update the education");
+  console.log(insertInfo);
   return insertInfo.acknowledged;
-}
-const delEdu = async(school,userId) => {
+};
+const delEdu = async (school, userId) => {
   if (!userId) {
     throw new CustomError(400, "id must be provided");
   }
@@ -1192,24 +1224,20 @@ const delEdu = async(school,userId) => {
   } else {
     userId = ObjectId(userId);
   }
-  if (
-    typeof school != "string" || school.trim().length === 0
-  ) {
-    throw new CustomError(
-      400,
-      "Value of school must be non-empty string"
-    );
+  if (typeof school != "string" || school.trim().length === 0) {
+    throw new CustomError(400, "Value of school must be non-empty string");
   }
   const usersCollection = await users();
   const insertInfo = await usersCollection.updateOne(
-    { _id: userId},
-    { $pull: { "profile.education": {school:school}} }
+    { _id: userId },
+    { $pull: { "profile.education": { school: school } } }
   );
-  if (insertInfo.modifiedCount === 0) throw new CustomError(400,"Could not del the education");
+  if (insertInfo.modifiedCount === 0)
+    throw new CustomError(400, "Could not del the education");
   return insertInfo.acknowledged;
-}
+};
 
-const getSk = async(userId) => {
+const getSk = async (userId) => {
   if (!userId) {
     throw new CustomError(400, "id must be provided");
   }
@@ -1228,9 +1256,9 @@ const getSk = async(userId) => {
   const res = await usersCollection.findOne({ _id: userId });
   if (res === null) throw new CustomError(400, "user did not exists");
   return res.profile.skills;
-}
+};
 
-const addSk = async(skill,userId) => {
+const addSk = async (skill, userId) => {
   if (!userId) {
     throw new CustomError(400, "id must be provided");
   }
@@ -1250,14 +1278,15 @@ const addSk = async(skill,userId) => {
   }
   const usersCollection = await users();
   const insertInfo = await usersCollection.updateOne(
-    { _id: userId},
-    { $addToSet: { "profile.skills": skill}}
+    { _id: userId },
+    { $addToSet: { "profile.skills": skill } }
   );
-  if (insertInfo.modifiedCount === 0) throw new CustomError(400,"Could not update the skills");
-  console.log(insertInfo)
+  if (insertInfo.modifiedCount === 0)
+    throw new CustomError(400, "Could not update the skills");
+  console.log(insertInfo);
   return insertInfo.acknowledged;
-}
-const delSk = async(skill,userId) => {
+};
+const delSk = async (skill, userId) => {
   if (!userId) {
     throw new CustomError(400, "id must be provided");
   }
@@ -1272,24 +1301,20 @@ const delSk = async(skill,userId) => {
   } else {
     userId = ObjectId(userId);
   }
-  if (
-    typeof skill != "string" || skill.trim().length === 0
-  ) {
-    throw new CustomError(
-      400,
-      "Value of skill must be non-empty string"
-    );
+  if (typeof skill != "string" || skill.trim().length === 0) {
+    throw new CustomError(400, "Value of skill must be non-empty string");
   }
   const usersCollection = await users();
   const insertInfo = await usersCollection.updateOne(
-    { _id: userId},
-    { $pull: { "profile.skills":skill } }
+    { _id: userId },
+    { $pull: { "profile.skills": skill } }
   );
-  if (insertInfo.modifiedCount === 0) throw new CustomError(400,"Could not del the education");
+  if (insertInfo.modifiedCount === 0)
+    throw new CustomError(400, "Could not del the education");
   return insertInfo.acknowledged;
-}
+};
 
-const getLa = async(userId) => {
+const getLa = async (userId) => {
   if (!userId) {
     throw new CustomError(400, "id must be provided");
   }
@@ -1308,9 +1333,9 @@ const getLa = async(userId) => {
   const res = await usersCollection.findOne({ _id: userId });
   if (res === null) throw new CustomError(400, "user did not exists");
   return res.profile.languages;
-}
+};
 
-const addLa = async(languages,userId) => {
+const addLa = async (languages, userId) => {
   if (!userId) {
     throw new CustomError(400, "id must be provided");
   }
@@ -1330,15 +1355,16 @@ const addLa = async(languages,userId) => {
   }
   const usersCollection = await users();
   const insertInfo = await usersCollection.updateOne(
-    { _id: userId},
-    { $addToSet: { "profile.languages": languages}}
+    { _id: userId },
+    { $addToSet: { "profile.languages": languages } }
   );
-  if (insertInfo.modifiedCount === 0) throw new CustomError(400,"Could not update the skills");
-  console.log(insertInfo)
+  if (insertInfo.modifiedCount === 0)
+    throw new CustomError(400, "Could not update the skills");
+  console.log(insertInfo);
   return insertInfo.acknowledged;
-}
+};
 
-const delLa = async(language,userId) => {
+const delLa = async (language, userId) => {
   if (!userId) {
     throw new CustomError(400, "id must be provided");
   }
@@ -1353,22 +1379,18 @@ const delLa = async(language,userId) => {
   } else {
     userId = ObjectId(userId);
   }
-  if (
-    typeof language != "string" || language.trim().length === 0
-  ) {
-    throw new CustomError(
-      400,
-      "Value of language must be non-empty string"
-    );
+  if (typeof language != "string" || language.trim().length === 0) {
+    throw new CustomError(400, "Value of language must be non-empty string");
   }
   const usersCollection = await users();
   const insertInfo = await usersCollection.updateOne(
-    { _id: userId},
-    { $pull: { "profile.languages":language } }
+    { _id: userId },
+    { $pull: { "profile.languages": language } }
   );
-  if (insertInfo.modifiedCount === 0) throw new CustomError(400,"Could not del the language");
+  if (insertInfo.modifiedCount === 0)
+    throw new CustomError(400, "Could not del the language");
   return insertInfo.acknowledged;
-}
+};
 module.exports = {
   create,
   getFile,
