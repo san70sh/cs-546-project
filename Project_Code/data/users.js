@@ -1,6 +1,8 @@
 const mongoCollections = require("../config/mongoCollections");
 const jobdata = require("./jobs");
 const users = mongoCollections.users;
+const recruiters = mongoCollections.recruiters;
+const jobs = mongoCollections.jobs;
 const userProfiles = mongoCollections.userProfiles;
 let { ObjectId } = require("mongodb");
 bcrypt = require("bcrypt");
@@ -609,7 +611,7 @@ const remove = async (userId) => {
   //**********************remove jobId in is not necessary here
 };
 
-const apply = async (jobId, userId, fileId) => {
+const apply1 = async (jobId, userId, fileId) => {
   if (!userId || !jobId || !fileId) {
     throw new CustomError(400, "id must be provided");
   }
@@ -676,6 +678,8 @@ const apply = async (jobId, userId, fileId) => {
   return 1;
   //*****************recruiter collection update userId to applicantId.
 };
+
+const apply2 = async (jobId, userId) => {};
 
 const Favorites = async (jobId, userId) => {
   if (!userId || !jobId) {
