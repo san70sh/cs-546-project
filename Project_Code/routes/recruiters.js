@@ -144,7 +144,7 @@ router.get('/accept/:jobId/:appId', async (req, res) => {
     }
 });
 
-router.post('/reject/:jobId/:appId', async (req, res) => {
+router.get('/reject/:jobId/:appId', async (req, res) => {
     try {
 
         // common session code all of your private routes
@@ -170,7 +170,7 @@ router.post('/reject/:jobId/:appId', async (req, res) => {
         // } else {
         if(!jobId) return res.status(400).render('pages/recruiterProfile', {message: "Invalid ID", genErr: true});
         if(ObjectId.isValid(recruiterId) && ObjectId.isValid(applicantId) && ObjectId.isValid(jobId)) {
-            let output = await recruiterDat.acceptDecision(recruiterId, applicantId, jobId);
+            let output = await recruiterDat.rejectDecision(recruiterId, applicantId, jobId);
             if(output) {
                 return res.redirect("/recruiters");
             }

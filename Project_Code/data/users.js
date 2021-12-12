@@ -437,29 +437,29 @@ const createProfile = async (
     throw new CustomError(400, "Could not add the profile");
 };
 
-const create = async (email, phone, firstname, lastname, password) => {
+const create = async (email, phone, firstName, lastName, password) => {
   if (
     typeof email !== "string" ||
     typeof phone !== "string" ||
-    typeof firstname !== "string" ||
-    typeof lastname !== "string" ||
+    typeof firstName !== "string" ||
+    typeof lastName !== "string" ||
     typeof password !== "string"
   ) {
     throw new CustomError(
       400,
-      "user's email, phone. firstname, lastname, password must be string"
+      "user's email, phone. firstName, lastName, password must be string"
     );
   }
   if (
     email.trim().length === 0 ||
     phone.trim().length === 0 ||
-    firstname.trim().length === 0 ||
-    lastname.trim().length === 0 ||
+    firstName.trim().length === 0 ||
+    lastName.trim().length === 0 ||
     password.trim().length === 0
   ) {
     throw new CustomError(
       400,
-      "uesr's email, phone. firstname, lastname, password can't be empty or just spaces"
+      "uesr's email, phone. firstName, lastName, password can't be empty or just spaces"
     );
   }
   const emailCheck = /[A-Z0-9._-]+@[A-Z0-9.-]+\.[A-Z]{2,}/im;
@@ -484,8 +484,8 @@ const create = async (email, phone, firstname, lastname, password) => {
   let newUser = {
     email,
     phone,
-    firstname,
-    lastname,
+    firstName,
+    lastName,
     password: hash,
     jobs,
     resume,
@@ -573,18 +573,18 @@ const create = async (email, phone, firstname, lastname, password) => {
 //   if (insertInfo.modifiedCount === 0) throw "Could not update the profile";
 // };
 
-const update = async (userId, email, phone, firstname, lastname, password) => {
+const update = async (userId, email, phone, firstName, lastName, password) => {
   if (
     typeof userId !== "string" ||
     typeof email !== "string" ||
     typeof phone !== "string" ||
-    typeof firstname !== "string" ||
-    typeof lastname !== "string" ||
+    typeof firstName !== "string" ||
+    typeof lastName !== "string" ||
     typeof password !== "string"
   ) {
     throw new CustomError(
       400,
-      "user's email, phone. firstname, lastname, password must be string"
+      "user's email, phone. firstName, lastName, password must be string"
     );
   }
 
@@ -592,13 +592,13 @@ const update = async (userId, email, phone, firstname, lastname, password) => {
     userId.trim().length === 0 ||
     email.trim().length === 0 ||
     phone.trim().length === 0 ||
-    firstname.trim().length === 0 ||
-    lastname.trim().length === 0 ||
+    firstName.trim().length === 0 ||
+    lastName.trim().length === 0 ||
     password.trim().length === 0
   ) {
     throw new CustomError(
       400,
-      "uesr's email, phone. firstname, lastname, password can't be empty or just spaces"
+      "uesr's email, phone. firstName, lastName, password can't be empty or just spaces"
     );
   }
   const emailCheck = /[A-Z0-9._-]+@[A-Z0-9.-]+\.[A-Z]{2,}/im;
@@ -625,8 +625,8 @@ const update = async (userId, email, phone, firstname, lastname, password) => {
   let newUser = {
     email,
     phone,
-    firstname,
-    lastname,
+    firstName,
+    lastName,
     password: hash,
   };
   const insertInfo = await usersCollection.updateOne(
