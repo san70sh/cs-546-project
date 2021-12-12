@@ -1169,6 +1169,10 @@ const addEx = async (experience, userId) => {
   if (new Date(experience.startDate) > new Date(experience.endDate)) {
     throw new CustomError(400, "Invalid start date and end date");
   }
+  let today = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
+  if (new Date(experience.startDate) > today || new Date(experience.endDate) > today) {
+    throw new CustomError(400, "start date and end date can't be later than today");
+  }
   const usersCollection = await users();
   const insertInfo = await usersCollection.updateOne(
     { _id: userId },
@@ -1281,7 +1285,10 @@ const addEdu = async (education, userId) => {
   if (new Date(education.startDate) > new Date(education.endDate)) {
     throw new CustomError(400, "Invalid start date and end date");
   }
-
+  let today = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
+  if (new Date(education.startDate) > today || new Date(education.endDate) > today) {
+    throw new CustomError(400, "start date and end date can't be later than today");
+  }
   const usersCollection = await users();
   const insertInfo = await usersCollection.updateOne(
     { _id: userId },
@@ -1554,7 +1561,8 @@ module.exports = {
 //getFavourites("61a33e13067da688cb1f8e39").then(ele => console.log(ObjectId(ele[0])))
 //delFavourites("61a4236167e3b3f821f5eeee","61a33e13067da688cb1f8e39");
 //checkUser("sega@gmail.com", "ccc11111111").then(ele => console.log(ele)).catch(e => console.log(e));
-//addEx({title:"cctv Engineer", employmentType: "full time", companyName:"Apple",startDate: "2017/05/17", endDate: "2021/05/12"},"61b15aafb06d8df4d3ec63c3").catch(e=>console.log(e))
+//addEx({title:"cctv Engineer", employmentType: "full time", companyName:"Apple",startDate: "2022/05/17", endDate: "2022/05/19"},"61b15aafb06d8df4d3ec63c3").catch(e=>console.log(e))
 //editProfile("61b409843132c093c1f3b57b","M","Ho","NJ")
 //delEx("Apple","61b409843132c093c1f3b57b")
 // delSk("JS","61b409843132c093c1f3b57b")
+//addEdu({school:"cctv Engineer", major: "full time", degree:"Apple",startDate: "2022/06/17", endDate: "2022/05/19"},"61b15aafb06d8df4d3ec63c3").catch(e=>console.log(e))

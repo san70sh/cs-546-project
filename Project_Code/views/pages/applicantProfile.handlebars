@@ -5,11 +5,11 @@
                 {{!-- <img src="{{user.profile.photo}}"></img> --}}
             </div>
             <div class="col-6">
-                <h2>Hello {{user.firstName}}{{user.lastName}}</h2>
+                <h1>Hello,{{user.firstname}}{{user.lastname}}</h2>
                 {{#if newUser}}
-                <h6>For your better experience, please complete your personal information first</h6>
+                <p>For your better experience, please complete your personal information first</p>
                 {{else}}
-                <h6>Welcome back</h6>
+                <h2>Welcome back</h6>
                 {{/if}}
             </div>
         </div>
@@ -83,7 +83,7 @@
     {{#if resumes}}
     {{#each resumes}}
     <ul id='resumeList'>
-        <li class='resumeList'> <a href="/users/resume/{{this}}" target="_blank">resume{{math @index "+" 1}}.pdf</a>
+        <li class='resumeList'> <a href="/users/resume/{{this}}" target="_blank" id = "fix_tota11y">resume{{math @index "+" 1}}.pdf</a>
             <button type="button" value={{this}} class="delete btn-primary"
                 onclick="deleteResume(this.value)">delete</button>
         </li>

@@ -170,9 +170,8 @@ router.get("/", async (req, res) => {
     } catch (e) {
       resumeError = e.message;
     }
-
     return res.render("pages/applicantProfile", {
-      user: user,
+      user,
       jobs: user.jobs,
       userId: id,
       newUser: newUser,
@@ -196,8 +195,6 @@ router.get("/profile/", async (req, res) => {
     }
     let id = req.session.user.id;
     if (ObjectId.isValid(id)) {
-      let user = await users.get(id);
-      console.log(user);
       return res.render("pages/applicanteditprofile", {
         title: "Update",
         method: "POST",
@@ -216,14 +213,14 @@ router.post("/login", async (req, res) => {
   let password = req.body.password;
   //let status = req.body.status; //**************use status to store a form data that shows the user is applicant or recruiter */
   if (typeof email !== "string") {
-    res.status(400).render("pages/applicantlogin", {
+    res.status(400).send( {
       message: "email must be string",
       emailerr: true,
     });
     return;
   }
   if (typeof password !== "string") {
-    res.status(400).render("pages/applicantlogin", {
+    res.status(400).send( {
       message: "password must be string",
       pwderr: true,
     });
@@ -232,7 +229,7 @@ router.post("/login", async (req, res) => {
   email = email.trim().toLowerCase();
   password = password.trim();
   if (email.length === 0 || password.length === 0) {
-    res.status(400).render("pages/applicantlogin", {
+    res.status(400).send( {
       message: "Not a valid email format",
       emailerr: true,
     });
@@ -240,7 +237,7 @@ router.post("/login", async (req, res) => {
   }
   const emailCheck = /[A-Z0-9._-]+@[A-Z0-9.-]+\.[A-Z]{2,}/im;
   if (!emailCheck.test(email)) {
-    res.status(400).render("pages/applicantlogin", {
+    res.status(400).send({
       message:
         "email can only be alphanumeric characters and should be at least 4 characters long.",
       emailerr: true,
@@ -248,14 +245,14 @@ router.post("/login", async (req, res) => {
     return;
   }
   if (password.length < 6) {
-    res.status(400).render("pages/applicantlogin", {
+    res.status(400).send( {
       message: "password must be longer than 6",
       pwderr: true,
     });
     return;
   }
   if (password.indexOf(" ") >= 0) {
-    res.status(400).render("pages/applicantlogin", {
+    res.status(400).send( {
       message: "password can't contain space",
       pwderr: true,
     });
@@ -267,14 +264,14 @@ router.post("/login", async (req, res) => {
   } catch (e) {
     res
       .status(400)
-      .render("pages/applicantlogin", { message: e.message, mainerr: true });
+      .send({ message: e.message, mainerr: true });
     return;
   }
   if (tmp.authenticated === true) {
     req.session.user = { email: email, type: "user", id: tmp.id };
     res.redirect(`/users/`); //goto main page after user has logined in
   } else {
-    res.status(400).render("pages/applicantlogin", {
+    res.status(400).send({
       message: "please try again",
       mainerr: true,
     });

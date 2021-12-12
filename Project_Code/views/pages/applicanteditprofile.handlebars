@@ -1,12 +1,12 @@
 <div id="userProfileEditCreate" >
     <div class="form-title text-center">
-       <h4>{{title}} Profile</h4>
+       <h1>{{title}} Profile</h1>
     </div>
-    <div class="d-flex flex-column text-center">
+    <div class="d-flex flex-column">
         {{#if mainerr}}
         <div class="error">{{message}}</div>
         {{/if}}
-        <p>basic information</p>
+        <p class = "edit_title text-center">basic information</p>
         <div id = "dumb" hidden>{{recid}}</div>
         <form action="/users/profile/" method="{{method}}" id="userBase" autocomplete="off">
             <div class="form-group">
@@ -25,7 +25,7 @@
                 {{#if cityErr}}
                 <div class="error">{{message}}</div>
                 {{/if}}
-                <label for="userCity" class="col-form-label">City: </label>
+                <label for="userCity" >City: </label>
                 <input type="text" name="city" id="userCity" class="form-control" placeholder="Hoboken" required>
             </div>
             <div class="form-group">
@@ -39,7 +39,7 @@
         </form>
     </div>
     <div class = "exRevise">
-        <p>experience</p>
+        <p class = "edit_title text-center">experience</p>
         <ol id="preEx"></ol>
         <form action="/users/profile/" method="{{method}}" id="userEx" autocomplete="off">
             {{#if exErr}}
@@ -65,7 +65,7 @@
     </div>
     <div class = "eduRevise">
     <br/>
-    <p>education</p>
+    <p class = "edit_title text-center">education</p>
     <ol id="preEdu"></ol>
     <form action="/users/profile/" method="{{method}}" id="userEdu" autocomplete="off">
         {{#if eduErr}}
@@ -88,7 +88,7 @@
     </div>
     <div class = "skRevise">
     <br/>
-    <p>skills</p>
+    <p class = "edit_title text-center">skills</p>
     <ol id="preSk"></ol>
     <form action="/users/profile/" method="{{method}}" id="userSk" autocomplete="off">
         {{#if skErr}}
@@ -103,7 +103,7 @@
     
     <div class = "laRevise">
     <br/>
-    <p>languages</p>
+    <p class = "edit_title text-center">languages</p>
     <ol id="preLa"></ol>
     <form action="/users/profile/" method="{{method}}" id="userLa" autocomplete="off">
         {{#if laErr}}
