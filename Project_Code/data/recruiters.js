@@ -362,28 +362,6 @@ async function removeRecruiter(recruiterId) {
   }
 }
 
-async function addApplicant(jobId, applicantId) {
-  if(ObjectId.isValid(applicantId) && ObjectId.isValid(jobId)) {
-    try {
-      const recCol = await recruiters();
-      const jobCol = await jobs();
-      jobId = new ObjectId(jobId);
-      applicantId = new ObjectId(applicantId);
-      let job = await jobCol.find({_id: jobId}).project({_id: 0, poster: 1}).toArray();
-      console.log(job);
-      if(job) {
-        let {poster} = job[0];
-        let recAppUpdate = await recCol.updateOne({$and: [{_id: poster}, {"jobs.job_id": jobId}]},{$push: {"jobs.$.applicants": {"appId": applicantId, "status": "pending"}}},{upsert: true});
-         if(recAppUpdate.modifiedCount == 1) {
-           return "Successfully Applied";
-         } else throw new CustomError(400,"The application could not be created.");
-      }
-    } catch (e) {
-      return e;
-    } 
-  } else throw "Invalid ID";
-}
-
 async function postJob(recruiterId, jobDetails) {
   
   if(ObjectId.isValid(recruiterId)) {
@@ -391,7 +369,7 @@ async function postJob(recruiterId, jobDetails) {
     let recruiter = await getRecruiter(recruiterId);
     if(recruiter.recFound) {
       let resObj = await jobMethods.createJob(recruiterId, recruiter.data.email, jobDetails);
-      const jobPost = await recruiterCol.updateOne({ _id: new ObjectId(recruiterId) }, { $push: { jobs : {"job_id": resObj._id }} });
+      const jobPost = await recruiterCol.updateOne({ _id: new ObjectId(recruiterId) }, { $push: { jobs : {"job_id": resObj._id, "applicants": [] }} });
       if (jobPost.modifiedCount === 0) {
         throw new CustomError(400,"The job could not be created.");
       } else {
