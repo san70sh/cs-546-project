@@ -4,6 +4,7 @@ const users = mongoCollections.users;
 const recruiters = mongoCollections.recruiters;
 const jobs = mongoCollections.jobs;
 const userProfiles = mongoCollections.userProfiles;
+const chunks = mongoCollections.profileChunks;
 let { ObjectId } = require("mongodb");
 bcrypt = require("bcrypt");
 const saltRounds = 5;
@@ -301,6 +302,22 @@ const removeResume = async (userId, fileId) => {
 
   if (insertInfo.modifiedCount === 0)
     throw new CustomError(400, "Could not update the user");
+
+  // delete from .files
+  const fileCol = await userProfiles();
+  try {
+    fileCol.deleteOne({ _id: fileId });
+  } catch (e) {
+    throw new CustomError(400, "error from delete file from file collection");
+  }
+
+  // delete from .chunks
+  const chunkCol = await chunks();
+  try {
+    chunkCol.deleteMany({ files_id: fileId });
+  } catch (e) {
+    throw new CustomError(400, "error from delete file from chunk collection");
+  }
 
   return await get(userId.toString());
 };
