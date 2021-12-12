@@ -15,6 +15,7 @@ router.get("/", async (req, res) => {
     }
     for (let i = 0; i < result.length; i++) {
       result[i].unique = String(result[i]._id);
+      result[i].postDateString = String(result[i].postDate);
     }
     //console.log(result);
 
@@ -64,7 +65,7 @@ router.get("/jobs/id/:id", async (req, res) => {
     }
     const result = await jobData.getJobsById(req.params.id);
     const jobId = req.params.id;
-    console.log(jobId);
+    //console.log(jobId);
     return res.render("pages/singleJob", { data: result, jobId: jobId });
   } catch (e) {
     return res.status(400).render("pages/error",{message: e});
@@ -115,6 +116,47 @@ router.get("/jobs/recruiters/id/:id", async (req, res) => {
     // write a function here to render page heere
     return res.status(400).render("pages/error",{message: e});
 
+  }
+});
+
+router.get("/jobs/recruiters/id/:id", async (req, res) => {
+  try {
+    if(!req.session.user || req.session.user.type != 'recruiter'){
+      //alert("PLEASE LOGIN FIRST");
+      return res.render('pages/home',{errorclass: true});
+    }
+    const result = await jobData.getJobsById(req.params.id);
+    const jobId = req.params.id;
+    console.log(jobId);
+    return res.render("pages/recJob", { data: result, jobId: jobId });
+  } catch (e) {
+    // write a function here to render page heere
+    return res.status(400).render("pages/error",{message: e});
+
+  }
+});
+
+// To sort the jobs by  post date
+
+router.get("/jobs/sort", async (req, res) => {
+  try {
+    const result = await jobData.sortByDate();
+    console.log(result);
+    if(result){
+      if(result.length == 0 ){
+        return res.render("pages/home",{nullJob:true, message:"No Jobs posted yet"});
+      }
+    }
+    result.reverse();
+    for (let i = 0; i < result.length; i++) {
+      result[i].unique = String(result[i]._id);
+      result[i].postDateString = String(result[i].postDate);
+    }
+    //console.log(result);
+
+    return res.render("pages/home", { jobFound:true,jobs: result });
+  } catch (e) {
+    return res.status(500).json({ error: "Internal Server Error" });
   }
 });
 

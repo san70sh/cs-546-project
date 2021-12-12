@@ -9,6 +9,7 @@
 
 {{#if jobFound}}
 <input type="text" id="mySearchterm" onkeyup="filter(this);" placeholder="Search for Jobs.." title="Type in a term">
+<button onclick="window.location.href='/jobs/sort'">Recent Jobs</button>
 <ul id = 'myJobList' class = 'tilesWrap'>
 {{#each jobs}}
     <li>
@@ -17,6 +18,7 @@
 		  <p>
 			Type : {{type}} <br>
       Location : {{city}},{{state}}<br>
+      Post Date: {{postDateString}}<br>
       Job Summary : {{details.summary}}<br>
 		</p>
 		<button onclick="window.location.href='/jobs/id/{{unique}}'">Read more</button>

@@ -145,7 +145,7 @@ async function createJob(recuriterId, recruiterEmail, jobDetails){
         contact : recruiterEmail.trim().toLowerCase(),
         city : jobDetails.city.trim().toLowerCase(),
         state : jobDetails.state.trim().toLowerCase(),
-        // postDate : jobDetails.postDate,
+        postDate : new Date(),
         // expiryDate: jobDetails.expiryDate,
         details : jobDetails.details,
         payRange : jobDetails.payRange,
@@ -376,16 +376,18 @@ async function getJobByCity(city){
 
 // function for sorting the db data by date
 
-async function sortByDate(res){
+async function sortByDate(){
 
     // this will sort the jobs according to the date;
     // need to check this function later again
-    //const res = await getAllJobs();
+    const res = await getAllJobs();
 
     res.sort(function (a, b) {
 	
         return a.postDate - b.postDate
     });
+
+    console.log(res);
 
     return res;
 
@@ -401,6 +403,7 @@ module.exports = {
     deleteJob,
     getJobByTitle,
     getJobByState,
-    getJobByCity
+    getJobByCity,
+    sortByDate
 
 }  
