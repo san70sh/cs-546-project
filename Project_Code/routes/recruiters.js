@@ -127,7 +127,7 @@ router.get('/accept/:jobId/:appId', async (req, res) => {
         console.log(jobId);
         console.log(applicantId);
         // if(!req.session.user) {
-        //     return res.status(403).render('partials/loginform', {, message: "Unauthorized Access", err: true})
+        //     return res.status(403).render('pages/loginform', {, message: "Unauthorized Access", err: true})
         // } else {
             if(!jobId) return res.status(400).render('pages/recruiterProfile', {message: "Invalid ID", genErr: true});
             if(ObjectId.isValid(recruiterId) && ObjectId.isValid(applicantId) && ObjectId.isValid(jobId)) {
@@ -140,7 +140,7 @@ router.get('/accept/:jobId/:appId', async (req, res) => {
         // }
     } catch (e) {
         console.log(e);
-        return res.status(e.status).render('partials/loginform', {message: e.message, err: true});
+        return res.status(e.status).render('pages/loginform', {message: e.message, err: true});
     }
 });
 
@@ -158,7 +158,7 @@ router.post('/reject/:jobId/:appId', async (req, res) => {
             }
         }
         // if(!req.session.user) {
-        //     return res.status(403).render('partials/loginform', {, message: "Unauthorized Access", err: true})
+        //     return res.status(403).render('pages/loginform', {, message: "Unauthorized Access", err: true})
         // } else {
         let recruiterId = req.session.user.id;
         let applicantId = req.params.appId;
@@ -166,7 +166,7 @@ router.post('/reject/:jobId/:appId', async (req, res) => {
         console.log(jobId);
         console.log(applicantId);
         // if(!req.session.user) {
-        //     return res.status(403).render('partials/loginform', {, message: "Unauthorized Access", err: true})
+        //     return res.status(403).render('pages/loginform', {, message: "Unauthorized Access", err: true})
         // } else {
         if(!jobId) return res.status(400).render('pages/recruiterProfile', {message: "Invalid ID", genErr: true});
         if(ObjectId.isValid(recruiterId) && ObjectId.isValid(applicantId) && ObjectId.isValid(jobId)) {
@@ -178,7 +178,7 @@ router.post('/reject/:jobId/:appId', async (req, res) => {
         }
         // }
     } catch (e) {
-        return res.status(e.status).render('partials/loginform', {message: e.message, err: true});
+        return res.status(e.status).render('pages/loginform', {message: e.message, err: true});
     }
 });
 

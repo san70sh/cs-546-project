@@ -95,7 +95,7 @@ router.get("/jobs/state/:state", async (req, res) => {
 router.get('/logout', (req, res) => {
   if(req.session.user){
       req.session.destroy((function(err){
-          res.clearCookie('AuthCookie').render('pages/logout');
+          res.clearCookie('AuthCookie').redirect('/');
   
       }));
       return;
