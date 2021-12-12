@@ -230,7 +230,7 @@ const addResume = async (userId, fileId) => {
   return await get(userId.toString());
 };
 
-const getResume = async (userId, jobId)=>{
+const getResume = async (userId, jobId) => {
   if (!ObjectId.isValid(jobId) && typeof jobId !== "string") {
     throw new CustomError(400, "Invalid jobId");
   } else {
@@ -249,17 +249,17 @@ const getResume = async (userId, jobId)=>{
 
   const jobs = thisUser.jobs;
   let fileFound = undefined;
-  jobs.forEach(ele=>{
-    if(ele._id.toString()===jobId.toString()){
+  jobs.forEach((ele) => {
+    if (ele._id.toString() === jobId.toString()) {
       fileFound = ele.resume;
     }
-  })
-  if(!fileFound)
-  {throw new CustomError(400, "resume not found")}
-  else{
+  });
+  if (!fileFound) {
+    throw new CustomError(400, "resume not found");
+  } else {
     return fileFound;
   }
-}
+};
 
 const removeResume = async (userId, fileId) => {
   if (!ObjectId.isValid(fileId) && typeof fileId !== "string") {
