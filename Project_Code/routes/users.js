@@ -577,6 +577,15 @@ router.post("/cancel/:id", async (req, res) => {
       return res.redirect("/logout");
     }
   }
+
+  try {
+    const cancelRes = await users.cancel(req.params.id, req.session.user.id);
+  } catch (e) {
+    return res.json({ message: e.message });
+  }
+
+  let message = "You have successfully cancel the application for the job";
+  return res.json({ message });
 });
 
 // router.delete("/apply", async (req, res) => {

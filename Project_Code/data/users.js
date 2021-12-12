@@ -889,16 +889,17 @@ const cancel = async (jobId, userId) => {
   } else {
     jobId = ObjectId(jobId);
   }
-  //** */ const usersCollection = await users();
-  // const insertInfo = await usersCollection.updateOne(
-  //   { _id: userId },
-  //   { $pull: { jobs: { _id: jobId } } }
-  // );
-  // if (insertInfo.modifiedCount === 0)
-  //   throw new CustomError(
-  //     400,
-  //     "Could not add the profile, the job is already exists or user doesn't exist"
-  //** */   );
+
+  const usersCollection = await users();
+  const insertInfo1 = await usersCollection.updateOne(
+    { _id: userId },
+    { $pull: { jobs: { _id: jobId } } }
+  );
+  if (insertInfo1.modifiedCount === 0)
+    throw new CustomError(
+      400,
+      "Could not add the profile, the job is already exists or user doesn't exist"
+    );
 
   // remove applicant from recruiter's collection
   const jobCol = await jobs();
@@ -907,27 +908,26 @@ const cancel = async (jobId, userId) => {
   const recruiterCol = await recruiters();
   const tmpInfo = await recruiterCol.findOne(
     { _id: recruiterId },
-    { _id: 0,'jobs':  { $elemMatch: { job_id: jobId } }}
+    { _id: 0, jobs: { $elemMatch: { job_id: jobId } } }
   );
   if (!tmpInfo) {
-    throw new CustomError(
-      400,
-      "the recruiter does not exists"
-    );
+    throw new CustomError(400, "the recruiter does not exists");
   }
   let jobstmp = tmpInfo.jobs;
-  let tmp1 = jobstmp.filter(ele => ele.job_id.toString() !== jobId.toString());//ele.appId.toString() === userId.toString();
-  let tmp2 = jobstmp.find(ele => ele.job_id.toString() === jobId.toString());
-  let tmp3 = tmp2.applicants.filter(ele => ele.appId.toString() !== userId.toString());
+  let tmp1 = jobstmp.filter(
+    (ele) => ele.job_id.toString() !== jobId.toString()
+  ); //ele.appId.toString() === userId.toString();
+  let tmp2 = jobstmp.find((ele) => ele.job_id.toString() === jobId.toString());
+  let tmp3 = tmp2.applicants.filter(
+    (ele) => ele.appId.toString() !== userId.toString()
+  );
 
-  tmp1.push({job_id:tmp2.job_id,
-    applicants:tmp3
-  })
+  tmp1.push({ job_id: tmp2.job_id, applicants: tmp3 });
   // console.log(tmp1, jobstmp)
   const insertInfo = await recruiterCol.updateOne(
     { _id: recruiterId },
-    { "$set": {"jobs" : tmp1}}
-  )
+    { $set: { jobs: tmp1 } }
+  );
   if (insertInfo.modifiedCount === 0) {
     throw new CustomError(400, "Could not apply cancel job for now");
   }
