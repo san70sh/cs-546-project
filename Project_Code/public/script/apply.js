@@ -19,8 +19,8 @@ function cancel(jobId) {
       url: `/users/cancel/${jobId}`,
     };
     $.ajax(cancelReq).then((res) => {
-      alert(res.message + ", redirect to job page...");
-      window.location.href = `/jobs/id/${jobId}`;
+      alert(res.message);
+      location.reload(true);
     });
   }
 }
