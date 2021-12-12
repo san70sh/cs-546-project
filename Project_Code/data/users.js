@@ -889,31 +889,49 @@ const cancel = async (jobId, userId) => {
   } else {
     jobId = ObjectId(jobId);
   }
-  const usersCollection = await users();
-  const insertInfo = await usersCollection.updateOne(
-    { _id: userId },
-    { $pull: { jobs: { _id: jobId } } }
-  );
-  if (insertInfo.modifiedCount === 0)
-    throw new CustomError(
-      400,
-      "Could not add the profile, the job is already exists or user doesn't exist"
-    );
+  //** */ const usersCollection = await users();
+  // const insertInfo = await usersCollection.updateOne(
+  //   { _id: userId },
+  //   { $pull: { jobs: { _id: jobId } } }
+  // );
+  // if (insertInfo.modifiedCount === 0)
+  //   throw new CustomError(
+  //     400,
+  //     "Could not add the profile, the job is already exists or user doesn't exist"
+  //** */   );
 
   // remove applicant from recruiter's collection
   const jobCol = await jobs();
-  const thisJob = jobCol.findOne({ _id: jobId });
+  const thisJob = await jobCol.findOne({ _id: jobId });
   const recruiterId = thisJob.poster;
   const recruiterCol = await recruiters();
-  const deleteInfo = await recruiterCol.updateOne(
+  const tmpInfo = await recruiterCol.findOne(
     { _id: recruiterId },
-    { $pull: { $elemMatch: { applicants: { appId: userId } } } }
+    { _id: 0,'jobs':  { $elemMatch: { job_id: jobId } }}
   );
-  console.log(deleteInfo);
+  if (!tmpInfo) {
+    throw new CustomError(
+      400,
+      "the recruiter does not exists"
+    );
+  }
+  let jobstmp = tmpInfo.jobs;
+  let tmp1 = jobstmp.filter(ele => ele.job_id.toString() !== jobId.toString());//ele.appId.toString() === userId.toString();
+  let tmp2 = jobstmp.find(ele => ele.job_id.toString() === jobId.toString());
+  let tmp3 = tmp2.applicants.filter(ele => ele.appId.toString() !== userId.toString());
+
+  tmp1.push({job_id:tmp2.job_id,
+    applicants:tmp3
+  })
+  // console.log(tmp1, jobstmp)
+  const insertInfo = await recruiterCol.updateOne(
+    { _id: recruiterId },
+    { "$set": {"jobs" : tmp1}}
+  )
 };
 
 const test = async () => {
-  await cancel("61b56ddcde0211eefbd3c846", "61b56e3984223f61f693d6d8");
+  await cancel("61b58a3b97fa9042b2c36df9", "61b58a3b97fa9042b2c36dfb");
 };
 test();
 
