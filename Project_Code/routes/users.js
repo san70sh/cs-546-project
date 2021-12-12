@@ -816,11 +816,20 @@ router.post("/ex", async (req, res) => {
       exErr: true,
     });
   }
+  let today = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
+  if (new Date(experience.startDate) > today || new Date(experience.endDate) > today) {
+    return res.status(400).render("pages/applicanteditprofile", {
+      title: "experience",
+      message: "start date and end date can't be later than today",
+      exErr: true,
+    });
+  }
   try {
     let output = await users.addEx(experience, userId);
     console.log(output);
     return res.json(output);
   } catch (e) {
+    console.log(e)
     return res.status(e.status).render("pages/applicanteditprofile", {
       title: "experience",
       message: e.message,
@@ -953,6 +962,14 @@ router.post("/edu", async (req, res) => {
     return res.status(400).render("pages/applicanteditprofile", {
       title: "education",
       message: "inValid start date and end date",
+      eduErr: true,
+    });
+  }
+  let today = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
+  if (new Date(education.startDate) > today || new Date(education.endDate) > today) {
+    return res.status(400).render("pages/applicanteditprofile", {
+      title: "education",
+      message: "start date and end date can't be later than today",
       eduErr: true,
     });
   }
