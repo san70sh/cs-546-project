@@ -286,20 +286,17 @@ router.post("/signup", async (req, res) => {
   let { email, password, firstName, lastName, phone } = req.body;
   let re = /[A-Z0-9._-]+@[A-Z0-9.-]+\.[A-Z]{2,}/im;
   if (email == "" || email == undefined)
-    return res.status(400).render("pages/applicantSignup", {
-      title: "Sign Up/Register",
+    return res.status(400).send({
       message: "Please enter your email.",
       emailerr: true,
     });
   if (email.length < 6)
-    return res.status(400).render("pages/applicantSignup", {
-      title: "Sign Up/Register",
+    return res.status(400).send({
       message: "The email is too short.",
       emailerr: true,
     });
   if (!re.test(email))
-    return res.status(400).render("pages/applicantSignup", {
-      title: "Sign Up/Register",
+    return res.status(400).send({
       message: `${email} is not a valid email.`,
       emailerr: true,
     });
@@ -308,20 +305,17 @@ router.post("/signup", async (req, res) => {
   //password validation
   let re2 = /\s/i;
   if (!password)
-    return res.status(400).render("pages/applicantSignup", {
-      title: "Sign Up/Register",
+    return res.status(400).send({
       message: `Please enter your password`,
       pwderr: true,
     });
   if (re2.test(password))
-    return res.status(400).render("pages/applicantSignup", {
-      title: "Sign Up/Register",
+    return res.status(400).send({
       message: "Spaces are not allowed in passwords.",
       pwderr: true,
     });
   if (password.length < 6)
-    return res.status(400).render("pages/applicantSignup", {
-      title: "Sign Up/Register",
+    return res.status(400).send({
       message: "Password is too short.",
       pwderr: true,
     });
@@ -331,26 +325,22 @@ router.post("/signup", async (req, res) => {
   firstName = firstName.trim();
   lastName = lastName.trim();
   if (firstName == "" || firstName == undefined)
-    return res.status(400).render("pages/applicantSignup", {
-      title: "Sign Up/Register",
+    return res.status(400).send({
       message: "Please enter your first name.",
       fnerr: true,
     });
   if (!re3.test(firstName))
-    return res.status(400).render("pages/applicantSignup", {
-      title: "Sign Up/Register",
+    return res.status(400).send({
       message: "Your name should not contain special characters.",
       fnerr: true,
     });
   if (lastName == "" || lastName == undefined)
-    return res.status(400).render("pages/applicantSignup", {
-      title: "Sign Up/Register",
+    return res.status(400).send({
       message: "Please enter your last name.",
       lnerr: true,
     });
   if (!re3.test(lastName))
-    return res.status(400).render("pages/applicantSignup", {
-      title: "Sign Up/Register",
+    return res.status(400).send({
       message: "Your name should not contain special characters.",
       lnerr: true,
     });
@@ -359,20 +349,17 @@ router.post("/signup", async (req, res) => {
   let re4 = /[0-9]{10}/;
   phone = phone.trim();
   if (phone == "" || phone == undefined)
-    return res.status(400).render("pages/applicantSignup", {
-      title: "Sign Up/Register",
+    return res.status(400).send({
       message: "Please enter your phone number.",
       pherr: true,
     });
   if (phone.length != 10)
-    return res.status(400).render("pages/applicantSignup", {
-      title: "Sign Up/Register",
+    return res.status(400).send({
       message: "Invalid phone number.",
       pherr: true,
     });
   if (!re4.test(phone))
-    return res.status(400).render("pages/applicantSignup", {
-      title: "Sign Up/Register",
+    return res.status(400).send({
       message: "Invalid phone number.",
       pherr: true,
     });

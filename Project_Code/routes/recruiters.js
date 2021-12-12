@@ -47,15 +47,15 @@ router.post('/login', async (req, res) => {
         //xss(req.body);
         let {email, password} = req.body;
         let re = /[A-Z0-9._-]+@[A-Z0-9.-]+\.[A-Z]{2,}/im
-        if(email == "" || email == undefined) return res.status(400).render('pages/recruiterlogin', {message: "Please enter your email.", emailerr: true});
-        if(email.length < 6) return res.status(400).render('pages/recruiterlogin', {message: "The email is too short.", emailerr: true});
-        if(!re.test(email)) return res.status(400).render('pages/recruiterlogin', {message: `${email} is not a valid email.`, emailerr: true});
+        if(email == "" || email == undefined) return res.status(400).send({message: "Please enter your email.", emailerr: true});
+        if(email.length < 6) return res.status(400).send({message: "The email is too short.", emailerr: true});
+        if(!re.test(email)) return res.status(400).send({message: `${email} is not a valid email.`, emailerr: true});
 
         //password validation
         let re2 = /\s/i
         if(!password) throw `Please enter your password`;
-        if(re2.test(password)) return res.status(400).render('pages/recruiterlogin', {message: "Spaces are not allowed in passwords.", pwderr: true});
-        if(password.length < 6) return res.status(400).render('pages/recruiterlogin', {message: "Password is too short.", pwderr: true});
+        if(re2.test(password)) return res.status(400).send({message: "Spaces are not allowed in passwords.", pwderr: true});
+        if(password.length < 6) return res.status(400).send({message: "Password is too short.", pwderr: true});
 
         try {
             let output = await recruiterDat.recruiterCheck(email, password);
@@ -68,7 +68,7 @@ router.post('/login', async (req, res) => {
                 return res.redirect('/recruiters/');
             }
         } catch (e) {
-            return res.render('pages/recruiterlogin', {message: e.message, mainerr: true});
+            return res.status(400).send({message: e.message, mainerr: true});
         }
     // }
 });
@@ -188,32 +188,32 @@ router.post('/signup', async (req, res) => {
         let {email, password, firstName, lastName, phone} = req.body;
         //Email validation
         let re = /[A-Z0-9._-]+@[A-Z0-9.-]+\.[A-Z]{2,}/im
-        if(email == "" || email == undefined) return res.status(400).render('pages/recruiterSignup', { message: "Please enter your email.", emailerr: true});
-        if(email.length < 6) return res.status(400).render('pages/recruiterSignup', { message: "The email is too short.", emailerr: true});
-        if(!re.test(email)) return res.status(400).render('pages/recruiterSignup', { message: `${email} is not a valid email.`, emailerr: true});
+        if(email == "" || email == undefined) return res.status(400).send({ message: "Please enter your email.", emailerr: true});
+        if(email.length < 6) return res.status(400).send({ message: "The email is too short.", emailerr: true});
+        if(!re.test(email)) return res.status(400).send({ message: `${email} is not a valid email.`, emailerr: true});
         email = email.toLowerCase();
 
         //password validation
         let re2 = /\s/i
-        if(!password) return res.status(400).render('pages/recruiterSignup',{ message: `Please enter your password`, pwderr: true});
-        if(re2.test(password)) return res.status(400).render('pages/recruiterSignup', { message: "Spaces are not allowed in passwords.", pwderr: true});
-        if(password.length < 6) return res.status(400).render('pages/recruiterSignup', { message: "Password is too short.", pwderr: true});
+        if(!password) return res.status(400).send({ message: `Please enter your password`, pwderr: true});
+        if(re2.test(password)) return res.status(400).send({ message: "Spaces are not allowed in passwords.", pwderr: true});
+        if(password.length < 6) return res.status(400).send({ message: "Password is too short.", pwderr: true});
 
         //name validation
         let re3 = /[A-Z]/i
         firstName = firstName.trim();
         lastName = lastName.trim();
-        if(firstName == "" || firstName == undefined) return res.status(400).render('pages/recruiterSignup', { message: "Please enter your first name.", fnerr: true});
-        if(!re3.test(firstName)) return res.status(400).render('pages/recruiterSignup', { message: "Your name should not contain special characters.", fnerr: true});
-        if(lastName == "" || lastName == undefined) return res.status(400).render('pages/recruiterSignup', { message: "Please enter your last name.", lnerr: true});
-        if(!re3.test(lastName)) return res.status(400).render('pages/recruiterSignup', { message: "Your name should not contain special characters.", lnerr: true});
+        if(firstName == "" || firstName == undefined) return res.status(400).send({ message: "Please enter your first name.", fnerr: true});
+        if(!re3.test(firstName)) return res.status(400).send({ message: "Your name should not contain special characters.", fnerr: true});
+        if(lastName == "" || lastName == undefined) return res.status(400).send({ message: "Please enter your last name.", lnerr: true});
+        if(!re3.test(lastName)) return res.status(400).send({ message: "Your name should not contain special characters.", lnerr: true});
 
         //phone validation
         let re4 = /[0-9]{10}/
         phone = phone.trim();
-        if(phone == "" || phone == undefined) return res.status(400).render('pages/recruiterSignup', { message: "Please enter your phone number.", pherr: true});
-        if(phone.length != 10) return res.status(400).render('pages/recruiterSignup', { message: "Invalid phone number.", pherr: true});
-        if(!re4.test(phone)) return res.status(400).render('pages/recruiterSignup', { message: "Invalid phone number.", pherr: true});
+        if(phone == "" || phone == undefined) return res.status(400).send({ message: "Please enter your phone number.", pherr: true});
+        if(phone.length != 10) return res.status(400).send({ message: "Invalid phone number.", pherr: true});
+        if(!re4.test(phone)) return res.status(400).send({ message: "Invalid phone number.", pherr: true});
 
         try {
             let recruiter = await recruiterDat.createRecruiter(email, password, firstName, lastName, phone);
@@ -228,7 +228,7 @@ router.post('/signup', async (req, res) => {
                 return res.redirect('/recruiters');
             }
         } catch (e) {
-            return res.status(e.status).render('pages/recruiterSignup', { message: e.message, mainerr: true});
+            return res.status(e.status).send({ message: e.message, mainerr: true});
         }
     // }
 });
