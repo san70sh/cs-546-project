@@ -5,6 +5,11 @@ const recruiterDat = require("../data/recruiters");
 const jobDat = require("../data/jobs");
 const usrDat = require("../data/users");
 const xss = require('xss');
+// used for see resume
+const download = require("../data/upload").download;
+const users = require("../data/users");
+
+
 router.get('/login', async (req, res) => {
     
     // $("#reclogin").show("modal");
@@ -67,6 +72,41 @@ router.post('/login', async (req, res) => {
         }
     // }
 });
+
+router.get('/checkResume/:jobId/:appId', async (req, res) => {
+    if(!req.session.user){
+        return res.redirect('/recruiters/login');
+    }
+
+    if(req.session.user){
+        if(req.session.user.type !=='recruiter'){
+            return res.redirect('/recruiters/login');
+        }
+    }
+
+    const fileId = users.getResume(req.params.appId, req.params.jobId);
+
+    try {
+        const downloadStream = await download(fileId);
+        downloadStream.on("data", function (data) {
+          return res.status(200).write(data);
+        });
+    
+        downloadStream.on("error", function (err) {
+        return res.status(404).render('pages/recruiterProfile', {message: "Cannot download the resume!", genErr: true});
+        //   return res
+        //     .status(404)
+        //     .render("/users", { error: "Cannot download the resume!" });
+        });
+    
+        downloadStream.on("end", () => {
+          return res.end();
+        });
+      } catch (e) {
+        return res.status(404).render('pages/recruiterProfile', {message: e, genErr: true});
+        // res.render("/users", { error: e });
+      }
+})
 
 router.get('/accept/:jobId/:appId', async (req, res) => {
     try {
