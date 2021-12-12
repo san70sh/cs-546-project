@@ -3,6 +3,7 @@ const newJob = require("./job_gen");
 const bcrypt = require("bcrypt");
 const data = require("../data/index");
 const recFuncs = data.recruiters;
+const userFuncs = data.users;
 const { connectToDb } = require("../config/mongoConnection");
 const { users, recruiters, jobs } = require("../config/mongoCollections");
 async function dropAll() {
@@ -14,6 +15,35 @@ async function dropAll() {
   }
 }
 
+async function seedUser(num) {
+  // creat users
+  console.log("--------------------------------------------");
+  console.log("Starting to Create Users...");
+  const ids = [];
+  const login = [];
+  for (let i = 0; i < num; i++) {
+    const { firstName, lastName, password, email, phone } = recs.rec();
+    // console.log(phone);
+    // const hashed = await bcrypt.hash(password, 4);
+    try {
+      var tmp = await userFuncs.create(
+        email,
+        phone,
+        firstName,
+        lastName,
+        password
+      );
+    } catch (e) {
+      console.log(e);
+    }
+    ids.push(tmp);
+    // console.log(tmp);
+    // console.log(ids);
+    login.push({ email: email, password: password });
+    console.log(`Inserting Users: ${i}/${num - 1}`);
+  }
+}
+
 async function seedRec(num, numOfJobs) {
   // creat recruiters
   console.log("Starting to Create Recruiters...");
@@ -22,11 +52,11 @@ async function seedRec(num, numOfJobs) {
   for (let i = 0; i < num; i++) {
     const { firstName, lastName, password, email, phone } = recs.rec();
     // console.log(phone);
-    const hashed = await bcrypt.hash(password, 4);
+    // const hashed = await bcrypt.hash(password, 4);
     try {
       var tmp = await recFuncs.createRecruiter(
         email,
-        hashed,
+        password,
         firstName,
         lastName,
         phone
@@ -69,4 +99,5 @@ async function seedRec(num, numOfJobs) {
 }
 
 dropAll();
-seedRec(3, 4);
+seedUser(10);
+seedRec(10, 4);
