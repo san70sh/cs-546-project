@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" translate="no">
 <head>
-    <meta charset="utf-8" content="notranslate">
+    <meta charset="utf-8">
     <title>JobHunt!</title>
     <link rel="stylesheet" href="/public/css/site.css">
     <!-- Bootstrap CSS only -->
@@ -32,11 +32,11 @@
             <div class="collapse navbar-collapse" id="navmenu">
                 {{!-- {{#if unauthenticated}} --}}
                 <ul class="navbar-nav ms-auto" id = "sessionactive">
-                    <li class="nav-item" id = 'RecLoginmain' >
-                        <a href="/recruiters/login" role="button" class="btn btn-outline-light text-light nav-link d-md-table m-2" id="recruiterLoginBtn">Login as Recruiter</a>
+                    <li class="nav-item" id = 'recLoginmain' >
+                        <button type="button" class="btn btn-outline-light text-light nav-link d-md-table m-2" id="recruiterLoginBtn" data-bs-toggle="modal" data-bs-target="#recruiterLogin">Login as Recruiter</button>
                     </li>
                     <li class="nav-item" id="userLoginmain">
-                        <a href="/users/login" role="button" class="btn btn-secondary text-light nav-link d-md-table m-2" id="applicantLoginBtn" >Login as Applicant</a> 
+                        <a href="/users/login" role="button" class="btn btn-secondary text-light nav-link d-md-table m-2" id="applicantLoginBtn" data-bs-toggle="modal" data-bs-target="#applicantLogin">Login as Applicant</a> 
                     </li>
                 </ul>
                 <ul class="navbar-nav ms-auto" id = "logout">
@@ -47,7 +47,7 @@
                         <a href="/users/" role="button" class="btn btn-outline-light text-light nav-link d-md-table m-2" id="userProfileBtn">My Profile</a>
                     </li>
                     <li class="nav-item" id = 'logoutmain' >
-                        <a href="/logout" role="button" class="btn btn-secondary text-light nav-link d-md-table m-2" id="applicantLoginBtn" >Logout</a> 
+                        <a href="/logout" role="button" class="btn btn-secondary text-light nav-link d-md-table m-2" id="logoutBtn" >Logout</a> 
                     </li>
                 </ul>
                 {{!-- {{else}}
