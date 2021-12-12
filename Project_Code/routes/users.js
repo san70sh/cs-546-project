@@ -1117,6 +1117,7 @@ router.get("/la", async (req, res) => {
 
 router.post("/la", async (req, res) => {
   let la = req.body.tmp;
+  console.log(la)
   if (!req.session.user) {
     return res.redirect("/users/login");
   }
