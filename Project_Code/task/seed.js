@@ -1,10 +1,18 @@
 const recs = require("./recruiter_gen");
 const newJob = require("./job_gen");
-const bcrypt = require("bcrypt");
+const fs = require("fs").promises;
 const data = require("../data/index");
 const recFuncs = data.recruiters;
+const userFuncs = data.users;
 const { connectToDb } = require("../config/mongoConnection");
-const { users, recruiters, jobs } = require("../config/mongoCollections");
+const { jobs } = require("../config/mongoCollections");
+async function* asyncGenerator(num) {
+  let i = 0;
+  while (i < num) {
+    yield i++;
+  }
+}
+
 async function dropAll() {
   const db = await connectToDb();
   try {
@@ -13,20 +21,57 @@ async function dropAll() {
     console.log(e);
   }
 }
+async function seedUser(num) {
+  // creat users
+  console.log("--------------------------------------------");
+  console.log("Starting to Create Users...");
+  const ids = [];
+  const login = [];
+  for (let i = 0; i < num; i++) {
+    const { firstName, lastName, password, email, phone } = recs.rec();
+    // console.log(phone);
+    // const hashed = await bcrypt.hash(password, 4);
+    try {
+      var tmp = await userFuncs.create(
+        email,
+        phone,
+        firstName,
+        lastName,
+        password
+      );
+    } catch (e) {
+      console.log(e);
+    }
+    ids.push(tmp);
+    // console.log(tmp);
+    // console.log(ids);
+    login.push({ email: email, password: password });
+    console.log(`Inserting Users: ${i}/${num - 1}`);
+  }
+  console.log("All users have been created!");
+  // output to json
+  let userLogin = JSON.stringify(login);
+  await fs.writeFile("./task/user.json", userLogin, "utf8");
+  return ids;
+}
 
-async function seedRec(num, numOfJobs) {
+async function seedRec(num, numOfUsers, numOfJobs) {
+  // create users
+  const userIds = await seedUser(numOfUsers);
+
   // creat recruiters
+  console.log("--------------------------------------------");
   console.log("Starting to Create Recruiters...");
   const ids = [];
   const login = [];
   for (let i = 0; i < num; i++) {
     const { firstName, lastName, password, email, phone } = recs.rec();
     // console.log(phone);
-    const hashed = await bcrypt.hash(password, 4);
+    // const hashed = await bcrypt.hash(password, 4);
     try {
       var tmp = await recFuncs.createRecruiter(
         email,
-        hashed,
+        password,
         firstName,
         lastName,
         phone
@@ -66,7 +111,29 @@ async function seedRec(num, numOfJobs) {
       }
     }
   }
+  // output to json
+  let RecLogin = JSON.stringify(login);
+  await fs.writeFile("./task/recruiter.json", RecLogin, "utf8");
+
+  // apply for jobs
+  console.log("--------------------------------------------");
+  console.log("Now users are applying for jobs...");
+  const jobCol = await jobs();
+  const allJob = await jobCol.find({}).toArray();
+  const assignApply = [];
+  for ({ _id: id } of allJob) {
+    let numOfApps = Math.floor(Math.random() * userIds.length);
+    for (let i = 0; i < numOfApps; i++) {
+      // console.log(userIds[i]);
+      try {
+        await userFuncs.auxApply(id.toString(), userIds[i].toString());
+      } catch (e) {
+        console.log(e);
+      }
+    }
+  }
 }
 
 dropAll();
-seedRec(3, 4);
+// seedUser(5);
+seedRec(3, 5, 4);
