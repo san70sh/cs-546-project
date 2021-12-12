@@ -372,10 +372,9 @@ router.post("/signup", async (req, res) => {
       password
     );
     req.session.user = { email: email, type: "user", id: userId };
-    console.log(req.session.user);
     return res.redirect(`/users/`);
   } catch (e) {
-    return res.status(e.status).render("pages/applicantSignup", {
+    return res.status(e.status).send({
       title: "Sign Up/Register",
       message: e.message,
       mainerr: true,

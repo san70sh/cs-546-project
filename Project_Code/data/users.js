@@ -474,7 +474,7 @@ const create = async (email, phone, firstName, lastName, password) => {
   //   throw new CustomError(400, "Profile must be array");
   // }
   if ((await checkDuplicateP(phone)) || (await checkDuplicateE(email))) {
-    throw new CustomError(400, "user already exists");
+    throw new CustomError(400, "phone number or email has been used, please try another one");
   }
   const jobs = [];
   const resume = [];
