@@ -567,8 +567,7 @@ router.post("/apply/:id", async (req, res) => {
   // console.log(errors);
 });
 
-router.delete("/apply", async (req, res) => {
-  // common session code all of your private routes
+router.post("/cancel/:id", async (req, res) => {
   if (!req.session.user) {
     return res.redirect("/users/login");
   }
@@ -578,58 +577,71 @@ router.delete("/apply", async (req, res) => {
       return res.redirect("/logout");
     }
   }
-
-  let jobId = req.body.jobId;
-  let userId = req.session.user.id;
-  if (!ObjectId.isValid(jobId) || !ObjectId.isValid(userId)) {
-    return res.status(400).render("pages/error", {
-      title: "apply",
-      message: "invalid id",
-      err: true,
-    });
-  }
-  try {
-    let output = await users.cancel(jobId, userId);
-    return res.json(output);
-  } catch (e) {
-    return res
-      .status(e.status)
-      .render("pages/error", { title: "Favor", message: e.message, err: true });
-  }
 });
 
-router.get("/apply/:id", async (req, res) => {
-  // common session code all of your private routes
-  if (!req.session.user) {
-    return res.redirect("/users/login");
-  }
+// router.delete("/apply", async (req, res) => {
+//   // common session code all of your private routes
+//   if (!req.session.user) {
+//     return res.redirect("/users/login");
+//   }
 
-  if (req.session.user) {
-    if (req.session.user.type !== "user") {
-      return res.redirect("/logout");
-    }
-  }
+//   if (req.session.user) {
+//     if (req.session.user.type !== "user") {
+//       return res.redirect("/logout");
+//     }
+//   }
 
-  let userId = req.session.user.id;
-  let jobId = req.params.jobId;
-  if (!ObjectId.isValid(jobId) || !ObjectId.isValid(userId)) {
-    return res.status(400).render("pages/error", {
-      title: "apply",
-      message: "invalid id",
-      err: true,
-    });
-  }
-  try {
-    let output = await users.track(jobId, userId);
-    return res.json(output);
-  } catch (e) {
-    return res.status(e.status).render("pages/error", {
-      title: "Favor",
-      message: e.message,
-      error: true,
-    });
-  }
-});
+//   let jobId = req.body.jobId;
+//   let userId = req.session.user.id;
+//   if (!ObjectId.isValid(jobId) || !ObjectId.isValid(userId)) {
+//     return res.status(400).render("pages/error", {
+//       title: "apply",
+//       message: "invalid id",
+//       err: true,
+//     });
+//   }
+//   try {
+//     let output = await users.cancel(jobId, userId);
+//     return res.json(output);
+//   } catch (e) {
+//     return res
+//       .status(e.status)
+//       .render("pages/error", { title: "Favor", message: e.message, err: true });
+//   }
+// });
+
+// router.get("/apply/:id", async (req, res) => {
+//   // common session code all of your private routes
+//   if (!req.session.user) {
+//     return res.redirect("/users/login");
+//   }
+
+//   if (req.session.user) {
+//     if (req.session.user.type !== "user") {
+//       return res.redirect("/logout");
+//     }
+//   }
+
+//   let userId = req.session.user.id;
+//   let jobId = req.params.jobId;
+//   if (!ObjectId.isValid(jobId) || !ObjectId.isValid(userId)) {
+//     return res.status(400).render("pages/error", {
+//       title: "apply",
+//       message: "invalid id",
+//       err: true,
+//     });
+//   }
+//   try {
+//     let output = await users.track(jobId, userId);
+//     return res.json(output);
+//   } catch (e) {
+//     return res.status(e.status).render("pages/error", {
+//       title: "Favor",
+//       message: e.message,
+//       error: true,
+//     });
+//   }
+// });
 
 router.get("/apply", async (req, res) => {
   // common session code all of your private routes
@@ -637,30 +649,39 @@ router.get("/apply", async (req, res) => {
     return res.redirect("/users/login");
   }
 
-  // common session code all of your private routes
-  if (!req.session.user) {
-    return res.redirect("/logout");
-  }
-
   if (req.session.user) {
     if (req.session.user.type !== "user") {
-      return res.redirect("/users/login");
+      return res.redirect("/logout");
     }
   }
+
+  //get all favor
   let userId = req.session.user.id;
   if (!ObjectId.isValid(userId)) {
-    return res.status(400).render("pages/error", {
-      title: "apply",
-      message: "invalid id",
-      err: true,
+    res.status(400).render("pages/error", {
+      title: "Favor",
+      message: "inValid userId",
+      error: true,
     });
   }
   try {
-    let output = await users.trackAll(userId);
-    return res.json(output);
+    let output = await users.track(userId);
+    console.log(output);
+    if (output) {
+      if (output.length == 0) {
+        return res.render("pages/appliedJob", {
+          nullJob: true,
+          message: "No Jobs applied yet",
+        });
+      }
+    }
+    for (let i = 0; i < output.length; i++) {
+      output[i].unique = String(output[i]._id);
+    }
+    return res.render("pages/appliedJob", { jobFound: true, jobs: output });
   } catch (e) {
-    return res.status(e.status).render("pages/error", {
-      title: "Favor",
+    return res.status(400).render("pages/error", {
+      title: "applied",
       message: e.message,
       error: true,
     });
