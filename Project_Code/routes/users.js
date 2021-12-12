@@ -552,19 +552,17 @@ router.post("/apply/:id", async (req, res) => {
       req.body.fileId
     );
   } catch (e) {
-    return res.json({ message: e });
+    return res.json({ message: e.message });
   }
 
-  try {
-    await recruiters.addApplicant(req.body.fileId, req.session.user.id);
-  } catch (e) {
-    return res.json({ message: e });
-  }
+  // try {
+  //   await recruiters.addApplicant(req.body.fileId, req.session.user.id);
+  // } catch (e) {
+  //   return res.json({ message: e });
+  // }
 
   let message = "You have successfully applied for the job";
-  res.json({
-    message,
-  });
+  return res.json({ message });
 
   // console.log(errors);
 });
