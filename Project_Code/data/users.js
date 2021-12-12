@@ -484,6 +484,7 @@ const create = async (email, phone, firstName, lastName, password) => {
   const favor = [];
   const hash = await bcrypt.hash(password, saltRounds);
   const usersCollection = await users();
+  email = email.trim().toLowerCase();
   let newUser = {
     email,
     phone,
@@ -1110,6 +1111,8 @@ const checkUser = async (email, password) => {
     throw new CustomError(400, "Either the email or password is invalid");
   }
   let compareToMerlin = false;
+  console.log(password);
+  console.log(tmp.password);
   try {
     compareToMerlin = await bcrypt.compare(password, tmp.password);
   } catch (e) {
@@ -1249,9 +1252,19 @@ const addEx = async (experience, userId) => {
   if (new Date(experience.startDate) > new Date(experience.endDate)) {
     throw new CustomError(400, "Invalid start date and end date");
   }
-  let today = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
-  if (new Date(experience.startDate) > today || new Date(experience.endDate) > today) {
-    throw new CustomError(400, "start date and end date can't be later than today");
+  let today = new Date(
+    new Date().getFullYear(),
+    new Date().getMonth(),
+    new Date().getDate()
+  );
+  if (
+    new Date(experience.startDate) > today ||
+    new Date(experience.endDate) > today
+  ) {
+    throw new CustomError(
+      400,
+      "start date and end date can't be later than today"
+    );
   }
   const usersCollection = await users();
   const insertInfo = await usersCollection.updateOne(
@@ -1365,9 +1378,19 @@ const addEdu = async (education, userId) => {
   if (new Date(education.startDate) > new Date(education.endDate)) {
     throw new CustomError(400, "Invalid start date and end date");
   }
-  let today = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
-  if (new Date(education.startDate) > today || new Date(education.endDate) > today) {
-    throw new CustomError(400, "start date and end date can't be later than today");
+  let today = new Date(
+    new Date().getFullYear(),
+    new Date().getMonth(),
+    new Date().getDate()
+  );
+  if (
+    new Date(education.startDate) > today ||
+    new Date(education.endDate) > today
+  ) {
+    throw new CustomError(
+      400,
+      "start date and end date can't be later than today"
+    );
   }
   const usersCollection = await users();
   const insertInfo = await usersCollection.updateOne(
