@@ -12,12 +12,12 @@
   <p class="search__title">
     Search Jobs by Location, Title ...
   </p>
+  <label for="mySearchterm">Search your Job</label>
   <input type="text" class="search__input" id="mySearchterm" onkeyup="filter(this);" placeholder="Search for Jobs..">
 </div>
 <ul id='myJobList' class='tilesWrap'>
   {{#each jobs}}
   <li>
-    <h2>{{@index}}</h2>
     <h3>{{title}}</h3>
     <p>
       Type : {{type}} <br>
