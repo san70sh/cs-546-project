@@ -1454,7 +1454,6 @@ module.exports = {
   createProfile,
   update,
   remove,
-  apply,
   Favorites,
   getFavourites,
   delFavourites,

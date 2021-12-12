@@ -44,7 +44,7 @@ $(document).ready(function(){
             EmploymentType:&nbsp ${ele.employmentType},
             StartDate:&nbsp${ele.startDate},
             EndDate:&nbsp${ele.endDate}
-            &nbsp&nbsp&nbsp&nbsp<a href = ${ele.companyName}>remove</a>
+            &nbsp&nbsp&nbsp&nbsp<a href = ${encodeURIComponent(ele.companyName)}>remove</a>
             </li>`
             $('#preEx').append(li);
         });
@@ -61,7 +61,7 @@ $(document).ready(function(){
             degree:&nbsp ${ele.degree},
             StartDate:&nbsp${ele.startDate},
             EndDate:&nbsp${ele.endDate}
-            &nbsp&nbsp&nbsp&nbsp<a href = ${ele.school}>remove</a>
+            &nbsp&nbsp&nbsp&nbsp<a href = ${encodeURIComponent(ele.school)}>remove</a>
             </li>`
             $('#preEdu').append(li);
         });
@@ -74,7 +74,7 @@ $(document).ready(function(){
         $('#preSk').children().remove();
         for(let i = 0; i < responseMessage.length; i++) {
             let li = `<li>${responseMessage[i]}
-            &nbsp&nbsp&nbsp&nbsp<a href = ${responseMessage[i]}>remove</a>
+            &nbsp&nbsp&nbsp&nbsp<a href = ${encodeURIComponent(responseMessage[i])}>remove</a>
             </li>`
             $('#preSk').append(li);
         }
@@ -87,7 +87,7 @@ $(document).ready(function(){
         $('#preLa').children().remove();
         for(let i = 0; i < responseMessage.length; i++) {
             let li = `<li>${responseMessage[i]}
-            &nbsp&nbsp&nbsp&nbsp<a href = ${responseMessage[i]}>remove</a>
+            &nbsp&nbsp&nbsp&nbsp<a href = ${encodeURIComponent(responseMessage[i])}>remove</a>
             </li>`
             $('#preLa').append(li);
         }
@@ -237,7 +237,7 @@ const exToremove = (remove) => {
             url: "/users/ex",
             type: "DELETE",
             data: {
-                    "companyName": obj
+                    "companyName": decodeURIComponent(obj)
                   },
             success: function() {
             location.reload(true);                         
@@ -255,7 +255,7 @@ const eduToremove = (remove) => {
             url: "/users/edu",
             type: "DELETE",
             data: {
-                    "school": obj
+                    "school": decodeURIComponent(obj)
                   },
             success: function() {
             location.reload(true);                         
@@ -273,7 +273,7 @@ const skToremove = (remove) => {
             url: "/users/sk",
             type: "DELETE",
             data: {
-                    "skill": obj
+                    "skill": decodeURIComponent(obj)
                   },
             success: function() {
             location.reload(true);                         
@@ -291,7 +291,7 @@ const laToremove = (remove) => {
             url: "/users/la",
             type: "DELETE",
             data: {
-                    "language": obj
+                    "language": decodeURIComponent(obj)
                   },
             success: function() {
             location.reload(true);                         

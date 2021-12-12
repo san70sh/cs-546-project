@@ -754,13 +754,32 @@ router.post("/ex", async (req, res) => {
       mainerr: true,
     });
   }
+  if (!experience) {
+    return res.status(400).render("pages/applicanteditprofile", {
+      title: "experience",
+      message: "experience is undefined",
+      exErr: true,
+    });
+  }
+  if (typeof experience.title !== "string" || experience.title.trim().length === 0
+    || typeof experience.employmentType !== "string" || experience.employmentType.trim().length === 0
+    || typeof experience.companyName !== "string" || experience.companyName.trim().length === 0
+    || typeof experience.startDate !== "string" || experience.startDate.trim().length === 0
+    || typeof experience.endDate !== "string" || experience.endDate.trim().length === 0
+  ) {
+    return res.status(400).render("pages/applicanteditprofile", {
+      title: "experience",
+      message: "All input must be non-empty string",
+      exErr: true,
+    });
+  }
   if (new Date(experience.startDate) > new Date(experience.endDate)) {
-    res.status(400).render("pages/applicanteditprofile", {
+    return res.status(400).render("pages/applicanteditprofile", {
       title: "experience",
       message: "inValid start date and end date",
       exErr: true,
     });
-    return;
+
   }
   try {
     let output = await users.addEx(experience, userId);
@@ -792,6 +811,21 @@ router.delete("/ex", async (req, res) => {
       title: "experience",
       message: "inValid userId",
       mainerr: true,
+    });
+  }
+  if (!companyName) {
+    return res.status(400).render("pages/applicanteditprofile", {
+      title: "experience",
+      message: "inValid company name",
+      exErr: true,
+    });
+  }
+
+  if (typeof companyName !== 'string' || companyName.trim().length == 0) {
+    return res.status(400).render("pages/applicanteditprofile", {
+      title: "experience",
+      message: "company name can only be non-empty string",
+      exErr: true,
     });
   }
   try {
@@ -855,13 +889,31 @@ router.post("/edu", async (req, res) => {
       mainerr: true,
     });
   }
+  if (!education) {
+    return res.status(400).render("pages/applicanteditprofile", {
+      title: "education",
+      message: "education is undefined",
+      eduErr: true,
+    });
+  }
+  if (typeof education.school !== "string" || education.school.trim().length === 0
+    || typeof education.major !== "string" || education.major.trim().length === 0
+    || typeof education.degree !== "string" || education.degree.trim().length === 0
+    || typeof education.startDate !== "string" || education.startDate.trim().length === 0
+    || typeof education.endDate !== "string" || education.endDate.trim().length === 0
+  ) {
+    return res.status(400).render("pages/applicanteditprofile", {
+      title: "education",
+      message: "All input must be non-empty string",
+      eduErr: true,
+    });
+  }
   if (new Date(education.startDate) > new Date(education.endDate)) {
-    res.status(400).render("pages/applicanteditprofile", {
+    return res.status(400).render("pages/applicanteditprofile", {
       title: "education",
       message: "inValid start date and end date",
       eduErr: true,
     });
-    return;
   }
   try {
     let output = await users.addEdu(education, userId);
@@ -892,6 +944,21 @@ router.delete("/edu", async (req, res) => {
       title: "education",
       message: "inValid userId",
       mainerr: true,
+    });
+  }
+  if (!school) {
+    return res.status(400).render("pages/applicanteditprofile", {
+      title: "education",
+      message: "inValid school name",
+      eduErr: true,
+    });
+  }
+
+  if (typeof school !== 'string' || school.trim().length == 0) {
+    return res.status(400).render("pages/applicanteditprofile", {
+      title: "education",
+      message: "school name can only be non-empty string",
+      eduErr: true,
     });
   }
   try {
@@ -956,6 +1023,20 @@ router.post("/sk", async (req, res) => {
       mainerr: true,
     });
   }
+  if (!sk) {
+    return res.status(400).render("pages/applicanteditprofile", {
+      title: "skills",
+      message: "invalid skills",
+      skErr: true,
+    });
+  }
+  if (typeof sk.skills !== 'string' || sk.skills.trim().length === 0) {
+    return res.status(400).render("pages/applicanteditprofile", {
+      title: "skills",
+      message: "skill must be non-empty string",
+      skErr: true,
+    });
+  }
   try {
     let output = await users.addSk(sk.skills, userId);
     return res.json(output);
@@ -984,6 +1065,13 @@ router.delete("/sk", async (req, res) => {
       title: "Skills",
       message: "inValid userId",
       mainerr: true,
+    });
+  }
+  if (typeof skill !== 'string' || skill.trim().length === 0) {
+    return res.status(400).render("pages/applicanteditprofile", {
+      title: "skill",
+      message: "skill must be non-empty string",
+      skErr: true,
     });
   }
   try {
@@ -1029,6 +1117,7 @@ router.get("/la", async (req, res) => {
 
 router.post("/la", async (req, res) => {
   let la = req.body.tmp;
+  console.log(la)
   if (!req.session.user) {
     return res.redirect("/users/login");
   }
@@ -1044,6 +1133,20 @@ router.post("/la", async (req, res) => {
       title: "languages",
       message: "inValid userId",
       mainerr: true,
+    });
+  }
+  if (!la) {
+    return res.status(400).render("pages/applicanteditprofile", {
+      title: "languages",
+      message: "invalid language",
+      laErr: true,
+    });
+  }
+  if (typeof la.languages !== 'string' || la.languages.trim().length === 0) {
+    return res.status(400).render("pages/applicanteditprofile", {
+      title: "languages",
+      message: "languages must be non-empty string",
+      laErr: true,
     });
   }
   try {
@@ -1075,6 +1178,13 @@ router.delete("/la", async (req, res) => {
       title: "languages",
       message: "inValid userId",
       mainerr: true,
+    });
+  }
+  if (typeof language !== 'string' || language.trim().length === 0) {
+    return res.status(400).render("pages/applicanteditprofile", {
+      title: "languages",
+      message: "languages must be non-empty string",
+      laErr: true,
     });
   }
   try {
