@@ -563,7 +563,7 @@ router.post('/jobs/new', async (req, res) => {
     try {
         // if(ObjectId.isValid(id)) {
             
-            let jobDetails = {title, type: jobType, company, city, state, jobExpiry, details :{summary, description, required: jobTags}, payrange};
+            let jobDetails = {title, type: jobType, company, city, state, jobExpiry, details :{summary, description, required: jobTags}, payRange};
             let output = await recruiterDat.postJob(id, jobDetails);
             console.log("I am here",output);
 
