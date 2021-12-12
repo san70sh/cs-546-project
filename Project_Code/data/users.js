@@ -179,6 +179,7 @@ const checkDuplicateP = async (phone) => {
   }
   return true;
 };
+
 const getFile = async (fileId) => {
   if (!ObjectId.isValid(fileId) && typeof fileId !== "string") {
     throw new CustomError(400, "Invalid fileId");
@@ -228,6 +229,37 @@ const addResume = async (userId, fileId) => {
 
   return await get(userId.toString());
 };
+
+const getResume = async (userId, jobId)=>{
+  if (!ObjectId.isValid(jobId) && typeof jobId !== "string") {
+    throw new CustomError(400, "Invalid jobId");
+  } else {
+    jobId = ObjectId(jobId);
+  }
+
+  if (!ObjectId.isValid(userId) && typeof userId !== "string") {
+    throw new CustomError(400, "Invalid fileId");
+  } else {
+    userId = ObjectId(userId);
+  }
+
+  const usersCollection = await users();
+  const thisUser = await usersCollection.findOne({ _id: userId });
+  if (thisUser === null) throw new CustomError(400, "applicant did not exist");
+
+  const jobs = thisUser.jobs;
+  let fileFound = undefined;
+  jobs.forEach(ele=>{
+    if(ele._id.toString()===jobId.toString()){
+      fileFound = ele.resume;
+    }
+  })
+  if(!fileFound)
+  {throw new CustomError(400, "resume not found")}
+  else{
+    return fileFound;
+  }
+}
 
 const removeResume = async (userId, fileId) => {
   if (!ObjectId.isValid(fileId) && typeof fileId !== "string") {
@@ -1447,6 +1479,7 @@ module.exports = {
   getLa,
   addLa,
   delLa,
+  getResume,
 };
 // test functions **IMPORTANT**
 //checkEx([{title:"Maintenance Engineer", employmentType: "full time", companyName:"Apple",startDate: "08/05/2017", endDate: "08/05/2018"}])
