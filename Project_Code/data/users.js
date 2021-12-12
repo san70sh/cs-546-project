@@ -611,7 +611,7 @@ const remove = async (userId) => {
   //**********************remove jobId in is not necessary here
 };
 
-const apply1 = async (jobId, userId, fileId) => {
+const apply = async (jobId, userId, fileId) => {
   if (!userId || !jobId || !fileId) {
     throw new CustomError(400, "id must be provided");
   }
@@ -675,11 +675,31 @@ const apply1 = async (jobId, userId, fileId) => {
   if (insertInfo.modifiedCount === 0)
     throw new CustomError(400, "Could not apply this job for now");
 
-  return 1;
   //*****************recruiter collection update userId to applicantId.
-};
+  const recruiterCol = await recruiters();
+  const jobCol = await jobs();
 
-const apply2 = async (jobId, userId) => {};
+  // find job, then find recruiter
+  const thisJob = await jobCol.findOne({ _id: jobId });
+  const posterId = thisJob.poster;
+  const thisPoster = await recruiterCol.findOne({ _id: posterId });
+  // find the job under this recruiter and add one
+  let posterJobs = thisPoster.jobs;
+  // let posterJob2 = posterJobs.map((a) => {
+  //   return { ...a };
+  // });
+  posterJobs.forEach((ele) => {
+    if (ele.job_id.toString() === jobId.toString()) {
+      ele.applicants.push({ appId: userId, status: "pending" });
+    }
+  });
+  const insertInfo2 = await recruiterCol.updateOne(
+    { _id: posterId },
+    { $set: { jobs: posterJobs } }
+  );
+  if (insertInfo2.modifiedCount === 0)
+    throw new CustomError(400, "Could not apply this job for now");
+};
 
 const Favorites = async (jobId, userId) => {
   if (!userId || !jobId) {
