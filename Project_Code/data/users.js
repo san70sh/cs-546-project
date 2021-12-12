@@ -912,53 +912,7 @@ const cancel = async (jobId, userId) => {
   console.log(deleteInfo);
 };
 
-const test = async () => {
-  await cancel("61b56ddcde0211eefbd3c846", "61b56e3984223f61f693d6d8");
-};
-test();
-
-const track = async (jobId, userId) => {
-  if (!userId || !jobId) {
-    throw new CustomError(400, "id must be provided");
-  }
-  if (typeof userId !== "string" || userId.trim().length === 0) {
-    throw new CustomError(
-      400,
-      "the userId must be non-empty string and can't just be space"
-    );
-  }
-  if (typeof jobId !== "string" || jobId.trim().length === 0) {
-    throw new CustomError(
-      400,
-      "the jobId must be non-empty string and can't just be space"
-    );
-  }
-  if (!ObjectId.isValid(userId)) {
-    throw new CustomError(400, "Invalid userID");
-  } else {
-    userId = ObjectId(userId);
-  }
-  if (!ObjectId.isValid(jobId)) {
-    throw new CustomError(400, "Invalid jobId");
-  } else {
-    jobId = ObjectId(jobId);
-  }
-  const usersCollection = await users();
-  const res = await usersCollection.findOne(
-    { _id: userId, "jobs._id": jobId },
-    { jobs: { $elemMatch: { _id: jobId } } }
-  );
-  if (res === null) throw new CustomError(400, "user or job did not exists");
-  let tmp;
-  res.jobs.filter((ele) => {
-    if (ele._id.equals(jobId)) {
-      tmp = ele.status;
-    }
-  });
-  return tmp;
-};
-
-const trackAll = async (userId) => {
+const track = async (userId) => {
   if (!userId) {
     throw new CustomError(400, "id must be provided");
   }
@@ -976,7 +930,25 @@ const trackAll = async (userId) => {
   const usersCollection = await users();
   const res = await usersCollection.findOne({ _id: userId });
   if (res === null) throw new CustomError(400, "user did not exists");
-  return res.jobs;
+
+  // get job title
+  const jobCol = await jobs();
+  let jobInfo = res.jobs;
+  console.log(jobInfo);
+  for (const ele of jobInfo) {
+    let job = await jobCol.findOne({ _id: ele._id });
+    ele.title = job.title;
+    ele.type = job.type;
+    ele.location = `${job.city}, ${job.state}`;
+    ele.summary = job.details.summary;
+  }
+  // jobInfo.forEach((ele) => {
+  //   let job = jobCol.findOne({ _id: ele._id });
+  //   jobTitle = job.title;
+  //   console.log(job);
+  //   ele.title = jobTitle;
+  // });
+  return jobInfo;
 };
 
 const get = async (userId) => {
@@ -1492,7 +1464,6 @@ module.exports = {
   delFavourites,
   cancel,
   track,
-  trackAll,
   get,
   getAll,
   checkUser,
