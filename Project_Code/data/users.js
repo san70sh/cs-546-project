@@ -474,7 +474,10 @@ const create = async (email, phone, firstName, lastName, password) => {
   //   throw new CustomError(400, "Profile must be array");
   // }
   if ((await checkDuplicateP(phone)) || (await checkDuplicateE(email))) {
-    throw new CustomError(400, "phone number or email has been used, please try another one");
+    throw new CustomError(
+      400,
+      "phone number or email has been used, please try another one"
+    );
   }
   const jobs = [];
   const resume = [];
@@ -658,6 +661,83 @@ const remove = async (userId) => {
     throw new CustomError(400, `Could not delete user with id: ${id}`);
   }
   //**********************remove jobId in is not necessary here
+};
+
+const auxApply = async (jobId, userId) => {
+  // this function is for seed databases
+  if (!userId || !jobId) {
+    throw new CustomError(400, "id must be provided");
+  }
+  if (typeof userId !== "string" || userId.trim().length === 0) {
+    throw new CustomError(
+      400,
+      "the userId must be non-empty string and can't just be space"
+    );
+  }
+  if (typeof jobId !== "string" || jobId.trim().length === 0) {
+    throw new CustomError(
+      400,
+      "the jobId must be non-empty string and can't just be space"
+    );
+  }
+
+  if (!ObjectId.isValid(userId)) {
+    throw new CustomError(400, "Invalid userID");
+  } else {
+    userId = ObjectId(userId);
+  }
+  if (!ObjectId.isValid(jobId)) {
+    throw new CustomError(400, "Invalid jobId");
+  } else {
+    jobId = ObjectId(jobId);
+  }
+
+  const usersCollection = await users();
+  const thisUser = await usersCollection.findOne({ _id: userId });
+  let thisJobs = thisUser.jobs;
+
+  thisJobs.forEach((ele) => {
+    if (ele._id.toString() === jobId.toString()) {
+      throw new CustomError(400, "You have already applied for it");
+    }
+  });
+
+  let newjob = {
+    _id: jobId,
+    status: "pending",
+  };
+
+  const insertInfo = await usersCollection.updateOne(
+    { _id: userId },
+    { $addToSet: { jobs: newjob } }
+  );
+  if (insertInfo.modifiedCount === 0)
+    throw new CustomError(400, "Could not apply this job for now");
+
+  //*****************recruiter collection update userId to applicantId.
+  const recruiterCol = await recruiters();
+  const jobCol = await jobs();
+
+  // find job, then find recruiter
+  const thisJob = await jobCol.findOne({ _id: jobId });
+  const posterId = thisJob.poster;
+  const thisPoster = await recruiterCol.findOne({ _id: posterId });
+  // find the job under this recruiter and add one
+  let posterJobs = thisPoster.jobs;
+  // let posterJob2 = posterJobs.map((a) => {
+  //   return { ...a };
+  // });
+  posterJobs.forEach((ele) => {
+    if (ele.job_id.toString() === jobId.toString()) {
+      ele.applicants.push({ appId: userId, status: "pending" });
+    }
+  });
+  const insertInfo2 = await recruiterCol.updateOne(
+    { _id: posterId },
+    { $set: { jobs: posterJobs } }
+  );
+  if (insertInfo2.modifiedCount === 0)
+    throw new CustomError(400, "Could not apply this job for now");
 };
 
 const apply = async (jobId, userId, fileId) => {
@@ -1506,6 +1586,7 @@ module.exports = {
   delLa,
   getResume,
   apply,
+  auxApply,
 };
 // test functions **IMPORTANT**
 //checkEx([{title:"Maintenance Engineer", employmentType: "full time", companyName:"Apple",startDate: "08/05/2017", endDate: "08/05/2018"}])
