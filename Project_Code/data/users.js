@@ -955,7 +955,7 @@ const track = async (userId) => {
   // get job title
   const jobCol = await jobs();
   let jobInfo = res.jobs;
-  console.log(jobInfo);
+  // console.log(jobInfo);
   for (const ele of jobInfo) {
     let job = await jobCol.findOne({ _id: ele._id });
     ele.title = job.title;
@@ -963,6 +963,7 @@ const track = async (userId) => {
     ele.location = `${job.city}, ${job.state}`;
     ele.summary = job.details.summary;
   }
+  console.log(jobInfo);
   // jobInfo.forEach((ele) => {
   //   let job = jobCol.findOne({ _id: ele._id });
   //   jobTitle = job.title;
