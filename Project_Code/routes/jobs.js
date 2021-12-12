@@ -15,7 +15,12 @@ router.get("/", async (req, res) => {
     }
     for (let i = 0; i < result.length; i++) {
       result[i].unique = String(result[i]._id);
-      result[i].postDateString = String(result[i].postDate);
+      let dd = String(result[i].postDate.getDate()).padStart(2, '0');
+      let mm = String(result[i].postDate.getMonth() + 1).padStart(2, '0'); //January is 0!
+      let yyyy = result[i].postDate.getFullYear();
+
+      let today = mm + '/' + dd + '/' + yyyy;
+      result[i].postDateString = today;
     }
     //console.log(result);
 
@@ -141,7 +146,7 @@ router.get("/jobs/recruiters/id/:id", async (req, res) => {
 router.get("/jobs/sort", async (req, res) => {
   try {
     const result = await jobData.sortByDate();
-    console.log(result);
+    //console.log(result);
     if(result){
       if(result.length == 0 ){
         return res.render("pages/home",{nullJob:true, message:"No Jobs posted yet"});
@@ -150,7 +155,12 @@ router.get("/jobs/sort", async (req, res) => {
     result.reverse();
     for (let i = 0; i < result.length; i++) {
       result[i].unique = String(result[i]._id);
-      result[i].postDateString = String(result[i].postDate);
+      let dd = String(result[i].postDate.getDate()).padStart(2, '0');
+      let mm = String(result[i].postDate.getMonth() + 1).padStart(2, '0'); //January is 0!
+      let yyyy = result[i].postDate.getFullYear();
+
+      let today = mm + '/' + dd + '/' + yyyy;
+      result[i].postDateString = today;
     }
     //console.log(result);
 
