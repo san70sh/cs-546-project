@@ -510,7 +510,6 @@ module.exports = {
   postJob,
   updateJob,
   removeJob,
-  addApplicant,
   acceptDecision,
   rejectDecision
 }
