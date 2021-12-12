@@ -899,7 +899,23 @@ const cancel = async (jobId, userId) => {
       400,
       "Could not add the profile, the job is already exists or user doesn't exist"
     );
+
+  // remove applicant from recruiter's collection
+  const jobCol = await jobs();
+  const thisJob = jobCol.findOne({ _id: jobId });
+  const recruiterId = thisJob.poster;
+  const recruiterCol = await recruiters();
+  const deleteInfo = await recruiterCol.updateOne(
+    { _id: recruiterId },
+    { $pull: { $elemMatch: { applicants: { appId: userId } } } }
+  );
+  console.log(deleteInfo);
 };
+
+const test = async () => {
+  await cancel("61b56ddcde0211eefbd3c846", "61b56e3984223f61f693d6d8");
+};
+test();
 
 const track = async (jobId, userId) => {
   if (!userId || !jobId) {
@@ -1496,6 +1512,7 @@ module.exports = {
   addLa,
   delLa,
   getResume,
+  apply,
 };
 // test functions **IMPORTANT**
 //checkEx([{title:"Maintenance Engineer", employmentType: "full time", companyName:"Apple",startDate: "08/05/2017", endDate: "08/05/2018"}])
