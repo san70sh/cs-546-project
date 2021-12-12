@@ -3,7 +3,7 @@
 <script src='/public/script/job_scripts.js'></script>
 {{#if errorclass }}
 <marquee>
-  <p class="not-found">Please Login first !!! </p>
+  <p class="not-found">Please Login first as user first!!! </p>
   </marquee>
 {{/if}}
 
@@ -16,7 +16,10 @@
     <input type="text" class="search__input" id="mySearchterm" onkeyup="filter(this);" placeholder="Search for Jobs.." />
     
 </div>
+<br>
+<div class="btn-group">
 <button onclick="window.location.href='/jobs/sort'">Recent Jobs</button>
+</div>
 <ul id = 'myJobList' class = 'tilesWrap'>
 {{#each jobs}}
     <li>
