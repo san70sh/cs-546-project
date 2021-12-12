@@ -4,6 +4,7 @@ const users = mongoCollections.users;
 const recruiters = mongoCollections.recruiters;
 const jobs = mongoCollections.jobs;
 const userProfiles = mongoCollections.userProfiles;
+const chunks = mongoCollections.profileChunks;
 let { ObjectId } = require("mongodb");
 bcrypt = require("bcrypt");
 const saltRounds = 5;
@@ -301,6 +302,22 @@ const removeResume = async (userId, fileId) => {
 
   if (insertInfo.modifiedCount === 0)
     throw new CustomError(400, "Could not update the user");
+
+  // delete from .files
+  const fileCol = await userProfiles();
+  try {
+    fileCol.deleteOne({ _id: fileId });
+  } catch (e) {
+    throw new CustomError(400, "error from delete file from file collection");
+  }
+
+  // delete from .chunks
+  const chunkCol = await chunks();
+  try {
+    chunkCol.deleteMany({ files_id: fileId });
+  } catch (e) {
+    throw new CustomError(400, "error from delete file from chunk collection");
+  }
 
   return await get(userId.toString());
 };
@@ -872,60 +889,51 @@ const cancel = async (jobId, userId) => {
   } else {
     jobId = ObjectId(jobId);
   }
+
   const usersCollection = await users();
-  const insertInfo = await usersCollection.updateOne(
+  const insertInfo1 = await usersCollection.updateOne(
     { _id: userId },
     { $pull: { jobs: { _id: jobId } } }
   );
-  if (insertInfo.modifiedCount === 0)
+  if (insertInfo1.modifiedCount === 0)
     throw new CustomError(
       400,
       "Could not add the profile, the job is already exists or user doesn't exist"
     );
-};
 
-const track = async (jobId, userId) => {
-  if (!userId || !jobId) {
-    throw new CustomError(400, "id must be provided");
-  }
-  if (typeof userId !== "string" || userId.trim().length === 0) {
-    throw new CustomError(
-      400,
-      "the userId must be non-empty string and can't just be space"
-    );
-  }
-  if (typeof jobId !== "string" || jobId.trim().length === 0) {
-    throw new CustomError(
-      400,
-      "the jobId must be non-empty string and can't just be space"
-    );
-  }
-  if (!ObjectId.isValid(userId)) {
-    throw new CustomError(400, "Invalid userID");
-  } else {
-    userId = ObjectId(userId);
-  }
-  if (!ObjectId.isValid(jobId)) {
-    throw new CustomError(400, "Invalid jobId");
-  } else {
-    jobId = ObjectId(jobId);
-  }
-  const usersCollection = await users();
-  const res = await usersCollection.findOne(
-    { _id: userId, "jobs._id": jobId },
-    { jobs: { $elemMatch: { _id: jobId } } }
+  // remove applicant from recruiter's collection
+  const jobCol = await jobs();
+  const thisJob = await jobCol.findOne({ _id: jobId });
+  const recruiterId = thisJob.poster;
+  const recruiterCol = await recruiters();
+  const tmpInfo = await recruiterCol.findOne(
+    { _id: recruiterId },
+    { _id: 0, jobs: { $elemMatch: { job_id: jobId } } }
   );
-  if (res === null) throw new CustomError(400, "user or job did not exists");
-  let tmp;
-  res.jobs.filter((ele) => {
-    if (ele._id.equals(jobId)) {
-      tmp = ele.status;
-    }
-  });
-  return tmp;
+  if (!tmpInfo) {
+    throw new CustomError(400, "the recruiter does not exists");
+  }
+  let jobstmp = tmpInfo.jobs;
+  let tmp1 = jobstmp.filter(
+    (ele) => ele.job_id.toString() !== jobId.toString()
+  ); //ele.appId.toString() === userId.toString();
+  let tmp2 = jobstmp.find((ele) => ele.job_id.toString() === jobId.toString());
+  let tmp3 = tmp2.applicants.filter(
+    (ele) => ele.appId.toString() !== userId.toString()
+  );
+
+  tmp1.push({ job_id: tmp2.job_id, applicants: tmp3 });
+  // console.log(tmp1, jobstmp)
+  const insertInfo = await recruiterCol.updateOne(
+    { _id: recruiterId },
+    { $set: { jobs: tmp1 } }
+  );
+  if (insertInfo.modifiedCount === 0) {
+    throw new CustomError(400, "Could not apply cancel job for now");
+  }
 };
 
-const trackAll = async (userId) => {
+const track = async (userId) => {
   if (!userId) {
     throw new CustomError(400, "id must be provided");
   }
@@ -943,7 +951,26 @@ const trackAll = async (userId) => {
   const usersCollection = await users();
   const res = await usersCollection.findOne({ _id: userId });
   if (res === null) throw new CustomError(400, "user did not exists");
-  return res.jobs;
+
+  // get job title
+  const jobCol = await jobs();
+  let jobInfo = res.jobs;
+  // console.log(jobInfo);
+  for (const ele of jobInfo) {
+    let job = await jobCol.findOne({ _id: ele._id });
+    ele.title = job.title;
+    ele.type = job.type;
+    ele.location = `${job.city}, ${job.state}`;
+    ele.summary = job.details.summary;
+  }
+  console.log(jobInfo);
+  // jobInfo.forEach((ele) => {
+  //   let job = jobCol.findOne({ _id: ele._id });
+  //   jobTitle = job.title;
+  //   console.log(job);
+  //   ele.title = jobTitle;
+  // });
+  return jobInfo;
 };
 
 const get = async (userId) => {
@@ -1459,7 +1486,6 @@ module.exports = {
   delFavourites,
   cancel,
   track,
-  trackAll,
   get,
   getAll,
   checkUser,
@@ -1479,6 +1505,7 @@ module.exports = {
   addLa,
   delLa,
   getResume,
+  apply,
 };
 // test functions **IMPORTANT**
 //checkEx([{title:"Maintenance Engineer", employmentType: "full time", companyName:"Apple",startDate: "08/05/2017", endDate: "08/05/2018"}])

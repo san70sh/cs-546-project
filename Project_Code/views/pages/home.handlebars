@@ -8,7 +8,12 @@
 {{/if}}
 
 {{#if jobFound}}
-<input type="text" id="mySearchterm" onkeyup="filter(this);" placeholder="Search for Jobs.." title="Type in a term">
+<div class="search__container">
+    <p class="search__title">
+        Search Jobs by Location, Title ...
+    </p>
+    <input type="text" class="search__input" id="mySearchterm" onkeyup="filter(this);" placeholder="Search for Jobs.." >
+</div>
 <button onclick="window.location.href='/jobs/sort'">Recent Jobs</button>
 <ul id = 'myJobList' class = 'tilesWrap'>
 {{#each jobs}}

@@ -80,4 +80,5 @@ module.exports = {
   jobs: getCollectionFn("jobs"),
   keyStore: getCollectionFn("keyStore"),
   userProfiles: getCollectionFn(userBucket + ".files"),
+  profileChunks: getCollectionFn(userBucket + ".chunks"),
 };

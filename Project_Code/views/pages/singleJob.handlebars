@@ -1,28 +1,51 @@
-<div>
-      <a href="/" role="button" class="btn btn-primary" id="landingBtn">All Jobs</a>
-      <h1>{{data.name}}</h1>
+<h1>Job Details</h1>
+<div class="container">
+  <div class="floating-stack">
+    <dl>
+      <dt>Title</dt>
+      <dd>{{data.title}}</dd>
 
-      <p> Type : {{data.type}}</p>
-      <p> Location : {{data.city}},{{data.state}}</p>
-      <p> Job Summary : {{data.details.summary}}</p>
+      <dt>Type</dt>
+      <dd>{{data.type}}</dd>
 
+      <dt>Company</dt>
+      <dd>{{data.company}}</dd>
+
+      <dt>Location</dt>
+      <dd>{{data.city}}, {{data.state}}</dd>
+
+      <dt>Summary</dt>
+      <dd>{{data.details.summary}}</dd>
+
+      <dt>Description</dt>
+      <dd>{{data.details.description}}</dd>
+
+      <dt>Required Skils</dt>
+      {{#each data.details.required}}
+      <dd>{{this}}</dd>
+      {{/each}}
+
+      <dt>Benefits</dt>
+      <dd>{{data.details.benefits}}</dd>
+    </dl>
+  </div>
+</div>
+<br>
+<br>
+
+<div class="btn-group">
+
+    <form action="/" , method="get">
+            <button>Back To all Jobs</button>
+      </form>
       <form action="/users/select/{{jobId}}" , method="get">
-            <button class="btn btn-primary">apply</button>
+            <button>apply</button>
       </form>
 
       <form action="/users/favor/{{jobId}}" , method="post">
-            <button class="btn btn-primary">save</button>
+            <button>save</button>
       </form>
 
-
-
-      </form>
-      <a href="/logout" role="button" id="buttonsaved">Logout</a>
-      </form>
-
-
-
-      </ul>
 </div>
 
 <script src="https://code.jquery.com/jquery-2.2.4.min.js"

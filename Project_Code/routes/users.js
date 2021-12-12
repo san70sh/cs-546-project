@@ -101,10 +101,10 @@ router.delete("/resume/:id", async (req, res) => {
 
   try {
     await users.removeResume(userId, fileId);
-    res.json({ message: "Delete Successfully" });
   } catch (e) {
-    res.json({ message: e });
+    return res.json({ message: e });
   }
+  return res.json({ message: "Delete Successfully" });
 });
 
 router.get("/login", async (req, res) => {
@@ -567,8 +567,7 @@ router.post("/apply/:id", async (req, res) => {
   // console.log(errors);
 });
 
-router.delete("/apply", async (req, res) => {
-  // common session code all of your private routes
+router.post("/cancel/:id", async (req, res) => {
   if (!req.session.user) {
     return res.redirect("/users/login");
   }
@@ -579,57 +578,79 @@ router.delete("/apply", async (req, res) => {
     }
   }
 
-  let jobId = req.body.jobId;
-  let userId = req.session.user.id;
-  if (!ObjectId.isValid(jobId) || !ObjectId.isValid(userId)) {
-    return res.status(400).render("pages/error", {
-      title: "apply",
-      message: "invalid id",
-      err: true,
-    });
-  }
   try {
-    let output = await users.cancel(jobId, userId);
-    return res.json(output);
+    const cancelRes = await users.cancel(req.params.id, req.session.user.id);
   } catch (e) {
-    return res
-      .status(e.status)
-      .render("pages/error", { title: "Favor", message: e.message, err: true });
+    return res.json({ message: e.message });
   }
+
+  let message = "You have successfully cancel the application for the job";
+  return res.json({ message });
 });
 
-router.get("/apply/:id", async (req, res) => {
-  // common session code all of your private routes
-  if (!req.session.user) {
-    return res.redirect("/users/login");
-  }
+// router.delete("/apply", async (req, res) => {
+//   // common session code all of your private routes
+//   if (!req.session.user) {
+//     return res.redirect("/users/login");
+//   }
 
-  if (req.session.user) {
-    if (req.session.user.type !== "user") {
-      return res.redirect("/logout");
-    }
-  }
+//   if (req.session.user) {
+//     if (req.session.user.type !== "user") {
+//       return res.redirect("/logout");
+//     }
+//   }
 
-  let userId = req.session.user.id;
-  let jobId = req.params.jobId;
-  if (!ObjectId.isValid(jobId) || !ObjectId.isValid(userId)) {
-    return res.status(400).render("pages/error", {
-      title: "apply",
-      message: "invalid id",
-      err: true,
-    });
-  }
-  try {
-    let output = await users.track(jobId, userId);
-    return res.json(output);
-  } catch (e) {
-    return res.status(e.status).render("pages/error", {
-      title: "Favor",
-      message: e.message,
-      error: true,
-    });
-  }
-});
+//   let jobId = req.body.jobId;
+//   let userId = req.session.user.id;
+//   if (!ObjectId.isValid(jobId) || !ObjectId.isValid(userId)) {
+//     return res.status(400).render("pages/error", {
+//       title: "apply",
+//       message: "invalid id",
+//       err: true,
+//     });
+//   }
+//   try {
+//     let output = await users.cancel(jobId, userId);
+//     return res.json(output);
+//   } catch (e) {
+//     return res
+//       .status(e.status)
+//       .render("pages/error", { title: "Favor", message: e.message, err: true });
+//   }
+// });
+
+// router.get("/apply/:id", async (req, res) => {
+//   // common session code all of your private routes
+//   if (!req.session.user) {
+//     return res.redirect("/users/login");
+//   }
+
+//   if (req.session.user) {
+//     if (req.session.user.type !== "user") {
+//       return res.redirect("/logout");
+//     }
+//   }
+
+//   let userId = req.session.user.id;
+//   let jobId = req.params.jobId;
+//   if (!ObjectId.isValid(jobId) || !ObjectId.isValid(userId)) {
+//     return res.status(400).render("pages/error", {
+//       title: "apply",
+//       message: "invalid id",
+//       err: true,
+//     });
+//   }
+//   try {
+//     let output = await users.track(jobId, userId);
+//     return res.json(output);
+//   } catch (e) {
+//     return res.status(e.status).render("pages/error", {
+//       title: "Favor",
+//       message: e.message,
+//       error: true,
+//     });
+//   }
+// });
 
 router.get("/apply", async (req, res) => {
   // common session code all of your private routes
@@ -637,30 +658,39 @@ router.get("/apply", async (req, res) => {
     return res.redirect("/users/login");
   }
 
-  // common session code all of your private routes
-  if (!req.session.user) {
-    return res.redirect("/logout");
-  }
-
   if (req.session.user) {
     if (req.session.user.type !== "user") {
-      return res.redirect("/users/login");
+      return res.redirect("/logout");
     }
   }
+
+  //get all favor
   let userId = req.session.user.id;
   if (!ObjectId.isValid(userId)) {
-    return res.status(400).render("pages/error", {
-      title: "apply",
-      message: "invalid id",
-      err: true,
+    res.status(400).render("pages/error", {
+      title: "Favor",
+      message: "inValid userId",
+      error: true,
     });
   }
   try {
-    let output = await users.trackAll(userId);
-    return res.json(output);
+    let output = await users.track(userId);
+    console.log(output);
+    if (output) {
+      if (output.length == 0) {
+        return res.render("pages/appliedJob", {
+          nullJob: true,
+          message: "No Jobs applied yet",
+        });
+      }
+    }
+    for (let i = 0; i < output.length; i++) {
+      output[i].unique = String(output[i]._id);
+    }
+    return res.render("pages/appliedJob", { jobFound: true, jobs: output });
   } catch (e) {
-    return res.status(e.status).render("pages/error", {
-      title: "Favor",
+    return res.status(400).render("pages/error", {
+      title: "applied",
       message: e.message,
       error: true,
     });
@@ -761,11 +791,17 @@ router.post("/ex", async (req, res) => {
       exErr: true,
     });
   }
-  if (typeof experience.title !== "string" || experience.title.trim().length === 0
-    || typeof experience.employmentType !== "string" || experience.employmentType.trim().length === 0
-    || typeof experience.companyName !== "string" || experience.companyName.trim().length === 0
-    || typeof experience.startDate !== "string" || experience.startDate.trim().length === 0
-    || typeof experience.endDate !== "string" || experience.endDate.trim().length === 0
+  if (
+    typeof experience.title !== "string" ||
+    experience.title.trim().length === 0 ||
+    typeof experience.employmentType !== "string" ||
+    experience.employmentType.trim().length === 0 ||
+    typeof experience.companyName !== "string" ||
+    experience.companyName.trim().length === 0 ||
+    typeof experience.startDate !== "string" ||
+    experience.startDate.trim().length === 0 ||
+    typeof experience.endDate !== "string" ||
+    experience.endDate.trim().length === 0
   ) {
     return res.status(400).render("pages/applicanteditprofile", {
       title: "experience",
@@ -779,13 +815,21 @@ router.post("/ex", async (req, res) => {
       message: "inValid start date and end date",
       exErr: true,
     });
-
+  }
+  let today = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
+  if (new Date(experience.startDate) > today || new Date(experience.endDate) > today) {
+    return res.status(400).render("pages/applicanteditprofile", {
+      title: "experience",
+      message: "start date and end date can't be later than today",
+      exErr: true,
+    });
   }
   try {
     let output = await users.addEx(experience, userId);
     console.log(output);
     return res.json(output);
   } catch (e) {
+    console.log(e)
     return res.status(e.status).render("pages/applicanteditprofile", {
       title: "experience",
       message: e.message,
@@ -821,7 +865,7 @@ router.delete("/ex", async (req, res) => {
     });
   }
 
-  if (typeof companyName !== 'string' || companyName.trim().length == 0) {
+  if (typeof companyName !== "string" || companyName.trim().length == 0) {
     return res.status(400).render("pages/applicanteditprofile", {
       title: "experience",
       message: "company name can only be non-empty string",
@@ -896,11 +940,17 @@ router.post("/edu", async (req, res) => {
       eduErr: true,
     });
   }
-  if (typeof education.school !== "string" || education.school.trim().length === 0
-    || typeof education.major !== "string" || education.major.trim().length === 0
-    || typeof education.degree !== "string" || education.degree.trim().length === 0
-    || typeof education.startDate !== "string" || education.startDate.trim().length === 0
-    || typeof education.endDate !== "string" || education.endDate.trim().length === 0
+  if (
+    typeof education.school !== "string" ||
+    education.school.trim().length === 0 ||
+    typeof education.major !== "string" ||
+    education.major.trim().length === 0 ||
+    typeof education.degree !== "string" ||
+    education.degree.trim().length === 0 ||
+    typeof education.startDate !== "string" ||
+    education.startDate.trim().length === 0 ||
+    typeof education.endDate !== "string" ||
+    education.endDate.trim().length === 0
   ) {
     return res.status(400).render("pages/applicanteditprofile", {
       title: "education",
@@ -912,6 +962,14 @@ router.post("/edu", async (req, res) => {
     return res.status(400).render("pages/applicanteditprofile", {
       title: "education",
       message: "inValid start date and end date",
+      eduErr: true,
+    });
+  }
+  let today = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
+  if (new Date(education.startDate) > today || new Date(education.endDate) > today) {
+    return res.status(400).render("pages/applicanteditprofile", {
+      title: "education",
+      message: "start date and end date can't be later than today",
       eduErr: true,
     });
   }
@@ -954,7 +1012,7 @@ router.delete("/edu", async (req, res) => {
     });
   }
 
-  if (typeof school !== 'string' || school.trim().length == 0) {
+  if (typeof school !== "string" || school.trim().length == 0) {
     return res.status(400).render("pages/applicanteditprofile", {
       title: "education",
       message: "school name can only be non-empty string",
@@ -1030,7 +1088,7 @@ router.post("/sk", async (req, res) => {
       skErr: true,
     });
   }
-  if (typeof sk.skills !== 'string' || sk.skills.trim().length === 0) {
+  if (typeof sk.skills !== "string" || sk.skills.trim().length === 0) {
     return res.status(400).render("pages/applicanteditprofile", {
       title: "skills",
       message: "skill must be non-empty string",
@@ -1067,7 +1125,7 @@ router.delete("/sk", async (req, res) => {
       mainerr: true,
     });
   }
-  if (typeof skill !== 'string' || skill.trim().length === 0) {
+  if (typeof skill !== "string" || skill.trim().length === 0) {
     return res.status(400).render("pages/applicanteditprofile", {
       title: "skill",
       message: "skill must be non-empty string",
@@ -1117,7 +1175,7 @@ router.get("/la", async (req, res) => {
 
 router.post("/la", async (req, res) => {
   let la = req.body.tmp;
-  console.log(la)
+  console.log(la);
   if (!req.session.user) {
     return res.redirect("/users/login");
   }
@@ -1142,7 +1200,7 @@ router.post("/la", async (req, res) => {
       laErr: true,
     });
   }
-  if (typeof la.languages !== 'string' || la.languages.trim().length === 0) {
+  if (typeof la.languages !== "string" || la.languages.trim().length === 0) {
     return res.status(400).render("pages/applicanteditprofile", {
       title: "languages",
       message: "languages must be non-empty string",
@@ -1180,7 +1238,7 @@ router.delete("/la", async (req, res) => {
       mainerr: true,
     });
   }
-  if (typeof language !== 'string' || language.trim().length === 0) {
+  if (typeof language !== "string" || language.trim().length === 0) {
     return res.status(400).render("pages/applicanteditprofile", {
       title: "languages",
       message: "languages must be non-empty string",

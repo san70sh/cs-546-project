@@ -1,4 +1,4 @@
-<section class="section profile-section" id="userProfile">
+<section class="section profile-section" id="userProfilePage">
     <div class="container">
         <div class="row">
             <div class="col-6">
@@ -73,36 +73,41 @@
     </div>
     {{/if}}
 
-    <button class="btn btn-primary" type="button" onclick="location.href = '/users/resume';">Arrange Resume</button>
+    <button class="btn btn-primary" type="button" onclick="location.href = '/users/resume';">Add Resume</button>
 
     {{#if resumeError}}
     <p class="error">{{resumeError}}</p>
     {{/if}}
 
+    <h2>Your Resumes</h2>
     {{#if resumes}}
     {{#each resumes}}
     <ul id='resumeList'>
-        <div class='resumeList'> <a href="/users/resume/{{this}}" target="_blank">resume{{math @index "+" 1}}.pdf</a>
+        <li class='resumeList'> <a href="/users/resume/{{this}}" target="_blank">resume{{math @index "+" 1}}.pdf</a>
             <button type="button" value={{this}} class="delete btn-primary"
                 onclick="deleteResume(this.value)">delete</button>
-        </div>
+        </li>
     </ul>
     {{/each}}
     {{/if}}
-    
-    <button class="btn btn-primary" type="button" onclick="location.href = '/users/favor';">Arrange Favorite Jobs</button>
 
-    <div class="row job-section">
+    <button class="btn btn-primary" type="button" onclick="location.href = '/users/favor';">Arrange Favorite
+        Jobs</button>
+
+    <button class="btn btn-primary" type="button" onclick="location.href = '/users/apply';">Arrange Applied
+        Jobs</button>
+    {{!-- <div class="row job-section">
         <div class="accordion" id="job-accordion">
+            <h2>Applied Jobs:</h2>
             {{#each jobs}}
             <div class="accordion-item">
-                <h2 class="accordion-header" id="jobheading{{@index}}">
-                    Job titles,{{_id}},{{status}}
-                </h2>
+                <h4 class="accordion-header" id="jobheading{{@index}}">
+                    Job titles,{{_id}},{{status}},{{title}}
+                </h4>
                 {{/each}}
             </div>
         </div>
-    </div>
+    </div> --}}
 </section>
 
 <script src="https://code.jquery.com/jquery-2.2.4.min.js"

@@ -18,9 +18,11 @@ $(document).ready(function() {
             if(data.type == 'recruiter') {
                 $("#recProfile").show();
                 $("#userProfile").hide();
+                $(".userExtra").hide();
             } else {
                 $("#recProfile").hide();
                 $("#userProfile").show();
+                $(".userExtra").show();
             }
 
 
