@@ -84,7 +84,7 @@ router.get('/checkResume/:jobId/:appId', async (req, res) => {
         }
     }
 
-    const fileId = users.getResume(req.params.appId, req.params.jobId);
+    try{var fileId = await users.getResume(req.params.appId, req.params.jobId);}catch(e){console.log(e)}
 
     try {
         const downloadStream = await download(fileId);
