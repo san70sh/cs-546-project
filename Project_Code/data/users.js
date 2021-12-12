@@ -1111,8 +1111,8 @@ const checkUser = async (email, password) => {
     throw new CustomError(400, "Either the email or password is invalid");
   }
   let compareToMerlin = false;
-  console.log(password);
-  console.log(tmp.password);
+  // console.log(password);
+  // console.log(tmp.password);
   try {
     compareToMerlin = await bcrypt.compare(password, tmp.password);
   } catch (e) {
