@@ -100,7 +100,7 @@ router.get("/checkResume/:jobId/:appId", async (req, res) => {
   try {
     var fileId = await users.getResume(req.params.appId, req.params.jobId);
   } catch (e) {
-    res.render("/pages/error", { message: e.message });
+    res.render("pages/error", { message: e.message });
     console.log(e);
   }
 
