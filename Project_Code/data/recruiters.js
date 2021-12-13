@@ -342,7 +342,7 @@ async function removeRecruiter(recruiterId) {
           if(jobDel.deletedCount === recruiterJobs.length) {
             if(appliedUsers.length != 0) {
               appliedUserSet = new Set(appliedUsers.flat());
-              usrUpdate = await userCol.updateMany({_id: {$in: [...appliedUserSet]}}, {$pull: {jobs: {job: {$in: recruiterJobs}}, favor: {$in: recruiterJobs}}})
+              usrUpdate = await userCol.updateMany({_id: {$in: [...appliedUserSet]}}, {$pull: {jobs: {_id: {$in: recruiterJobs}}, favor: {$in: recruiterJobs}}})
             }
           }
         }
@@ -416,8 +416,7 @@ async function removeJob(recruiterId, jobId) {
           }
         })
         if(appliedUserSet.length > 0){
-          // Change appliedUserSet if applicant_id is converted to object.
-          usrUpdate = await userCol.updateMany({_id: {$in: appliedUserSet}}, {$pull: {jobs: {job: {$eq: jobId}}, favor: {$eq: jobId}}});
+          usrUpdate = await userCol.updateMany({_id: {$in: appliedUserSet}}, {$pull: {jobs: {_id: {$eq: jobId}}, favor: {$eq: jobId}}});
         } 
         
         if(appliedUserSet.length == 0 || usrUpdate.modifiedCount == appliedUserSet.length){
@@ -455,8 +454,6 @@ async function acceptDecision(recruiterId, applicantId, jobId) {
         let recAppUpdate = await recCol.updateOne({_id: new ObjectId(recruiterId)}, {$set: {"jobs.$[job].applicants.$[app].status": "Accepted"}}, {arrayFilters: [{"app.appId": {$eq: applicantId}},{"job.job_id": {$eq: jobId}}]});
          if(recAppUpdate.modifiedCount === 1){
            let applicant = await userCol.updateOne({$and: [{_id: applicantId, "jobs._id": jobId}]},{$set: {"jobs.$.status": "Accepted"}});
-          // // let applicant = await userCol.updateOne({"_id": new ObjectId(applicantId), "jobs.job": jobId}, {$set: {"jobs.$.status": "Accepted"}})
-          // let applicant = await userCol.updateOne({"_id": {$eq: new ObjectId(applicantId)}}, {$set: {"jobs.$[elem].status": "Accepted"}}, {arrayFilters: [{"elem.job": {$eq: jobId}}]})
           if(applicant.modifiedCount === 1) {
             return "Accepted";
          }
@@ -481,8 +478,6 @@ async function rejectDecision(recruiterId, applicantId, jobId) {
             let recAppUpdate = await recruiterCol.updateOne({_id: new ObjectId(recruiterId)}, {$set: {"jobs.$[job].applicants.$[app].status": "Rejected"}}, {arrayFilters: [{"app.appId": {$eq: applicantId}},{"job.job_id": jobId}]});
             if(recAppUpdate.modifiedCount === 1){
               let applicant = await userCol.updateOne({$and: [{_id: applicantId, "jobs._id": jobId}]},{$set: {"jobs.$.status": "Rejected"}});
-              // // let applicant = await userCol.updateOne({"_id": new ObjectId(applicantId), "jobs.job": jobId}, {$set: {"jobs.$.status": "Accepted"}})
-              // let applicant = await userCol.updateOne({"_id": {$eq: new ObjectId(applicantId)}}, {$set: {"jobs.$[elem].status": "Accepted"}}, {arrayFilters: [{"elem.job": {$eq: jobId}}]})
               if(applicant.modifiedCount === 1) {
                 return "Rejected";
               }else throw new CustomError(500,"Rejection error");
@@ -493,9 +488,6 @@ async function rejectDecision(recruiterId, applicantId, jobId) {
     console.log(e);
   }
 }
-  //async function sendMail()
-  //async function resetPassword() 
-
 
 
 module.exports = {
