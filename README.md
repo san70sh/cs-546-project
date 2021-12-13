@@ -12,10 +12,10 @@ The goal of this project is to centralize the job application process and to red
 
 ## Seed Database
 
-Run the following code to seed the database: (You must run this under the project_code folder!)
+Run the following code under `Project_Code` folder to seed the database:
 
 ```node
-node ./task/seed.js
+npm run seed
 ```
 
 This function are organized as following:
@@ -29,8 +29,10 @@ After seeding, you can find emails and passwords used to log in the website for 
 
 ## Start the website
 
-Run the following code to start the website:
+Run the following code under `Project_Code` folder to start the website:
 
 ```node
 npm start
 ```
+
+After that, you can access our website through [http://localhost:3000](http://localhost:3000)
