@@ -136,4 +136,8 @@ async function seedRec(num, numOfUsers, numOfJobs) {
 
 dropAll();
 // seedUser(5);
-seedRec(3, 5, 4);
+
+// first parameter is the number of recruiters
+// first parameter is the number of users
+// first parameter is the number of jobs under each recruiter
+seedRec(6, 20, 5);

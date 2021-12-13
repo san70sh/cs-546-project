@@ -98,8 +98,17 @@
                                                                         <button id="rejectDecision{{@../index}}{{@index}}" type="submit" value="Reject" class="btn btn-danger me-md-2">Reject</button>
                                                                     </form> --}}
                                                                     <a href="/recruiters/checkResume/{{../job_id}}/{{_id}}" target="_blank" role="button" class="btn btn-outline-secondary me-md-2 openResume" id="openResume{{@../index}}{{@index}}">Open Resume</a>
+                                                                    {{#ifCond jobs.0.status "pending"}}
                                                                     <a href="/recruiters/accept/{{../job_id}}/{{_id}}" role="button" class="btn btn-outline-success me-md-2 acceptDec" id="acceptDecision{{@../index}}{{@index}}">Accept</a>
                                                                     <a href="/recruiters/reject/{{../job_id}}/{{_id}}" role="button" class="btn btn-outline-danger me-md-2 rejectDec" id="rejectDecision{{@../index}}{{@index}}">Reject</a>
+                                                                    {{/ifCond}}
+                                                                    {{#ifCond jobs.0.status "Accepted"}}
+                                                                    <button class="btn btn-success me-md-2 acceptDec" id="acceptDecision{{@../index}}{{@index}}" disabled>Accepted</button>
+                                                                    {{/ifCond}}
+                                                                    {{#ifCond jobs.0.status "Rejected"}}
+                                                                    <button class="btn btn-danger me-md-2 rejectDec" id="rejectDecision{{@../index}}{{@index}}" disabled>Rejected</button>
+                                                                    {{/ifCond}}
+                                                                    
 
                                                             </div>
                                                         </div>
