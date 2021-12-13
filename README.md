@@ -12,7 +12,7 @@ The goal of this project is to centralize the job application process and to red
 
 ## Seed Database
 
-Run the following code to seed the database:
+Run the following code to seed the database: (You must run this under the project_code folder!)
 
 ```node
 node ./task/seed.js
