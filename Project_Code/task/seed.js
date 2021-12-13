@@ -132,6 +132,8 @@ async function seedRec(num, numOfUsers, numOfJobs) {
       }
     }
   }
+  console.log("Now users have applied for jobs");
+  console.log("You can close the session now");
 }
 
 dropAll();
