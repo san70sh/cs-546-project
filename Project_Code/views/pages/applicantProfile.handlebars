@@ -4,12 +4,12 @@
             <div class="col-6">
                 {{!-- <img src="{{user.profile.photo}}"></img> --}}
             </div>
-            <div class="col-6">
-                <h1>Hello,{{user.firstname}}{{user.lastname}}</h2>
+            <div class="text-center">
+                <h1>Hello,{{user.firstName}}{{user.lastName}}</h1>
                 {{#if newUser}}
                 <p>For your better experience, please complete your personal information first</p>
                 {{else}}
-                <h2>Welcome back</h6>
+                <h2>Welcome back</h2>
                 {{/if}}
             </div>
         </div>
@@ -20,7 +20,7 @@
                     onclick="location.href='/users/profile/';">Create
                     Profile</button>
             </div>
-        </div>
+        </div><br>
         {{else}}
         <div class="row editprofilebtn">
             <div class="col">

@@ -1,4 +1,4 @@
-<section class="section profile-section" id="recProfile">
+<section class="section profile-section" >
     {{!-- Delete Recruiter Modal --}}
 
     <div class="modal" tabindex="-1" role="dialog" id="recDelModal">
@@ -55,7 +55,7 @@
                             <div class="accordion" id="job-accordion">
                                 {{#each jobs}}
                                 <div class="card bg-light">
-                                    <h2 class="card-header" id="jobheading{{@index}}">
+                                    <div class="card-header" id="jobheading{{@index}}">
                                         <div class="container-fluid px-0" id="jobContainer{{@index}}">
                                             <div class="row mb-0" id="jobModify{{@index}}">
                                                 <div class="col-9 text-center">
@@ -79,7 +79,7 @@
                                                 </div>
                                             </div>
                                         </div>
-                                    </h2>
+                                    </div>
                                 </div>
                                     <div id="collapseJob{{@index}}" class="accordion-collapse collapse" aria-labelledby="jobheading{{@index}}" data-bs-parent="#job-accordion">
                                         <div class="card-body">

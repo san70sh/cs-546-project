@@ -124,16 +124,33 @@ $('#userBase').submit((event) => {
 $('#userEx').submit((event) => {
     event.preventDefault();
     if (new Date(startDateEx.val())>new Date(endDateEx.val())) {
-        $('#exError').show();
-        $('#exError').html('endDate can\'t be earlier than startDate');
-        // $('#formLabel').addClass('error');
+        // $('#exError').show();
+        // $('#exError').html('endDate can\'t be earlier than startDate');
+        // // $('#formLabel').addClass('error');
+        $.toast({
+            heading: 'Experience date Error',
+            text: 'endDate can\'t be earlier than startDate',
+            position: 'top-center',
+            bgColor: '#990000',
+            textColor: 'white',
+            stack: false
+        })
         return;
     }
     let today = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
     if (new Date(startDateEx.val()) > today || new Date(endDateEx.val()) > today) {
-        $('#exError').show();
-        $('#exError').html('startDate and endDate can\'t be later than today');
-        // $('#formLabel').addClass('error');
+        // $('#exError').show();
+        // $('#exError').html('startDate and endDate can\'t be later than today');
+        // // $('#formLabel').addClass('error');
+
+        $.toast({
+            heading: 'Experience date Error',
+            text: 'startDate and endDate can\'t be later than today',
+            position: 'top-center',
+            bgColor: '#990000',
+            textColor: 'white',
+            stack: false
+        })
         return;
     }
     if(title.val().trim().length && companyName.val().trim().length !== 0){
@@ -163,16 +180,32 @@ $('#userEx').submit((event) => {
 $('#userEdu').submit((event) => {
     event.preventDefault();
     if (new Date(startDateEdu.val())>new Date(endDateEdu.val())) {
-        $('#eduError').show();
-        $('#eduError').html('endDate can\'t be earlier than startDate');
-        // $('#formLabel').addClass('error');
+        // $('#eduError').show();
+        // $('#eduError').html('endDate can\'t be earlier than startDate');
+        // // $('#formLabel').addClass('error');
+        $.toast({
+            heading: 'Education date Error',
+            text: 'endDate can\'t be earlier than startDate',
+            position: 'top-center',
+            bgColor: '#990000',
+            textColor: 'white',
+            stack: false
+        })
         return;
     }
     let today = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
     if (new Date(startDateEdu.val()) > today || new Date(endDateEdu.val()) > today) {
-        $('#eduError').show();
-        $('#eduError').html('startDate and endDate can\'t be later than today');
-        // $('#formLabel').addClass('error');
+        // $('#eduError').show();
+        // $('#eduError').html('startDate and endDate can\'t be later than today');
+        // // $('#formLabel').addClass('error');
+        $.toast({
+            heading: 'Education date Error',
+            text: 'startDate and endDate can\'t be later than today',
+            position: 'top-center',
+            bgColor: '#990000',
+            textColor: 'white',
+            stack: false
+        })
         return;
     }
     if(school.val().trim().length && major.val().trim().length !== 0 && degree.val().trim().length !== 0){
