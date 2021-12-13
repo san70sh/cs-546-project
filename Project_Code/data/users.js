@@ -501,81 +501,6 @@ const create = async (email, phone, firstName, lastName, password) => {
   return insertInfo.insertedId;
 };
 
-// const updateProfile = async (
-//   profileId,
-//   userId,
-//   photo,
-//   gender,
-//   city,
-//   state,
-//   experience,
-//   education,
-//   skills,
-//   languages,
-//   tags
-// ) => {
-//   if (
-//     typeof userId !== "string" ||
-//     typeof photo !== "string" ||
-//     typeof gender !== "string" ||
-//     typeof city !== "string" ||
-//     typeof state !== "string"
-//   ) {
-//     throw new CustomError(
-//       400,
-//       "photo, gender, city must be stirng type and can't be null"
-//     );
-//   }
-//   if (!ObjectId.isValid(userId)) {
-//     throw new CustomError(400, "Invalid userID");
-//   } else {
-//     userId = ObjectId(userId);
-//   }
-//   if (!ObjectId.isValid(profileId)) {
-//     throw new CustomError(400, "Invalid profileId");
-//   } else {
-//     profileId = ObjectId(profileId);
-//   }
-//   if (
-//     photo.trim().length === 0 ||
-//     gender.trim().length === 0 ||
-//     city.trim().length === 0 ||
-//     state.trim().length === 0
-//   ) {
-//     // not optional, the user must fill in this data when regiester
-//     throw new CustomError(
-//       400,
-//       "name, location, phoneNumber, website, priceRange can't be empty or just spaces"
-//     );
-//   }
-//   if (gender !== "M" && gender !== "F") {
-//     throw new CustomError(400, "gender must be M(male) or F(female)");
-//   }
-//   //checkWeb(photo);
-//   checkEx(experience);
-//   checkEd(education);
-//   checkSk(skills);
-//   checkTa(tags);
-//   checkLa(languages);
-//   const usersCollection = await users();
-//   let newProfiles = {
-//     _id: profileId,
-//     photo,
-//     gender,
-//     city,
-//     state,
-//     experience,
-//     education,
-//     skills,
-//     languages,
-//     tags,
-//   };
-//   const insertInfo = await usersCollection.updateOne(
-//     { _id: userId, "profile._id": profileId },
-//     { $set: { "profile.$": newProfiles } }
-//   );
-//   if (insertInfo.modifiedCount === 0) throw "Could not update the profile";
-// };
 
 const update = async (userId, email, phone, firstName, lastName, password) => {
   if (
@@ -896,7 +821,7 @@ const getFavourites = async (userId) => {
 
   for (let i = 0; i < res.favor.length; i++) {
     for (let j = 0; j < jobAllData.length; j++) {
-      //console.log(jobAllData[j]._id);
+
 
       if (String(jobAllData[j]._id) == String(res.favor[i])) {
         allFavourJobs.push(jobAllData[j]);
@@ -904,7 +829,7 @@ const getFavourites = async (userId) => {
       }
     }
   }
-  //console.log(allFavourJobs);
+
   return allFavourJobs;
 };
 
@@ -1004,7 +929,6 @@ const cancel = async (jobId, userId) => {
   );
 
   tmp1.push({ job_id: tmp2.job_id, applicants: tmp3 });
-  // console.log(tmp1, jobstmp)
   const insertInfo = await recruiterCol.updateOne(
     { _id: recruiterId },
     { $set: { jobs: tmp1 } }
@@ -1036,7 +960,6 @@ const track = async (userId) => {
   // get job title
   const jobCol = await jobs();
   let jobInfo = res.jobs;
-  // console.log(jobInfo);
   for (const ele of jobInfo) {
     let job = await jobCol.findOne({ _id: ele._id });
     ele.title = job.title;
@@ -1044,13 +967,6 @@ const track = async (userId) => {
     ele.location = `${job.city}, ${job.state}`;
     ele.summary = job.details.summary;
   }
-  console.log(jobInfo);
-  // jobInfo.forEach((ele) => {
-  //   let job = jobCol.findOne({ _id: ele._id });
-  //   jobTitle = job.title;
-  //   console.log(job);
-  //   ele.title = jobTitle;
-  // });
   return jobInfo;
 };
 
@@ -1111,8 +1027,6 @@ const checkUser = async (email, password) => {
     throw new CustomError(400, "Either the email or password is invalid");
   }
   let compareToMerlin = false;
-  // console.log(password);
-  // console.log(tmp.password);
   try {
     compareToMerlin = await bcrypt.compare(password, tmp.password);
   } catch (e) {
@@ -1399,7 +1313,6 @@ const addEdu = async (education, userId) => {
   );
   if (insertInfo.modifiedCount === 0)
     throw new CustomError(400, "Could not update the education");
-  console.log(insertInfo);
   return insertInfo.acknowledged;
 };
 const delEdu = async (school, userId) => {
@@ -1476,7 +1389,6 @@ const addSk = async (skill, userId) => {
   );
   if (insertInfo.modifiedCount === 0)
     throw new CustomError(400, "Could not update the skills");
-  console.log(insertInfo);
   return insertInfo.acknowledged;
 };
 const delSk = async (skill, userId) => {
@@ -1553,7 +1465,6 @@ const addLa = async (languages, userId) => {
   );
   if (insertInfo.modifiedCount === 0)
     throw new CustomError(400, "Could not update the skills");
-  console.log(insertInfo);
   return insertInfo.acknowledged;
 };
 
@@ -1618,55 +1529,4 @@ module.exports = {
   apply,
   auxApply,
 };
-// test functions **IMPORTANT**
-//checkEx([{title:"Maintenance Engineer", employmentType: "full time", companyName:"Apple",startDate: "08/05/2017", endDate: "08/05/2018"}])
-//checkEd([{school:"SIT", major: "CE", degree:"master of science",startDate: "08/05/2017", endDate: "08/05/2018"}])
-//console.log(ObjectId.isValid('timtomtamted'));
 
-// createProfile(
-//     "61b409843132c093c1f3b57b",
-//     "one url",
-//     "M",
-//     "Hoboken",
-//     "NJ",
-//     [{title:"Maintenance Engineer", employmentType: "full time", companyName:"Apple",startDate: "08/05/2017", endDate: "08/05/2018"}],
-//     [{school:"SIT", major: "CE", degree:"master of science",startDate: "08/05/2017", endDate: "08/05/2018"}],
-//     ["Java", "JS"],
-//     ["english"],
-//     ["SDE","DS"]
-// ).catch(e => console.log(e));
-//tmp =
-
-//create("sega@gmail.com", "8482426666", "demo", "sega", "ccc11111111").catch(e => console.log(e));
-
-// updateProfile(
-//     '61a34056fbd0613af9d399fc',
-//     "61a33e54ded974aae50bb725",
-//     "one url",
-//     "M",
-//     "Hoboken",
-//     "NJ",
-//     [{title:"Maintenance Engineer", employmentType: "full time", companyName:"Apple",startDate: "08/05/2017", endDate: "08/05/2018"}],
-//     [{school:"SIT", major: "CE", degree:"master of science",startDate: "08/05/2017", endDate: "08/05/2018"}],
-//     ["Java", "JS"],
-//     ["english","ch"],
-//     ["SDE","DS","Web"]
-// )
-
-//update("61b078ea5805134fecbbf766","Wangyou@gmail.com", "8482426556", "you", "wang", "12345678").catch(ele => console.log(ele));
-//apply("61b15a1e8c17796d6171015d","61b15aafb06d8df4d3ec63c3").catch(ele => console.log(ele));
-//cancel("61a33e454966f774489ca999", "61a4236167e3b3f821f5e374");
-
-//track("61a33e454966f774489ca999", "61a4236167e3b3f821f5e374").then(ele => console.log(ele));
-//trackAll("61a4236167e3b3f821f5e374").then(ele => console.log(ele));
-// get("61a4236167e3b3f821f5e374???").then(ele => console.log(ele)).catch(ele => console.log(ele));
-//getAll().then(ele => console.log(ele));
-//Favorites("61b15a1e8c17796d6171015f","61b409843132c093c1f3b57b");
-//getFavourites("61a33e13067da688cb1f8e39").then(ele => console.log(ObjectId(ele[0])))
-//delFavourites("61a4236167e3b3f821f5eeee","61a33e13067da688cb1f8e39");
-//checkUser("sega@gmail.com", "ccc11111111").then(ele => console.log(ele)).catch(e => console.log(e));
-//addEx({title:"cctv Engineer", employmentType: "full time", companyName:"Apple",startDate: "2022/05/17", endDate: "2022/05/19"},"61b15aafb06d8df4d3ec63c3").catch(e=>console.log(e))
-//editProfile("61b409843132c093c1f3b57b","M","Ho","NJ")
-//delEx("Apple","61b409843132c093c1f3b57b")
-// delSk("JS","61b409843132c093c1f3b57b")
-//addEdu({school:"cctv Engineer", major: "full time", degree:"Apple",startDate: "2022/06/17", endDate: "2022/05/19"},"61b15aafb06d8df4d3ec63c3").catch(e=>console.log(e))

@@ -115,7 +115,6 @@ router.get("/jobs/recruiters/id/:id", async (req, res) => {
     }
     const result = await jobData.getJobsById(req.params.id);
     const jobId = req.params.id;
-    console.log(jobId);
     return res.render("pages/recJob", { data: result, jobId: jobId });
   } catch (e) {
     // write a function here to render page heere
@@ -132,7 +131,6 @@ router.get("/jobs/recruiters/id/:id", async (req, res) => {
     }
     const result = await jobData.getJobsById(req.params.id);
     const jobId = req.params.id;
-    console.log(jobId);
     return res.render("pages/recJob", { data: result, jobId: jobId });
   } catch (e) {
     // write a function here to render page heere

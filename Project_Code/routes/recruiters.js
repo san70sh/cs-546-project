@@ -100,8 +100,8 @@ router.get("/checkResume/:jobId/:appId", async (req, res) => {
   try {
     var fileId = await users.getResume(req.params.appId, req.params.jobId);
   } catch (e) {
-    res.render("pages/error", { message: e.message });
-    console.log(e);
+    return res.render("pages/error", { message: e.message });
+    // console.log(e);
   }
 
   try {
@@ -147,8 +147,8 @@ router.get("/accept/:jobId/:appId", async (req, res) => {
     let recruiterId = req.session.user.id;
     let applicantId = req.params.appId;
     let jobId = req.params.jobId;
-    console.log(jobId);
-    console.log(applicantId);
+    // console.log(jobId);
+    // console.log(applicantId);
     // if(!req.session.user) {
     //     return res.status(403).render('pages/loginform', {, message: "Unauthorized Access", err: true})
     // } else {
@@ -173,7 +173,7 @@ router.get("/accept/:jobId/:appId", async (req, res) => {
     }
     // }
   } catch (e) {
-    console.log(e);
+    // console.log(e);
     return res
       .status(e.status)
       .render("pages/loginform", { message: e.message, err: true });
@@ -198,8 +198,8 @@ router.get("/reject/:jobId/:appId", async (req, res) => {
     let recruiterId = req.session.user.id;
     let applicantId = req.params.appId;
     let jobId = req.params.jobId;
-    console.log(jobId);
-    console.log(applicantId);
+    // console.log(jobId);
+    // console.log(applicantId);
     // if(!req.session.user) {
     //     return res.status(403).render('pages/loginform', {, message: "Unauthorized Access", err: true})
     // } else {
@@ -371,8 +371,8 @@ router.get("/", async (req, res) => {
           e["jobDetails"] = job;
 
           e.job_id = e.job_id.toString();
-          console.log(e);
-          console.log(e.applicants[0].jobs);
+          // console.log(e);
+          // console.log(e.applicants[0].jobs);
         })
       );
     } catch (e) {
@@ -410,7 +410,7 @@ router.get("/profile", async (req, res) => {
 
     if (ObjectId.isValid(id)) {
       let recruiter = await recruiterDat.getRecruiter(id);
-      console.log(recruiter);
+      // console.log(recruiter);
       if (Object.keys(recruiter.data.profile).length != 0) {
         return res.render("pages/recruitereditprofile", {
           title: "Update",
@@ -475,7 +475,7 @@ router.get("/jobs/update/:id", async (req, res) => {
     let id = req.params.id;
     if (ObjectId.isValid(id)) {
       let job = await jobDat.getJobsById(id);
-      console.log(job);
+      // console.log(job);
       if (job) {
         return res.render("pages/jobpost", {
           title: "Update",
@@ -618,7 +618,7 @@ router.post("/profile/create", async (req, res) => {
       });
     }
   } catch (e) {
-    console.log(e);
+    // console.log(e);
     return res
       .status(e.status)
       .render("pages/recruitereditprofile", { message: e.message, err: true });
@@ -748,7 +748,7 @@ router.post("/profile/update", async (req, res) => {
       company: { name: company, position: position, description: description },
     };
     if (ObjectId.isValid(id)) {
-      console.log(recProfile);
+      // console.log(recProfile);
       let output = await recruiterDat.updateProfile(id, recProfile);
       return res.redirect("/recruiters/");
     } else {
@@ -758,7 +758,7 @@ router.post("/profile/update", async (req, res) => {
       });
     }
   } catch (e) {
-    console.log(e);
+    // console.log(e);
     return res
       .status(e.status)
       .render("pages/recruitereditprofile", { message: e.message, err: true });
@@ -805,7 +805,7 @@ router.post("/jobs/new", async (req, res) => {
       return res.redirect("/recruiters/login");
     }
   }
-  console.log(req.body);
+  // console.log(req.body);
   let id = req.session.user.id;
   let {
     title,
@@ -888,14 +888,14 @@ router.post("/jobs/new", async (req, res) => {
       payrange,
     };
     let output = await recruiterDat.postJob(id, jobDetails);
-    console.log("I am here", output);
+    // console.log("I am here", output);
 
     if (output) {
       return res.redirect("/recruiters");
     }
     // }
   } catch (e) {
-    console.log(e);
+    // console.log(e);
     return res
       .status(e.status)
       .render("pages/jobpost", { message: e.message, mainErr: true });
@@ -1031,7 +1031,7 @@ router.get("/jobs/delete/:id", async (req, res) => {
       }
     }
   } catch (e) {
-    console.log(e);
+    // console.log(e);
     return res
       .status(e.status)
       .render("pages/rec", { message: e.message, err: true });

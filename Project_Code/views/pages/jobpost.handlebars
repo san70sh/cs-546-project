@@ -1,6 +1,6 @@
 <div id="newjobpost" aria-labelledby="newjobpost">
     <div class="form-title text-center">
-       <h4>{{title}} Job</h4>
+       <h1>{{title}} Job</h1>
     </div>
     <div class="d-flex flex-column justify-content-center">
         {{#if mainerr}}
@@ -73,13 +73,15 @@
                 <div class="error">{{message}}</div>
                 {{/if}}
                 <div class="col-sm-2">
-                    <label for="jobMinPay" class="col-form-label">Pay: </label>
+
                 </div>
                 <div class="col-sm-3">
+                    <label for="jobMinPay" class="col-form-label">MinPay: </label>
                     <input type="number" class="form-control" name="jobMinPay" id="jobMinPay" placeholder="5000"  min="0" required>
                 </div>
                 <div class="col-sm-1 align-bottom mt-2 ml-2 text-center"><span>&mdash;</span></div>
                 <div class="col-sm-3">
+                    <label for="jobMaxPay" class="col-form-label">MaxPay: </label>
                     <input type="number" class="form-control" name="jobMaxPay" id="jobMaxPay" placeholder="10000"  min="0" required>
                 </div>
             </div>

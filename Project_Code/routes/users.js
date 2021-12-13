@@ -42,13 +42,13 @@ router.post("/resume/upload", upload.single("file"), async (req, res) => {
   if (req.file.mimetype !== "application/pdf") {
     return res.render("pages/applicantResume", { error: "file type error" });
   }
-  console.log(res.req.file);
+  // console.log(res.req.file);
   try {
     const addRes = await users.addResume(req.session.user.id, res.req.file.id);
-    console.log(addRes);
+    // console.log(addRes);
   } catch (e) {
     res.render("pages/applicantResume", { error: e.message });
-    console.log(e);
+    // console.log(e);
   }
   res.redirect("/users");
 });
@@ -176,7 +176,7 @@ router.get("/", async (req, res) => {
       userId: id,
       newUser: newUser,
       resumes,
-      resumeError,
+      resumeError
     });
   }
 });
@@ -401,7 +401,7 @@ router.get("/favor", async (req, res) => {
   }
   try {
     let output = await users.getFavourites(userId);
-    console.log(output);
+    // console.log(output);
     if (output) {
       if (output.length == 0) {
         return res.render("pages/favorJobs", {
@@ -658,7 +658,7 @@ router.get("/apply", async (req, res) => {
   }
   try {
     let output = await users.track(userId);
-    console.log(output);
+    // console.log(output);
     if (output) {
       if (output.length == 0) {
         return res.render("pages/appliedJob", {
@@ -809,10 +809,10 @@ router.post("/ex", async (req, res) => {
   }
   try {
     let output = await users.addEx(experience, userId);
-    console.log(output);
+    // console.log(output);
     return res.json(output);
   } catch (e) {
-    console.log(e)
+    // console.log(e)
     return res.status(e.status).render("pages/applicanteditprofile", {
       title: "experience",
       message: e.message,
@@ -1006,7 +1006,7 @@ router.delete("/edu", async (req, res) => {
     let output = await users.delEdu(school, userId);
     return res.json(output);
   } catch (e) {
-    console.log(e);
+    // console.log(e);
     return res.status(e.status).render("pages/applicanteditprofile", {
       title: "education",
       message: e.message,
@@ -1158,7 +1158,7 @@ router.get("/la", async (req, res) => {
 
 router.post("/la", async (req, res) => {
   let la = req.body.tmp;
-  console.log(la);
+  // console.log(la);
   if (!req.session.user) {
     return res.redirect("/users/login");
   }

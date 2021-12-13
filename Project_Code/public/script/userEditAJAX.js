@@ -44,7 +44,7 @@ $(document).ready(function(){
             EmploymentType:&nbsp ${ele.employmentType},
             StartDate:&nbsp${ele.startDate},
             EndDate:&nbsp${ele.endDate}
-            &nbsp&nbsp&nbsp&nbsp<a href = ${encodeURIComponent(ele.companyName)}>remove</a>
+            &nbsp&nbsp&nbsp&nbsp<a href = ${encodeURIComponent(ele.companyName) } role="button" class="btn btn-danger me-md-2">remove</a>
             </li>`
             $('#preEx').append(li);
         });
@@ -61,7 +61,7 @@ $(document).ready(function(){
             degree:&nbsp ${ele.degree},
             StartDate:&nbsp${ele.startDate},
             EndDate:&nbsp${ele.endDate}
-            &nbsp&nbsp&nbsp&nbsp<a href = ${encodeURIComponent(ele.school)}>remove</a>
+            &nbsp&nbsp&nbsp&nbsp<a href = ${encodeURIComponent(ele.school)} role="button" class="btn btn-danger me-md-2">remove</a>
             </li>`
             $('#preEdu').append(li);
         });
@@ -74,7 +74,7 @@ $(document).ready(function(){
         $('#preSk').children().remove();
         for(let i = 0; i < responseMessage.length; i++) {
             let li = `<li>${responseMessage[i]}
-            &nbsp&nbsp&nbsp&nbsp<a href = ${encodeURIComponent(responseMessage[i])}>remove</a>
+            &nbsp&nbsp&nbsp&nbsp<a href = ${encodeURIComponent(responseMessage[i])} role="button" class="btn btn-danger me-md-2">remove</a>
             </li>`
             $('#preSk').append(li);
         }
@@ -87,7 +87,7 @@ $(document).ready(function(){
         $('#preLa').children().remove();
         for(let i = 0; i < responseMessage.length; i++) {
             let li = `<li>${responseMessage[i]}
-            &nbsp&nbsp&nbsp&nbsp<a href = ${encodeURIComponent(responseMessage[i])}>remove</a>
+            &nbsp&nbsp&nbsp&nbsp<a href = ${encodeURIComponent(responseMessage[i])} role="button" class="btn btn-danger me-md-2">remove</a>
             </li>`
             $('#preLa').append(li);
         }
