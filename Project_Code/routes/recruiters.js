@@ -24,7 +24,7 @@ router.get('/login', async (req, res) => {
             // return res.redirect('/ ##### USERS ROUTE HERE');
         }
     }
-    return res.render('pages/home');
+    return res.redirect('/');
 });
 
 router.get('/signup', async (req, res) => {
@@ -274,6 +274,7 @@ router.get('/', async (req, res) => {
 
                 e.job_id = e.job_id.toString();
                 console.log(e);
+                console.log(e.applicants[0].jobs);
             }));
         } catch(e) {
             console.log(e);
